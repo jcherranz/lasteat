@@ -5,6 +5,40 @@
 
 ---
 
+## Manual Tasks (owner: jcherranz)
+_These require access to external dashboards and can't be done by Claude._
+
+### HTTPS & SSL Certificate `[ ]`
+**Why:** Site shows "Not secure" in browser. Geolocation API requires HTTPS.
+**Steps:**
+1. Go to **github.com/settings/pages** → Add `lasteat.es` as a verified domain
+2. GitHub will provide a TXT record value — add it in your DNS provider:
+   ```
+   _github-pages-challenge-jcherranz.lasteat.es  TXT  <value from GitHub>
+   ```
+3. Wait for GitHub to verify (usually minutes, up to 24h)
+4. Once verified, go to **repo Settings > Pages** → check "Enforce HTTPS"
+5. If "Enforce HTTPS" is greyed out, wait ~15 min for cert provisioning
+
+**Current DNS (correct, no changes needed):**
+```
+A  @  185.199.108.153
+A  @  185.199.109.153
+A  @  185.199.110.153
+A  @  185.199.111.153
+```
+
+**Verify it worked:** `curl -sI https://lasteat.es | head -5` should show HTTP/2 200.
+
+### Google Search Console `[ ]`
+**Why:** Needed to submit sitemap and monitor SEO indexing.
+**Steps:**
+1. Go to **search.google.com/search-console** → Add property `https://lasteat.es`
+2. Verify ownership (DNS TXT or HTML file method)
+3. Submit sitemap: `https://lasteat.es/sitemap.xml`
+
+---
+
 ## Phase 1: Foundation — CI/CD & Scraper Reliability
 _Goal: Automate data freshness and prevent silent breakage._
 
