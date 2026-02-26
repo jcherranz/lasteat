@@ -37,185 +37,403 @@ A  @  185.199.111.153
 2. Verify ownership (DNS TXT or HTML file method)
 3. Submit sitemap: `https://lasteat.es/sitemap.xml`
 
+### Analytics Setup `[ ]`
+**Why:** Need usage data to prioritize future work.
+**Steps:**
+1. Sign up for Plausible Analytics (plausible.io) or self-host Umami
+2. Add the site domain `lasteat.es`
+3. Provide the script tag to Claude for integration in Phase 9B
+
 ---
 
-## Phase 1: Foundation — CI/CD & Scraper Reliability
-_Goal: Automate data freshness and prevent silent breakage._
+## Completed Phases (history)
 
-### 1A. Automated Scraper Pipeline `[x]`
-**Why:** Data goes stale because scraper + data.js update is manual.
+<details>
+<summary>Phase 1: Foundation — CI/CD & Scraper Reliability [x]</summary>
+
+- 1A. Automated Scraper Pipeline `[x]` — GitHub Actions weekly cron, generate_data_js.py, dynamic footer
+- 1B. Scraper Hardening `[x]` — Pinned deps, validation thresholds, retry with backoff, CI failure alerts
+</details>
+
+<details>
+<summary>Phase 2: SEO & Shareability [x]</summary>
+
+- 2A. Individual Restaurant Pages `[x]` — 770 pages with OG tags, JSON-LD, canonical URLs
+- 2B. Sitemap & SEO Metadata `[x]` — sitemap.xml, robots.txt, OG image, homepage meta tags
+</details>
+
+<details>
+<summary>Phase 3: User Experience Enhancements [x]</summary>
+
+- 3A. "Near Me" Geolocation `[x]` — Haversine distance, distance sort, user marker on map
+- 3B. Progressive Web App `[x]` — manifest.json, service worker, app icons, offline support
+</details>
+
+---
+
+## Phase 4: Security & Robustness
+_Goal: Eliminate all security vulnerabilities and harden defensive code._
+
+### 4A. Fix Security Vulnerabilities `[ ]`
+**Why:** CDN compromise is undetected, incomplete HTML escaping, localStorage can crash the page.
 **Scope:**
-- Create `.github/workflows/scrape.yml` — weekly cron (Sunday 03:00 UTC)
-- Workflow runs `scraper.py --fresh --enrich`, transforms output to `docs/data.js`
-- Auto-commits and pushes if data changed (skip if identical)
-- Add a `scripts/generate_data_js.py` that reads `output/madrid_restaurants.json` and writes `docs/data.js` in the abbreviated key format
-- Update footer timestamp automatically from pipeline
+- Add Subresource Integrity (SRI) hashes to all CDN resources (Leaflet JS/CSS, Google Fonts)
+- Complete the `esc()` function to also escape single quotes (`'` → `&#39;`)
+- Wrap `localStorage.getItem` + `JSON.parse` calls in try-catch with fallback defaults
+- Validate `r.w` (website URLs) — only allow `http://` and `https://` schemes in card links
+- Add `rel="noopener noreferrer"` to all external links
+
+**Files to modify:**
+- `docs/index.html` — esc() fix, localStorage hardening, SRI attributes, URL validation, link rels
+
+**How to get SRI hashes:**
+```bash
+curl -s https://unpkg.com/leaflet@1.9.4/dist/leaflet.js | openssl dgst -sha384 -binary | openssl base64 -A
+curl -s https://unpkg.com/leaflet@1.9.4/dist/leaflet.css | openssl dgst -sha384 -binary | openssl base64 -A
+```
+
+**Acceptance criteria:**
+- [ ] All CDN `<script>` and `<link>` tags have `integrity` + `crossorigin` attributes
+- [ ] `esc()` escapes `&`, `"`, `<`, `>`, and `'`
+- [ ] Corrupted localStorage doesn't crash the page (test by setting `mf-fav` to `"broken"`)
+- [ ] `javascript:` URLs in restaurant data are not rendered as links
+- [ ] All external `<a>` tags have `rel="noopener noreferrer"`
+
+---
+
+### 4B. Harden Scraper Error Handling `[ ]`
+**Why:** Bare `except Exception` silently masks bugs. Brittle HTML parsing fails without warning.
+**Scope:**
+- Replace `except Exception` with specific exceptions (`httpx.RequestError`, `httpx.HTTPStatusError`)
+- Add per-field warnings when HTML parsing returns None (e.g. "No cuisine found for {slug}")
+- Log count of restaurants skipped due to missing slug
+- Add a `--strict` flag that exits non-zero if any field has <80% coverage (for CI debugging)
+- Remove dead `return resp` comment in `_fetch_with_retry`
+- Increase httpx timeout from 30s to 60s for enrichment requests
+
+**Files to modify:**
+- `scraper.py` — exception specificity, field warnings, strict mode, timeout
+
+**Acceptance criteria:**
+- [ ] No bare `except Exception` in codebase
+- [ ] Scraper logs warnings for missing cuisine/district/rating fields
+- [ ] `--strict` mode fails if any field drops below 80%
+- [ ] httpx timeout is 60s
+
+---
+
+## Phase 5: Testing
+_Goal: Automated test coverage for scraper, data pipeline, and frontend logic._
+
+### 5A. Scraper & Pipeline Tests `[ ]`
+**Why:** Zero test coverage. Scraper changes are deployed blind.
+**Scope:**
+- Create `tests/` directory with pytest configuration
+- Add `tests/test_scraper.py`:
+  - Test `parse_html_cards()` with a fixture HTML snippet (save a real card from Macarfi)
+  - Test `merge_data()` with mock map data + HTML extras
+  - Test `validate_data()` with good data, bad data, edge cases
+  - Test `_fetch_with_retry()` with mocked httpx responses (5xx retry, timeout retry, success)
+- Add `tests/test_generate_data_js.py`:
+  - Test `abbreviate()` key mapping is correct
+  - Test output file format (const RESTAURANTS=...; const META=...;)
+  - Test with empty input, single record, full dataset
+- Add `tests/test_generate_pages.py`:
+  - Test `build_page()` output has required HTML elements
+  - Test `build_jsonld()` output is valid JSON with correct schema
+  - Test `build_sitemap()` output is valid XML with correct URL count
+- Add `pytest` to requirements.txt (dev dependency)
 
 **Files to create:**
-- `.github/workflows/scrape.yml`
-- `scripts/generate_data_js.py`
+- `tests/__init__.py`
+- `tests/test_scraper.py`
+- `tests/test_generate_data_js.py`
+- `tests/test_generate_pages.py`
+- `tests/fixtures/` — sample HTML card, sample restaurant JSON
+- `pyproject.toml` or `pytest.ini` — pytest config
 
 **Files to modify:**
-- `scraper.py` — make it exit with error code on validation failure
-- `docs/index.html` — footer reads timestamp from data.js instead of hardcoded
+- `requirements.txt` — add pytest
+- `.github/workflows/scrape.yml` — add `pytest` step before scraping
 
 **Acceptance criteria:**
-- [x] Workflow runs successfully in GitHub Actions
-- [x] `docs/data.js` is generated programmatically (not hand-edited)
-- [x] Footer shows dynamic "Actualizado" date
-- [x] Pipeline skips commit when data is unchanged
+- [ ] `pytest` runs and passes with ≥20 tests
+- [ ] parse_html_cards has fixture-based tests
+- [ ] validate_data has positive and negative test cases
+- [ ] generate_data_js output format is tested
+- [ ] generate_pages HTML output validated for OG tags and JSON-LD
+- [ ] CI runs tests before scraping
 
 ---
 
-### 1B. Scraper Hardening `[x]`
-**Why:** If Macarfi changes HTML structure, scraper silently returns empty fields.
+### 5B. Frontend Logic Tests `[ ]`
+**Why:** Filter, sort, and search logic is untested. Regressions are invisible.
 **Scope:**
-- Pin dependency versions in `requirements.txt`
-- Add validation after scraping: assert minimum thresholds (e.g. ≥700 restaurants, ≥90% with cuisine data)
-- Add retry with backoff for transient HTTP errors in `enrich_from_detail`
-- Log warnings for restaurants missing expected fields
-- If validation fails in CI, open a GitHub Issue automatically
-
-**Files to modify:**
-- `requirements.txt` — pin versions
-- `scraper.py` — add validation function, retry logic, structured logging
-- `.github/workflows/scrape.yml` — add failure notification step
-
-**Acceptance criteria:**
-- [x] `requirements.txt` has pinned versions
-- [x] Scraper exits non-zero if data quality drops below thresholds
-- [x] HTTP retries work for transient 5xx errors
-- [x] CI creates a GitHub Issue on scraper failure
-
----
-
-## Phase 2: SEO & Shareability
-_Goal: Make restaurants discoverable via search engines and shareable on social._
-
-### 2A. Individual Restaurant Pages `[x]`
-**Why:** Can't link to or share a specific restaurant. Zero SEO surface.
-**Scope:**
-- Create `scripts/generate_pages.py` — generates `docs/r/{slug}.html` per restaurant
-- Each page has: name, rating, cuisine, district, price, address, map embed, link back to main site
-- Proper `<title>`, `<meta description>`, Open Graph tags, `schema.org/Restaurant` structured data
-- Canonical URL: `https://lasteat.es/r/{slug}.html`
-- Add link from main site cards to individual pages
+- Extract core logic functions from index.html into a testable `docs/app.js` module
+  - Functions to extract: `getFiltered()`, `sortList()`, `haversine()`, `formatDist()`, `esc()`
+  - Keep DOM manipulation in index.html, move pure logic to app.js
+- Write tests using a lightweight runner (inline `<script>` test page or Node.js with jsdom)
+- Create `tests/test_frontend.html` — a test harness page that loads app.js and runs assertions
+- Test cases: filter by cuisine, sort by distance, search substring, haversine math, esc() edge cases
 
 **Files to create:**
-- `scripts/generate_pages.py`
-- `docs/r/.gitkeep` (directory placeholder; generated pages will be many)
+- `docs/app.js` — extracted pure logic functions
+- `tests/test_frontend.html` — browser-based test harness (open in browser to run)
 
 **Files to modify:**
-- `docs/index.html` — card links point to `/r/{slug}.html` instead of Macarfi
-- `.github/workflows/scrape.yml` — add page generation step
-- `.gitignore` — consider whether generated pages are committed or built in CI
+- `docs/index.html` — import app.js, remove duplicated logic
 
 **Acceptance criteria:**
-- [x] Each restaurant has a `/r/{slug}.html` page
-- [x] Pages have correct OG tags (test with https://opengraph.dev)
-- [x] Pages have schema.org/Restaurant JSON-LD
-- [x] Google can crawl individual pages (add `docs/sitemap.xml`)
+- [ ] Core logic is in a separate testable file
+- [ ] ≥15 frontend test assertions pass
+- [ ] haversine, esc, sortList, getFiltered all tested
+- [ ] index.html still works identically after extraction
 
 ---
 
-### 2B. Sitemap & SEO Metadata `[x]`
-**Why:** Search engines need a sitemap to discover all restaurant pages.
+## Phase 6: Accessibility
+_Goal: WCAG 2.1 AA compliance. Usable by keyboard and screen reader users._
+
+### 6A. Keyboard Navigation & Focus Management `[ ]`
+**Why:** Cards aren't keyboard-reachable. No skip links. No focus indicators.
 **Scope:**
-- Generate `docs/sitemap.xml` listing all restaurant pages + homepage
-- Add `docs/robots.txt` allowing all crawlers
-- Add `<meta>` tags to `index.html` (description, OG image, twitter card)
-- Create a simple OG image (static, branded — `docs/og.png`)
+- Add skip link: `<a href="#grid" class="skip-link">Saltar al contenido</a>`
+- Make cards focusable: `tabindex="0"` + Enter/Space to expand
+- Add `:focus-visible` outlines on all interactive elements (buttons, links, inputs)
+- Multi-select dropdowns: arrow key navigation, Escape to close
+- Favorite button: announce state change to screen readers via `aria-pressed`
+
+**Files to modify:**
+- `docs/index.html` — skip link HTML, card tabindex, focus styles, keyboard handlers, ARIA
+
+**Acceptance criteria:**
+- [ ] Can Tab through all controls and reach restaurant cards
+- [ ] Enter/Space expands a focused card
+- [ ] Escape closes open dropdowns
+- [ ] Skip link jumps to grid, visible on focus
+- [ ] All interactive elements have visible focus ring (`:focus-visible`)
+
+---
+
+### 6B. ARIA Labels & Screen Reader Support `[ ]`
+**Why:** Missing labels, unexpanded states, and unlabeled inputs exclude screen reader users.
+**Scope:**
+- Add `<label>` (visually hidden) for search input
+- Add `aria-expanded` to multi-select trigger buttons, update on open/close
+- Add `role="listbox"` to multi-select option containers, `role="option"` to items
+- Add `aria-label` to sort button group ("Ordenar por") and view button group ("Modo de vista")
+- Add `aria-live="polite"` to stats element so filter count is announced
+- Add `aria-pressed` to favorite toggle button and geo toggle button
+- Restaurant cards: `role="article"` or semantic `<article>` element
+
+**Files to modify:**
+- `docs/index.html` — ARIA attributes, hidden labels, live regions
+
+**Acceptance criteria:**
+- [ ] axe DevTools reports 0 critical/serious issues
+- [ ] Screen reader announces filter count changes
+- [ ] Dropdown open/close state communicated via `aria-expanded`
+- [ ] All form inputs have associated labels
+- [ ] Favorite and geo buttons announce their toggle state
+
+---
+
+### 6C. Color Contrast & Touch Targets `[ ]`
+**Why:** Dark mode muted text fails WCAG AA. Touch targets are too small on mobile.
+**Scope:**
+- Audit all text/background combinations with WebAIM contrast checker
+- Fix dark mode `--muted` color: bump from `#7E8482` to `#95A09D` or lighter (≥4.5:1 ratio)
+- Increase touch targets: favorite button, sort buttons, view buttons — minimum 44x44px tap area
+- Ensure price filter `<select>` has adequate tap area on mobile
+
+**Files to modify:**
+- `docs/index.html` — CSS variable adjustment, padding increases
+
+**Acceptance criteria:**
+- [ ] All text/background combinations pass WCAG AA (≥4.5:1 normal, ≥3:1 large text)
+- [ ] All interactive elements have ≥44x44px touch area
+- [ ] Lighthouse Accessibility score ≥95
+
+---
+
+## Phase 7: Scraper Resilience & DevOps
+_Goal: The pipeline detects, alerts, and recovers from data quality issues._
+
+### 7A. Data Quality Monitoring `[ ]`
+**Why:** CI validates thresholds but can't detect gradual degradation or compare against previous runs.
+**Scope:**
+- Save a `output/quality_report.json` after each scrape with per-field coverage stats
+- In CI, compare current report against the last committed report — warn if any field drops >5%
+- If >50% of restaurants disappear compared to previous data.js, fail the workflow (prevent catastrophic data loss)
+- Add a `--compare` flag to scraper that loads previous data and reports diff
 
 **Files to create:**
-- `docs/sitemap.xml` (generated by script)
-- `docs/robots.txt`
-- `docs/og.png` (static branded image)
+- `scripts/compare_data.py` — compares two JSON files, reports added/removed/changed restaurants
 
 **Files to modify:**
-- `scripts/generate_pages.py` — also generates sitemap.xml
-- `docs/index.html` — add meta tags in `<head>`
+- `scraper.py` — generate quality_report.json
+- `.github/workflows/scrape.yml` — add comparison step, conditional failure
 
 **Acceptance criteria:**
-- [x] `sitemap.xml` lists all URLs
-- [x] `robots.txt` exists and allows crawling
-- [x] Homepage has OG tags with image
-- [ ] Google Search Console can read the sitemap (manual verification)
+- [ ] quality_report.json generated on each run
+- [ ] CI detects and warns on >5% field coverage drop
+- [ ] CI fails if >50% restaurant count drops
+- [ ] compare_data.py reports added/removed/changed restaurants
 
 ---
 
-## Phase 3: User Experience Enhancements
-_Goal: Turn the site into a genuinely useful tool for people in Madrid._
-
-### 3A. "Near Me" Geolocation `[x]`
-**Why:** All 770 restaurants have coordinates but no proximity feature exists.
+### 7B. CI Improvements `[ ]`
+**Why:** No rollback strategy, no PR review for data changes, no test step.
 **Scope:**
-- Add "Cerca de mi" button in controls bar
-- Request browser geolocation on click
-- Calculate haversine distance from user to each restaurant
-- Show distance on cards (e.g. "1.2 km")
-- Add distance as a sort option
-- On map view, show user position marker + optional radius circle
+- Add pytest step to CI workflow (run before scraping)
+- Create data updates as a PR instead of direct push to main (allows review)
+- Add data.js size check: warn if it grows/shrinks >20%
+- Pin GitHub Actions versions with full SHA hashes (not just @v4)
 
 **Files to modify:**
-- `docs/index.html` — new button, distance calc, sort option, card display, map marker
+- `.github/workflows/scrape.yml` — test step, PR creation, size check, SHA pinning
 
 **Acceptance criteria:**
-- [x] Button requests geolocation permission
-- [x] Cards show distance when location is active
-- [x] Distance sort works correctly
-- [x] Map shows user position
-- [x] Graceful fallback if permission denied
+- [ ] CI runs pytest before scraping
+- [ ] Data updates create a PR (not direct push)
+- [ ] GitHub Actions are pinned to SHA
+- [ ] Data.js size anomaly triggers a warning
 
 ---
 
-### 3B. Progressive Web App `[x]`
-**Why:** Madrid visitors have spotty data. Offline access makes this a pocket guide.
+## Phase 8: SEO & Metadata Polish
+_Goal: Fix all metadata issues found in audit. Maximize search engine and social performance._
+
+### 8A. Fix SEO Metadata Issues `[ ]`
+**Why:** JSON-LD has string values instead of numbers, Twitter card format suboptimal, OG image dimensions missing.
 **Scope:**
-- Create `docs/manifest.json` with app name, icons, theme color
-- Create `docs/sw.js` service worker — cache-first for data.js, network-first for HTML
-- Generate app icons (multiple sizes) from a base icon
-- Add install prompt / "Add to Home Screen" hint
-- Cache favorited restaurant pages for offline priority
+- Fix JSON-LD in generate_pages.py: `ratingValue`, `bestRating`, `worstRating` as numbers not strings
+- Fix `servesCuisine` parsing: remove dead `\u2022` replace (data uses commas)
+- Add `og:image:width` (1200) and `og:image:height` (630) to all pages
+- Change restaurant page Twitter card from `summary` to `summary_large_image`
+- Add `aggregateRating.ratingCount` to JSON-LD (use "1" as source — Macarfi is the rater)
+- Validate all 770 pages with schema.org validator after changes
+
+**Files to modify:**
+- `scripts/generate_pages.py` — JSON-LD fixes, OG image dimensions, Twitter card type
+
+**Acceptance criteria:**
+- [ ] JSON-LD rating values are numbers
+- [ ] og:image:width and og:image:height present on all pages
+- [ ] Twitter card is `summary_large_image` on restaurant pages
+- [ ] schema.org validator reports no errors for sample pages
+
+---
+
+### 8B. Branded OG Image `[ ]`
+**Why:** Current OG image is a solid teal rectangle. Social sharing looks generic.
+**Scope:**
+- Design a proper OG image with "Last Eat" text, "Restaurantes en Madrid" subtitle
+- Use Python Pillow or an SVG-to-PNG approach to render text on the teal gradient
+- Consider per-restaurant OG images (name + rating overlaid) — optional, high effort
+- Add Pillow to dev dependencies if needed
 
 **Files to create:**
-- `docs/manifest.json`
-- `docs/sw.js`
-- `docs/icons/` (icon-192.png, icon-512.png minimum)
+- `scripts/generate_og_image.py` — generates docs/og.png with text
 
 **Files to modify:**
-- `docs/index.html` — register service worker, link manifest, add apple-touch-icon
+- `docs/og.png` — replaced with branded version
 
 **Acceptance criteria:**
-- [x] Lighthouse PWA audit passes
-- [x] App installable on mobile
-- [x] Site works offline after first visit
-- [x] Cached data updates on next online visit
+- [ ] OG image shows "Last Eat" text and subtitle
+- [ ] Image renders clearly at 1200x630 and when scaled down to thumbnails
+- [ ] OG image is <100KB
 
 ---
 
-## Phase 4: Discovery & Scale
-_Goal: Better ways to find restaurants and expand to more cities._
+## Phase 9: Features & Discovery
+_Goal: Better ways to find restaurants. Expand content._
 
-### 4A. Smart Search & Discovery `[ ]`
+### 9A. Smart Search & Discovery `[ ]`
 **Why:** Current search is exact substring match — typos fail, no serendipity.
 **Scope:**
-- Add fuzzy matching (lightweight, no library — trigram or Levenshtein on client)
-- "Surprise me" button: random pick from current filtered set, with animation
-- Quick-filter tags above the grid: "Top 50", "Cheap eats (<30€)", "Best service"
+- Add fuzzy matching (lightweight trigram similarity on client)
+- "Surprise me" button: random pick from current filtered set, with card highlight animation
+- Quick-filter tags above the grid: "Top 50", "Cheap eats (<30 EUR)", "Best service"
 - Result count badge on active filters for discoverability
 
 **Files to modify:**
-- `docs/index.html` — fuzzy search logic, surprise button, quick-filter tags
+- `docs/index.html` (or `docs/app.js` if extracted in Phase 5B)
 
 **Acceptance criteria:**
 - [ ] "divesro" matches "Diverxo"
-- [ ] Surprise button picks a random restaurant and scrolls to it
+- [ ] Surprise button picks a random restaurant and scrolls/highlights it
 - [ ] Quick-filter tags filter correctly and compose with other filters
 - [ ] Performance remains smooth with 770 restaurants
 
 ---
 
-### 4B. Multi-City Architecture `[ ]`
+### 9B. Privacy-Friendly Analytics `[ ]`
+**Why:** No visibility into usage. Need data to prioritize future work.
+**Scope:**
+- Add Plausible or Umami script tag (lightweight, cookie-free)
+- Track: page views, search queries (aggregated), filter usage, map vs grid
+- Custom events: favorite toggles, card expansions, outbound clicks
+- Requires manual setup by owner (see Manual Tasks above)
+
+**Files to modify:**
+- `docs/index.html` — analytics script tag, custom event calls
+
+**Acceptance criteria:**
+- [ ] Analytics script loads (<1KB overhead)
+- [ ] No cookies set, GDPR-compliant
+- [ ] Custom events fire on filter use, favorites, card expand
+- [ ] Page views tracked on homepage and restaurant pages
+
+---
+
+## Phase 10: Performance
+_Goal: Lighthouse 95+ across all categories. Fast on 3G._
+
+### 10A. Font & Asset Optimization `[ ]`
+**Why:** Google Fonts is a render-blocking external dependency. CDN failures break fonts.
+**Scope:**
+- Self-host Cormorant Garamond and DM Sans (download woff2 files)
+- Inline critical font-face CSS, preload woff2 files
+- Remove Google Fonts `<link>` and preconnect tags
+- Add `font-display: swap` to self-hosted @font-face rules
+
+**Files to create:**
+- `docs/fonts/` — woff2 font files (cormorant-garamond-300.woff2, etc.)
+
+**Files to modify:**
+- `docs/index.html` — replace Google Fonts link with inline @font-face + preload
+
+**Acceptance criteria:**
+- [ ] No external font requests (Google Fonts removed)
+- [ ] Fonts load via self-hosted woff2 with font-display: swap
+- [ ] First Contentful Paint unchanged or improved
+
+---
+
+### 10B. Data & Rendering Optimization `[ ]`
+**Why:** 256KB data.js on slow connections. Small gains compound on mobile.
+**Scope:**
+- Strip empty string values from data.js (e.g. `"ph":""` → omit key entirely)
+- Add `<link rel="preload" href="data.js" as="script">` to head
+- Evaluate splitting data.js into chunks (first 60 restaurants inline, rest lazy-loaded) — only if measurable gain
+- Add `<meta name="color-scheme" content="light dark">` for instant theme before JS
+
+**Files to modify:**
+- `scripts/generate_data_js.py` — strip empty values
+- `docs/index.html` — preload hint, color-scheme meta
+
+**Acceptance criteria:**
+- [ ] data.js is ≥15% smaller after stripping empty values
+- [ ] Lighthouse Performance score ≥95
+- [ ] No layout shift from theme detection (CLS = 0)
+
+---
+
+## Phase 11: Multi-City Expansion
+_Goal: Serve Barcelona, Valencia, and other cities with minimal new code._
+
+### 11A. Multi-City Architecture `[ ]`
 **Why:** Macarfi covers Barcelona, Valencia, Sevilla. Same scraper can serve them all.
 **Scope:**
 - Parameterize scraper: `python scraper.py --city mad|bcn|vlc`
@@ -223,10 +441,12 @@ _Goal: Better ways to find restaurants and expand to more cities._
 - Generate per-city data files: `docs/data-mad.js`, `docs/data-bcn.js`
 - Add city switcher dropdown to frontend
 - Update CI workflow to scrape all configured cities
+- Generate per-city restaurant pages and sitemap entries
 
 **Files to modify:**
 - `scraper.py` — city parameter, config dict
 - `scripts/generate_data_js.py` — per-city output
+- `scripts/generate_pages.py` — per-city pages
 - `docs/index.html` — city switcher, dynamic data loading
 - `.github/workflows/scrape.yml` — loop over cities
 
@@ -235,48 +455,25 @@ _Goal: Better ways to find restaurants and expand to more cities._
 - [ ] Frontend loads correct data per city selection
 - [ ] URL state includes city parameter
 - [ ] CI scrapes all cities
+- [ ] Restaurant pages and sitemap include all cities
 
 ---
 
-## Phase 5: Polish & Insights
-_Goal: Optimize performance and understand user behavior._
+## Scoring Targets
 
-### 5A. Performance Optimization `[ ]`
-**Why:** Reduce load time, especially on mobile networks.
-**Scope:**
-- Self-host fonts (download woff2, inline critical CSS)
-- Minify inline CSS/JS in index.html (or add a tiny build step)
-- Add `<link rel="preconnect">` for CDN resources
-- Compress data.js with more aggressive abbreviation or split lazy-load
-- Add `<meta>` viewport hints, preload critical resources
+After completing all phases, the project should achieve:
 
-**Files to modify:**
-- `docs/index.html` — font loading, preconnects, minification
-- Possibly create `docs/fonts/` for self-hosted font files
-
-**Acceptance criteria:**
-- [ ] Lighthouse Performance score ≥95
-- [ ] No render-blocking external requests
-- [ ] First Contentful Paint <1.5s on 3G throttle
-
----
-
-### 5B. Privacy-Friendly Analytics `[ ]`
-**Why:** No visibility into usage. Need data to prioritize future work.
-**Scope:**
-- Add Plausible or Umami script tag (lightweight, cookie-free)
-- Track: page views, search queries (aggregated), filter usage, map vs grid
-- Custom events: favorite toggles, card expansions, outbound clicks
-- Dashboard accessible to project owner
-
-**Files to modify:**
-- `docs/index.html` — analytics script tag, custom event calls
-
-**Acceptance criteria:**
-- [ ] Analytics dashboard shows page views
-- [ ] No cookies set, GDPR-compliant
-- [ ] Custom events fire correctly
-- [ ] <1KB script overhead
+| Dimension | Current | Target | Key phases |
+|---|---|---|---|
+| Design & UX | 8/10 | 10/10 | 8B, 9A |
+| Functionality | 8/10 | 10/10 | 9A, 9B, 11A |
+| Code quality | 5/10 | 10/10 | 4B, 5B |
+| Testing | 1/10 | 10/10 | 5A, 5B |
+| Security | 4/10 | 10/10 | 4A |
+| Accessibility | 3/10 | 10/10 | 6A, 6B, 6C |
+| DevOps/CI | 7/10 | 10/10 | 7A, 7B |
+| SEO | 7/10 | 10/10 | 8A |
+| Performance | 7/10 | 10/10 | 10A, 10B |
 
 ---
 
