@@ -81,8 +81,9 @@ _Goal: match professional delivery sequencing for a live MVP._
 4. CI/DevOps hardening (Phase 7A + 7B)
 5. SEO metadata + branded OG image (Phase 8A partial + 8B)
 6. Font self-hosting + data optimization (Phase 10A + 10B partial)
-7. Frontend design polish (dark mode contrast, empty states, mobile UX, theme transitions)
+7. Frontend design polish (dark mode contrast, mobile UX, theme transitions)
 8. UX/UI redesign (load-more pagination, controls bar layout, theme crossfade, favicon, map prefetch, uniform markers, entrance animations)
+9. Editorial restraint refactor (warm accent limited to 5 locations, decorative animations removed)
 
 ### Remaining work
 1. **P0 Close open audits:** 6B/6C (axe + Lighthouse a11y), 8A (schema.org validator), 10B (Lighthouse perf)
@@ -386,19 +387,20 @@ _Goal: Better ways to find restaurants. Expand content._
 ### 9A. Smart Search & Discovery `[~]`
 **Why:** Current search is exact substring match — typos fail, no serendipity.
 **Scope:**
-- Add fuzzy matching (lightweight trigram similarity on client)
-- "Surprise me" button: random pick from current filtered set, with card highlight animation
+- Add fuzzy matching (lightweight edit distance on client)
+- "Surprise me" button: random pick from current filtered set, expand + scroll + focus
 - Quick-filter tags above the grid: "Top 50", "Cheap eats (<30 EUR)", "Best service"
-- Result count badge on active filters for discoverability
 
 **Files to modify:**
 - `docs/index.html` (or `docs/app.js` if extracted in Phase 5B)
 
 **Acceptance criteria:**
 - [x] "divesro" matches "Diverxo"
-- [x] Surprise button picks a random restaurant and scrolls/highlights it
+- [x] Surprise button picks a random restaurant and scrolls to it
 - [x] Quick-filter tags filter correctly and compose with other filters
 - [ ] Performance remains smooth with 770 restaurants
+
+_Note: Surprise pulse animation and quick-filter badge counts were removed in the editorial restraint refactor._
 
 ---
 
@@ -499,11 +501,10 @@ _Goal: Evolve from "competent developer project" to "editorial dining platform" 
 ### 12A. Design System Foundation `[x]`
 **Why:** Teal accent does everything (ratings, tags, actions, hover, map) — monotone palette lacks hierarchy. ~25 distinct font-sizes between 0.55–3.4rem with no system. Thin 300-weight logo lacks presence.
 **Scope:**
-- Add `--warm` accent CSS variables (gold/amber ~#C4956A) for ratings/price/data display
+- Add `--warm` accent CSS variables (gold/amber ~#C4956A) for ratings display only
 - Define typography scale variables (`--text-xs` through `--text-xl`, 6 steps)
 - Migrate all ~25 hardcoded font-sizes to nearest scale variable
 - Scale logo to 4.2rem/600 weight (from 3.4rem/300), mobile 3rem
-- Add header atmosphere (subtle warm radial gradient, decorative divider)
 - Mirror CSS variable changes in `scripts/generate_pages.py` template
 
 **Files to modify:**
@@ -515,60 +516,61 @@ _Goal: Evolve from "competent developer project" to "editorial dining platform" 
 - [x] `--warm`, `--warm-soft`, `--warm-muted` defined for both light and dark themes
 - [x] Typography scale variables in `:root`, no more than 8 hardcoded font-sizes remain
 - [x] Logo 4.2rem/600 desktop, 3rem mobile
-- [x] Header has warm radial gradient
 - [x] Dark mode correct with new warm tones
 - [x] Detail pages receive new variables after regeneration
+
+_Note: Header radial gradient was added then removed in the editorial restraint refactor._
 
 ---
 
 ### 12B. Card Hierarchy + Micro-interactions + Footer `[x]`
-**Why:** Cards are a wall of small text with no visual tiers. No hover personality. Bland empty states. Footer is minimal.
+**Why:** Cards are a wall of small text with no visual tiers. No hover personality. Footer is minimal.
 **Scope:**
 - Card name to `--text-lg` (0.95rem)/600 weight
-- Rating pill: warm-tinted background badge
-- Tags: increase to `--text-sm` (0.72rem), use warm accent (not teal)
-- Left border accent on 9.0+ rated cards (`data-top-rated` attribute)
-- Enhanced hover: warmer layered shadow, more lift
+- Rating: warm color (no pill background — editorial restraint)
+- Tags: teal accent (consistent with interactive elements)
+- Left border accent on 9.0+ rated cards
+- Card hover: neutral shadow, subtle lift
 - Heart bounce animation on toggle (keyframe + `just-toggled` class)
 - Load-more arrow rotation on hover
-- CSS-only fork-knife illustration for empty state
-- Footer: larger Cormorant brand, italic "Hecho en Madrid"
+- Footer: larger Cormorant brand, plain "Hecho en Madrid"
 - All animations respect `prefers-reduced-motion`
 
 **Files to modify:**
 - `docs/index.html` — CSS (card styles, animations, footer) + JS (buildCard, toggleFav)
 
 **Acceptance criteria:**
-- [x] Card name 0.95rem/600, rating has warm pill, tags use warm accent
+- [x] Card name 0.95rem/600, rating warm color, tags use teal accent
 - [x] 9.0+ cards have left border accent
 - [x] Heart bounces on toggle, arrow rotates on hover
-- [x] Empty state has CSS illustration
-- [x] Footer brand larger, "Hecho en Madrid" italic serif
+- [x] Footer brand larger, "Hecho en Madrid" in footer
 - [x] Dark mode correct, reduced-motion respected
+
+_Note: Rating pill background, warm tags, fork-knife empty illustration, warm card hover, and italic serif footer were removed in the editorial restraint refactor._
 
 ---
 
 ### 12C. Content Rhythm + Scroll Reveals + Map Polish `[~]`
 **Why:** 770 identical cards in a flat grid with no editorial punctuation. Static page feel with no scroll reveals. Map view lacks branding.
 **Scope:**
-- Decorative banner row between first and second card batch
 - District headers when sorted by name
-- IntersectionObserver for card fade-in (second batch onward)
-- Stats count-up animation (0→N over 800ms) on initial load
-- Map view: "Explora Madrid" header, refined zoom controls (36x36px, warm hover)
-- Service worker cache bump to `lasteat-v7`
+- IntersectionObserver for card fade-in (second batch onward, 0.3s transition)
+- Stats count-up animation (0→N over 400ms) on initial load
+- Map view: "Explora Madrid" header, refined zoom controls (36x36px, teal accent hover)
+- Service worker cache bump to `lasteat-v8`
 
 **Files to modify:**
-- `docs/index.html` — CSS (banner, district headers, fade-in, map) + JS (renderBatch, IntersectionObserver, map header, count-up)
+- `docs/index.html` — CSS (district headers, fade-in, map) + JS (renderBatch, IntersectionObserver, map header, count-up)
 
 **Acceptance criteria:**
-- [x] Banner appears between first and second batch
 - [x] District headers when sorted by name
 - [x] Cards beyond initial batch fade in on scroll
 - [x] Stats count-up on initial load
 - [x] Map has "Explora Madrid" header, 36x36px zoom controls
 - [x] All animations disabled under `prefers-reduced-motion`
 - [ ] No performance regression
+
+_Note: Rhythm banner between card batches was removed in the editorial restraint refactor. Stats count-up tightened from 800ms to 400ms. Zoom hover changed from warm to teal accent._
 
 ---
 
