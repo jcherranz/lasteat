@@ -1,5 +1,5 @@
 """
-Macarfi Madrid restaurant scraper.
+Last Eat — Madrid restaurant scraper (Macarfi source).
 
 Scrapes all restaurants from https://macarfi.com/es/mad/restaurantes
 and exports them as a CSV ready to import into Google My Maps.
@@ -352,10 +352,10 @@ def main():
         export_json(restaurants, OUTPUT_DIR / "enriched_details.json")
 
     # Export
-    csv_path = OUTPUT_DIR / "macarfi_madrid_restaurants.csv"
+    csv_path = OUTPUT_DIR / "madrid_restaurants.csv"
     export_google_maps_csv(restaurants, csv_path)
 
-    json_path = OUTPUT_DIR / "macarfi_madrid_restaurants.json"
+    json_path = OUTPUT_DIR / "madrid_restaurants.json"
     export_json(restaurants, json_path)
 
     # Stats
