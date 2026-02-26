@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Macarfi Madrid — Restaurantes</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --card: #fff;
+    --text: #1a1a1a;
+    --muted: #6b7280;
+    --accent: #e63946;
+    --accent-light: #fef2f2;
+    --border: #e5e7eb;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: .75rem;
+  }
+  .logo {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -.02em;
+  }
+  .logo span { color: var(--accent); }
+  .stats {
+    font-size: .8rem;
+    color: var(--muted);
+  }
+
+  /* Controls */
+  .controls {
+    max-width: 1200px;
+    margin: 1rem auto;
+    padding: 0 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    align-items: center;
+  }
+  .search-box {
+    flex: 1;
+    min-width: 200px;
+    padding: .55rem .85rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: .9rem;
+    outline: none;
+    transition: border .2s;
+  }
+  .search-box:focus { border-color: var(--accent); }
+
+  select {
+    padding: .55rem .75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: .85rem;
+    background: var(--card);
+    outline: none;
+    cursor: pointer;
+    max-width: 180px;
+  }
+  select:focus { border-color: var(--accent); }
+
+  .sort-btn {
+    padding: .55rem .75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: .85rem;
+    background: var(--card);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .15s;
+  }
+  .sort-btn:hover { border-color: var(--accent); }
+  .sort-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* Grid */
+  .grid {
+    max-width: 1200px;
+    margin: 1rem auto;
+    padding: 0 1.5rem 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: .75rem;
+  }
+
+  /* Card */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.15rem;
+    transition: box-shadow .15s, transform .15s;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+  }
+  .card:hover {
+    box-shadow: var(--shadow);
+    transform: translateY(-1px);
+  }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: .5rem;
+  }
+  .card-name {
+    font-size: .95rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .card-name a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .card-name a:hover { color: var(--accent); }
+
+  .card-rating {
+    flex-shrink: 0;
+    background: var(--accent);
+    color: #fff;
+    font-size: .8rem;
+    font-weight: 700;
+    padding: .2rem .5rem;
+    border-radius: 6px;
+    min-width: 2.2rem;
+    text-align: center;
+  }
+  .card-rating.no-rating {
+    background: var(--border);
+    color: var(--muted);
+  }
+
+  .card-meta {
+    font-size: .8rem;
+    color: var(--muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem .75rem;
+  }
+  .card-meta span::before {
+    margin-right: .3rem;
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .3rem;
+  }
+  .tag {
+    font-size: .7rem;
+    padding: .15rem .45rem;
+    background: var(--accent-light);
+    color: var(--accent);
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .card-ratings {
+    display: flex;
+    gap: .75rem;
+    font-size: .75rem;
+    color: var(--muted);
+  }
+  .card-ratings strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .card-actions {
+    display: flex;
+    gap: .4rem;
+    margin-top: auto;
+    padding-top: .25rem;
+  }
+  .card-actions a {
+    font-size: .75rem;
+    color: var(--accent);
+    text-decoration: none;
+    padding: .25rem .5rem;
+    border: 1px solid var(--accent);
+    border-radius: 5px;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  .card-actions a:hover {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--muted);
+    font-size: .95rem;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 1.5rem;
+    font-size: .75rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 640px) {
+    .grid { grid-template-columns: 1fr; }
+    .controls { padding: 0 1rem; }
+    .grid { padding: 0 1rem 2rem; }
+    header { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">Macarfi <span>Madrid</span></div>
+    <div class="stats" id="stats">Loading...</div>
+  </div>
+</header>
+
+<div class="controls">
+  <input type="text" class="search-box" id="search" placeholder="Buscar restaurante, cocina, zona...">
+  <select id="cuisine-filter"><option value="">Todas las cocinas</option></select>
+  <select id="district-filter"><option value="">Todas las zonas</option></select>
+  <select id="price-filter">
+    <option value="">Cualquier precio</option>
+    <option value="0-30">Hasta 30 &euro;</option>
+    <option value="0-50">Hasta 50 &euro;</option>
+    <option value="0-80">Hasta 80 &euro;</option>
+    <option value="80-999">Desde 80 &euro;</option>
+  </select>
+  <button class="sort-btn active" data-sort="rating">Ranking</button>
+  <button class="sort-btn" data-sort="name">A-Z</button>
+  <button class="sort-btn" data-sort="price">Precio</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<footer>
+  Datos de <a href="https://macarfi.com/es/mad/restaurantes" target="_blank" rel="noopener">Macarfi</a>
+  &middot; Actualizado feb 2026
+</footer>
+
+<script src="data.js"></script>
+<script>
+(function() {
+  const grid = document.getElementById('grid');
+  const searchInput = document.getElementById('search');
+  const cuisineSelect = document.getElementById('cuisine-filter');
+  const districtSelect = document.getElementById('district-filter');
+  const priceSelect = document.getElementById('price-filter');
+  const statsEl = document.getElementById('stats');
+
+  // Populate filters
+  const cuisines = [...new Set(RESTAURANTS.map(r => r.c).filter(Boolean))].sort();
+  const districts = [...new Set(RESTAURANTS.map(r => r.d).filter(Boolean))].sort();
+  cuisines.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c; o.textContent = c;
+    cuisineSelect.appendChild(o);
+  });
+  districts.forEach(d => {
+    const o = document.createElement('option');
+    o.value = d; o.textContent = d;
+    districtSelect.appendChild(o);
+  });
+
+  let currentSort = 'rating';
+
+  function sortRestaurants(list, key) {
+    return [...list].sort((a, b) => {
+      if (key === 'rating') {
+        const ra = parseFloat(a.r) || 0;
+        const rb = parseFloat(b.r) || 0;
+        return rb - ra;
+      }
+      if (key === 'name') return a.n.localeCompare(b.n, 'es');
+      if (key === 'price') {
+        const pa = parseInt(a.p) || 9999;
+        const pb = parseInt(b.p) || 9999;
+        return pa - pb;
+      }
+      return 0;
+    });
+  }
+
+  function render() {
+    const query = searchInput.value.toLowerCase().trim();
+    const cuisine = cuisineSelect.value;
+    const district = districtSelect.value;
+    const priceRange = priceSelect.value;
+
+    let filtered = RESTAURANTS.filter(r => {
+      if (query) {
+        const haystack = (r.n + ' ' + r.c + ' ' + r.d + ' ' + r.a).toLowerCase();
+        if (!haystack.includes(query)) return false;
+      }
+      if (cuisine && r.c !== cuisine) return false;
+      if (district && r.d !== district) return false;
+      if (priceRange) {
+        const [min, max] = priceRange.split('-').map(Number);
+        const p = parseInt(r.p) || 0;
+        if (!r.p || p < min || p > max) return false;
+      }
+      return true;
+    });
+
+    filtered = sortRestaurants(filtered, currentSort);
+    statsEl.textContent = filtered.length + ' de ' + RESTAURANTS.length + ' restaurantes';
+
+    if (!filtered.length) {
+      grid.innerHTML = '<div class="no-results">No se encontraron restaurantes con esos filtros.</div>';
+      return;
+    }
+
+    grid.innerHTML = filtered.map(r => {
+      const ratingClass = r.r && r.r !== '-' ? '' : ' no-rating';
+      const ratingText = r.r && r.r !== '-' ? r.r : '—';
+      const cuisineTags = r.c ? r.c.split('•').map(t =>
+        '<span class="tag">' + t.trim() + '</span>'
+      ).join('') : '';
+      const ratingsDetail = [
+        r.rf ? 'Comida <strong>' + r.rf + '</strong>' : '',
+        r.rd ? 'Decor <strong>' + r.rd + '</strong>' : '',
+        r.rs ? 'Servicio <strong>' + r.rs + '</strong>' : '',
+      ].filter(Boolean).join(' &middot; ');
+      const price = r.p ? r.p + ' &euro;' : '';
+      const phone = r.ph ? r.ph : '';
+      const gmapsUrl = 'https://www.google.com/maps/search/?api=1&query=' +
+        encodeURIComponent(r.n + ', ' + r.a);
+
+      return '<div class="card">' +
+        '<div class="card-top">' +
+          '<div class="card-name"><a href="' + r.u + '" target="_blank" rel="noopener">' + r.n + '</a></div>' +
+          '<div class="card-rating' + ratingClass + '">' + ratingText + '</div>' +
+        '</div>' +
+        '<div class="card-meta">' +
+          (r.d ? '<span>' + r.d + '</span>' : '') +
+          (price ? '<span>' + price + '</span>' : '') +
+          (phone ? '<span>' + phone + '</span>' : '') +
+        '</div>' +
+        (cuisineTags ? '<div class="card-tags">' + cuisineTags + '</div>' : '') +
+        (ratingsDetail ? '<div class="card-ratings">' + ratingsDetail + '</div>' : '') +
+        '<div class="card-actions">' +
+          '<a href="' + gmapsUrl + '" target="_blank" rel="noopener">Google Maps</a>' +
+          (r.w ? '<a href="' + r.w + '" target="_blank" rel="noopener">Web</a>' : '') +
+          '<a href="' + r.u + '" target="_blank" rel="noopener">Macarfi</a>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // Event listeners
+  searchInput.addEventListener('input', render);
+  cuisineSelect.addEventListener('change', render);
+  districtSelect.addEventListener('change', render);
+  priceSelect.addEventListener('change', render);
+
+  document.querySelectorAll('.sort-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentSort = btn.dataset.sort;
+      render();
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
