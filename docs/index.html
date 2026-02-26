@@ -838,31 +838,6 @@
     50% { opacity: 1; transform: scale(2.5); }
   }
 
-  /* ── Map Counter Badge ── */
-  .map-counter {
-    position: absolute;
-    top: 12px;
-    left: 332px;
-    z-index: 1000;
-    background: var(--surface);
-    color: var(--secondary);
-    font-size: 0.7rem;
-    font-weight: 500;
-    padding: 0.3rem 0.65rem;
-    border-radius: var(--radius-pill);
-    border: 1px solid var(--border);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    pointer-events: none;
-    letter-spacing: 0.02em;
-  }
-  @media (max-width: 768px) {
-    .map-counter {
-      top: auto;
-      bottom: 12px;
-      left: 12px;
-    }
-  }
-
   /* ── Map Markers (SVG divIcon) ── */
   .map-marker {
     display: flex;
@@ -1127,7 +1102,6 @@
     <ul id="map-panel-list"></ul>
   </nav>
   <div id="map-view"></div>
-  <div class="map-counter" id="map-counter" aria-live="polite"></div>
 </div>
 
 <button class="btt" id="btt" aria-label="Volver arriba">&uarr;</button>
@@ -1162,7 +1136,6 @@
   var favBtn   = document.getElementById('fav-filter');
   var mapCont  = document.getElementById('map-container');
   var mapPanel = document.getElementById('map-panel-list');
-  var mapCounter = document.getElementById('map-counter');
   var geoBtn   = document.getElementById('geo-btn');
   var sortDistBtn = document.getElementById('sort-dist');
 
@@ -1792,17 +1765,13 @@
     return html;
   }
 
-  /* Update counter + sync panel to visible bounds */
-  function updateMapCounter() {
+  /* Sync panel to visible map bounds */
+  function updateMapPanel() {
     if (!map) return;
     var bounds = map.getBounds();
-    var count = 0;
     markerIndex.forEach(function(item) {
-      var visible = bounds.contains(item.marker.getLatLng());
-      if (visible) count++;
-      if (item.panelEl) item.panelEl.style.display = visible ? '' : 'none';
+      if (item.panelEl) item.panelEl.style.display = bounds.contains(item.marker.getLatLng()) ? '' : 'none';
     });
-    mapCounter.textContent = count + ' restaurante' + (count !== 1 ? 's' : '') + ' en vista';
   }
 
   /* Highlight panel item + scroll into view */
@@ -1828,7 +1797,7 @@
       map.attributionControl.setPrefix('');
       tileLayer = L.tileLayer(getTileUrl(), { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>' }).addTo(map);
       document.getElementById('map-view').classList.add('loaded');
-      map.on('moveend', updateMapCounter);
+      map.on('moveend', updateMapPanel);
       updateMap();
     });
   }
@@ -1905,7 +1874,7 @@
       var group = L.featureGroup(allMarkers);
       map.fitBounds(group.getBounds().pad(0.1));
     }
-    updateMapCounter();
+    updateMapPanel();
   }
 
   function showGrid() {
