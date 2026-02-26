@@ -37,6 +37,11 @@
 <link rel="preload" href="fonts/cormorant-garamond-300-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/dm-sans-400-latin.woff2" as="font" type="font/woff2" crossorigin>
 
+<!-- Prefetch map resources for faster first switch -->
+<link rel="prefetch" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="prefetch" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+<link rel="prefetch" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js">
+
 <style>
   @font-face {
     font-family: 'Cormorant Garamond';
@@ -296,7 +301,7 @@
   .controls {
     max-width: 1140px;
     margin: 0 auto;
-    padding: 1rem 2rem;
+    padding: 0.75rem 2rem;
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
@@ -304,12 +309,33 @@
   }
 
   /* ── Search ── */
+  .search-wrap {
+    flex-basis: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.15rem;
+  }
+  .search-wrap::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%23878C89' stroke-width='1.5' stroke-linecap='round'%3E%3Ccircle cx='6' cy='6' r='4.5'/%3E%3Cline x1='9.5' y1='9.5' x2='13' y2='13'/%3E%3C/svg%3E") no-repeat center;
+    opacity: 0.65;
+    pointer-events: none;
+  }
   .search-box {
-    padding: 0.55rem 0;
-    min-height: 44px;
+    flex: 1;
+    min-width: 0;
+    padding: 0.5rem 2rem 0.5rem 1.5rem;
+    min-height: 40px;
     border: none;
     border-bottom: 1.5px solid var(--border);
-    font-size: 0.88rem;
+    font-size: 0.85rem;
     font-family: inherit;
     font-weight: 400;
     letter-spacing: 0.01em;
@@ -320,14 +346,6 @@
   }
   .search-box::placeholder { color: var(--muted); font-weight: 300; }
   .search-box:focus { border-bottom-color: var(--accent); }
-  .search-wrap {
-    flex: 1;
-    min-width: 180px;
-    position: relative;
-    display: flex;
-    align-items: center;
-  }
-  .search-wrap .search-box { flex: 1; min-width: 0; padding-right: 2rem; }
   .search-clear {
     position: absolute;
     right: 0;
@@ -351,12 +369,13 @@
 
   /* ── Select ── */
   select {
-    padding: 0.5rem 2rem 0.5rem 0.9rem;
+    padding: 0 2rem 0 0.85rem;
     border: 1.5px solid var(--border);
     border-radius: var(--radius-pill);
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     font-family: inherit;
     font-weight: 400;
+    letter-spacing: 0.02em;
     background: var(--surface);
     color: var(--secondary);
     outline: none;
@@ -364,39 +383,40 @@
     transition: border-color 0.25s, color 0.25s;
     -webkit-appearance: none;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23878C89'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23878C89'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.7rem center;
-    min-height: 44px;
+    height: 36px;
   }
   select:focus { border-color: var(--accent); }
   select:hover { border-color: var(--accent); color: var(--accent); }
   [data-theme="dark"] select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238A8F8C'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%238A8F8C'/%3E%3C/svg%3E");
   }
 
   /* ── Multi-select ── */
   .ms { position: relative; }
   .ms-trigger {
-    padding: 0.5rem 2rem 0.5rem 0.9rem;
+    padding: 0 2rem 0 0.85rem;
     border: 1.5px solid var(--border);
     border-radius: var(--radius-pill);
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     font-family: inherit;
     font-weight: 400;
+    letter-spacing: 0.02em;
     background: var(--surface);
     color: var(--secondary);
     cursor: pointer;
     white-space: nowrap;
     transition: border-color 0.25s, color 0.25s, background 0.25s;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23878C89'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23878C89'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.7rem center;
-    min-height: 44px;
+    height: 36px;
   }
-  .ms-trigger:hover { border-color: var(--accent); }
+  .ms-trigger:hover { border-color: var(--accent); color: var(--accent); }
   [data-theme="dark"] .ms-trigger {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238A8F8C'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%238A8F8C'/%3E%3C/svg%3E");
   }
   .ms.open .ms-trigger { border-color: var(--accent); color: var(--accent); }
   .ms.has-sel .ms-trigger {
@@ -505,11 +525,11 @@
 
   /* ── Control Buttons ── */
   .ctrl-btn {
-    width: 44px;
-    height: 44px;
+    width: 36px;
+    height: 36px;
     border: 1.5px solid var(--border);
     border-radius: 50%;
-    font-size: 0.88rem;
+    font-size: 0.85rem;
     font-family: inherit;
     background: var(--surface);
     color: var(--muted);
@@ -535,44 +555,43 @@
     white-space: nowrap;
   }
 
-  .sep {
-    width: 1px;
-    height: 20px;
-    background: var(--border);
-    margin: 0 0.2rem;
-  }
+  /* Hide separators — spacing handled by gap + auto-margin */
+  .sep { display: none; }
 
   .btn-group {
     display: flex;
     align-items: center;
-    gap: 2px;
-    background: var(--accent-soft);
+    gap: 1px;
+    background: var(--border);
+    border: 1.5px solid var(--border);
     border-radius: var(--radius-pill);
-    padding: 3px;
+    padding: 0;
+    overflow: hidden;
   }
+  /* Push first btn-group (sort) to the right */
+  .btn-group:first-of-type { margin-left: auto; }
   .sort-btn, .view-btn {
-    padding: 0.35rem 0.75rem;
+    padding: 0 0.7rem;
     border: none;
-    border-radius: var(--radius-pill);
-    font-size: 0.74rem;
+    border-radius: 0;
+    font-size: 0.72rem;
     font-family: inherit;
-    background: transparent;
+    letter-spacing: 0.02em;
+    background: var(--surface);
     color: var(--muted);
     cursor: pointer;
     white-space: nowrap;
-    transition: color 0.2s, background 0.2s, box-shadow 0.2s;
-    min-width: 44px;
-    min-height: 38px;
+    transition: color 0.2s, background 0.2s;
+    height: 32px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
   }
-  .sort-btn:hover, .view-btn:hover { color: var(--secondary); }
+  .sort-btn:hover, .view-btn:hover { color: var(--text); background: var(--accent-soft); }
   .sort-btn.active, .view-btn.active {
-    color: var(--accent);
-    background: var(--surface);
+    color: #fff;
+    background: var(--accent);
     font-weight: 500;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
   }
 
   /* ── Grid ── */
@@ -1174,7 +1193,9 @@
     .logo { font-size: 2.4rem; letter-spacing: 0.15em; }
     .subtitle { font-size: 0.62rem; letter-spacing: 0.2em; }
     .theme-toggle { top: 1rem; right: 1rem; }
-    .controls { padding: 0.75rem 1.25rem; gap: 0.4rem; }
+    .controls { padding: 0.6rem 1.25rem; gap: 0.35rem; }
+    .search-wrap { margin-bottom: 0.1rem; }
+    .btn-group:first-of-type { margin-left: 0; }
     .grid {
       grid-template-columns: 1fr;
       padding: 0 1rem 2rem;
@@ -1185,11 +1206,10 @@
     #map-container { padding: 0 1rem 2rem; }
     #map-view { height: 55vh; border-radius: var(--radius); }
     .sort-btn, .view-btn {
-      font-size: 0.72rem;
-      padding: 0.3rem 0.6rem;
-      min-height: 44px;
+      font-size: 0.68rem;
+      padding: 0 0.55rem;
+      height: 30px;
     }
-    .btn-group { padding: 2px; }
   }
 </style>
 </head>
