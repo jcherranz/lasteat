@@ -560,7 +560,6 @@
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 0.75rem;
   }
-  .sentinel { height: 1px; grid-column: 1 / -1; }
 
   /* ── Card ── */
   @keyframes cardIn {
@@ -1275,8 +1274,8 @@
   'use strict';
 
   /* ── Constants ── */
+  var INITIAL_BATCH = 9;
   var BATCH = 60;
-  var AUTO_BATCHES = 2;
   var LEAFLET_CSS_INTEGRITY = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
   var LEAFLET_JS_INTEGRITY = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
   var MC_JS_INTEGRITY = 'sha256-Hk4dIpcqOSb0hZjgyvFOP+cEmDXUKKNE/tT542ZbNQg=';
@@ -1315,7 +1314,6 @@
   var selDistrict= new Set();
   var filtered   = [];
   var rendered   = 0;
-  var batchCount = 0;
   var map          = null;
   var tileLayer    = null;
   var clusterGroup = null;
@@ -1791,16 +1789,7 @@
     '</div>';
   }
 
-  /* ── Progressive Rendering (hybrid: auto + load-more) ── */
-  var sentinel = document.createElement('div');
-  sentinel.className = 'sentinel';
-  var observer = new IntersectionObserver(function(entries) {
-    if (entries[0] && entries[0].isIntersecting && rendered < filtered.length) {
-      observer.unobserve(sentinel);
-      renderBatch();
-    }
-  }, { rootMargin: '300px' });
-
+  /* ── Progressive Rendering (load-more button) ── */
   var loadMoreWrap = document.createElement('div');
   loadMoreWrap.className = 'load-more';
   var loadMoreBtn = document.createElement('button');
@@ -1821,32 +1810,23 @@
   }
 
   function renderBatch() {
-    var batch = filtered.slice(rendered, rendered + BATCH);
+    var size = (rendered === 0) ? INITIAL_BATCH : BATCH;
+    var batch = filtered.slice(rendered, rendered + size);
     if (!batch.length) return;
-    if (sentinel.parentNode) sentinel.remove();
     if (loadMoreWrap.parentNode) loadMoreWrap.remove();
     grid.insertAdjacentHTML('beforeend', batch.map(function(r, i) { return buildCard(r, i); }).join(''));
     rendered += batch.length;
-    batchCount++;
     if (rendered < filtered.length) {
-      if (batchCount < AUTO_BATCHES) {
-        grid.appendChild(sentinel);
-        observer.observe(sentinel);
-      } else {
-        showLoadMore();
-      }
+      showLoadMore();
     }
   }
 
   function render() {
-    observer.disconnect();
-    if (sentinel.parentNode) sentinel.remove();
     if (loadMoreWrap.parentNode) loadMoreWrap.remove();
     filtered = getFiltered();
     statsEl.textContent = filtered.length + ' de ' + RESTAURANTS.length + ' restaurantes';
     grid.innerHTML = '';
     rendered = 0;
-    batchCount = 0;
     if (!filtered.length) {
       if (favsOnly && !favs.size) {
         grid.innerHTML = '<div class="no-results"><p>Marca restaurantes con el coraz\u00f3n para verlos aqu\u00ed.</p></div>';
