@@ -1,4 +1,4 @@
-httpx
-beautifulsoup4
-lxml
-tqdm
+httpx==0.28.1
+beautifulsoup4==4.14.3
+lxml==6.0.2
+tqdm==4.67.3

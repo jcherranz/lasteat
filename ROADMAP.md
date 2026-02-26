@@ -33,7 +33,7 @@ _Goal: Automate data freshness and prevent silent breakage._
 
 ---
 
-### 1B. Scraper Hardening `[ ]`
+### 1B. Scraper Hardening `[x]`
 **Why:** If Macarfi changes HTML structure, scraper silently returns empty fields.
 **Scope:**
 - Pin dependency versions in `requirements.txt`
@@ -48,9 +48,9 @@ _Goal: Automate data freshness and prevent silent breakage._
 - `.github/workflows/scrape.yml` — add failure notification step
 
 **Acceptance criteria:**
-- [ ] `requirements.txt` has pinned versions
+- [x] `requirements.txt` has pinned versions
 - [x] Scraper exits non-zero if data quality drops below thresholds
-- [ ] HTTP retries work for transient 5xx errors
+- [x] HTTP retries work for transient 5xx errors
 - [x] CI creates a GitHub Issue on scraper failure
 
 ---

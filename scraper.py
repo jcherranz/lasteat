@@ -132,12 +132,33 @@ def parse_html_cards(html: str) -> dict[str, dict]:
 # ── Step 2 (optional): Enrich from detail pages ─────────────────────────────
 
 
+def _fetch_with_retry(client: httpx.Client, url: str, retries: int = 3) -> httpx.Response:
+    """Fetch a URL with exponential backoff for transient errors."""
+    for attempt in range(retries):
+        try:
+            resp = client.get(url)
+            if resp.status_code >= 500 and attempt < retries - 1:
+                wait = 2 ** attempt
+                print(f"  Server error {resp.status_code}, retrying in {wait}s...")
+                time.sleep(wait)
+                continue
+            resp.raise_for_status()
+            return resp
+        except httpx.TimeoutException:
+            if attempt < retries - 1:
+                wait = 2 ** attempt
+                print(f"  Timeout, retrying in {wait}s...")
+                time.sleep(wait)
+                continue
+            raise
+    return resp  # unreachable, but satisfies type checker
+
+
 def enrich_from_detail(client: httpx.Client, restaurant: dict) -> dict:
     """Fetch a restaurant detail page to get phone, website, and price."""
     url = f"{BASE_URL}/es/mad/ficha-restaurante/{restaurant['slug']}"
     try:
-        resp = client.get(url)
-        resp.raise_for_status()
+        resp = _fetch_with_retry(client, url)
     except Exception as e:
         restaurant["_enrich_error"] = str(e)
         return restaurant
@@ -388,29 +409,26 @@ def main():
     json_path = OUTPUT_DIR / "madrid_restaurants.json"
     export_json(restaurants, json_path)
 
-    # Stats
-    with_coords = sum(1 for r in restaurants if r.get("latitude"))
-    with_address = sum(1 for r in restaurants if r.get("address"))
-    with_cuisine = sum(1 for r in restaurants if r.get("cuisine"))
-    with_phone = sum(1 for r in restaurants if r.get("phone"))
+    # Stats & warnings
+    total = len(restaurants)
+    fields = {
+        "coordinates": sum(1 for r in restaurants if r.get("latitude")),
+        "address": sum(1 for r in restaurants if r.get("address")),
+        "cuisine": sum(1 for r in restaurants if r.get("cuisine")),
+        "rating": sum(1 for r in restaurants if r.get("rating") and r["rating"] != "-"),
+        "phone": sum(1 for r in restaurants if r.get("phone")),
+    }
     print(f"\n{'='*50}")
     print(f"SCRAPING COMPLETE")
     print(f"{'='*50}")
-    print(f"Total restaurants: {len(restaurants)}")
-    print(f"With coordinates:  {with_coords}")
-    print(f"With address:      {with_address}")
-    print(f"With cuisine:      {with_cuisine}")
-    print(f"With phone:        {with_phone}")
+    print(f"Total restaurants: {total}")
+    for field, count in fields.items():
+        pct = count / total * 100 if total else 0
+        marker = " ⚠" if pct < 95 else ""
+        print(f"  {field:15s} {count:>4d}/{total}  ({pct:.0f}%){marker}")
     print(f"\nOutput files:")
     print(f"  CSV (Google Maps): {csv_path}")
     print(f"  JSON (full data):  {json_path}")
-    print(f"\nTo import into Google My Maps:")
-    print(f"  1. Go to https://www.google.com/maps/d/")
-    print(f"  2. Create a new map")
-    print(f"  3. Click 'Import' and upload the CSV file")
-    print(f"  4. Select 'Latitude' and 'Longitude' as position columns")
-    print(f"     (or 'Address' if coordinates are missing)")
-    print(f"  5. Select 'Name' as the title column")
     if not enrich:
         print(f"\nTip: Run with --enrich to also fetch phone/website (takes ~13 min)")
 
