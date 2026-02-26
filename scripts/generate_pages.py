@@ -133,7 +133,7 @@ def build_page(r: dict) -> str:
     cuisine_tags = ""
     if cuisine:
         tags = [c.strip() for c in cuisine.replace("\u2022", ",").split(",") if c.strip()]
-        cuisine_tags = "".join(f'<span class="tag">{escape(t)}</span>' for t in tags)
+        cuisine_tags = ", ".join(escape(t) for t in tags)
 
     # Ratings breakdown
     ratings_html = ""
@@ -310,15 +310,11 @@ def build_page(r: dict) -> str:
     letter-spacing: 0.01em;
   }}
   .ratings strong {{ color: var(--secondary); font-weight: 500; }}
-  .tags {{ display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0.75rem 0; }}
-  .tag {{
-    font-size: var(--text-xs);
-    padding: 0.15rem 0.5rem;
-    background: var(--accent-soft);
-    color: var(--accent);
-    border-radius: var(--radius-pill);
-    font-weight: 500;
-    letter-spacing: 0.02em;
+  .tags {{
+    font-size: var(--text-sm);
+    color: var(--secondary);
+    margin: 0.75rem 0;
+    line-height: 1.45;
   }}
   .card {{
     background: var(--surface);

@@ -182,7 +182,7 @@
     inset: 0;
     z-index: 9999;
     pointer-events: none;
-    animation: themeFade 0.45s ease both;
+    animation: themeFade 0.3s ease both;
   }
   @keyframes themeFade {
     0%   { opacity: 0; }
@@ -224,55 +224,41 @@
   }
 
   /* ── Masthead ── */
-  @keyframes headerIn {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
   header {
-    padding: 3rem 2rem 0;
+    padding: 1.5rem 2rem 0;
     text-align: center;
     position: relative;
   }
   .logo {
     font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: var(--text-2xl);
+    font-size: 2.8rem;
     font-weight: 600;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     line-height: 1;
     color: var(--text);
-    animation: headerIn 0.6s ease both;
   }
   .subtitle {
     font-size: var(--text-sm);
     color: var(--muted);
-    letter-spacing: 0.28em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    margin-top: 0.65rem;
+    margin-top: 0.5rem;
     font-weight: 400;
-    animation: headerIn 0.6s ease both;
   }
   .stats {
     font-size: var(--text-sm);
     color: var(--secondary);
-    margin-top: 1.2rem;
+    margin-top: 0.8rem;
     letter-spacing: 0.04em;
     font-weight: 400;
-    animation: headerIn 0.6s ease both;
-  }
-  .divider {
-    width: 48px;
-    height: 1px;
-    background: var(--border);
-    margin: 1.2rem auto 0;
-    animation: headerIn 0.6s ease both;
   }
   .theme-toggle {
     position: absolute;
     top: 1.5rem;
     right: 1.5rem;
     background: none;
-    border: 1.5px solid var(--border);
+    border: none;
     border-radius: 50%;
     cursor: pointer;
     font-size: var(--text-base);
@@ -282,12 +268,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: border-color 0.25s, color 0.25s;
+    transition: color 0.25s;
     line-height: 1;
   }
   .theme-toggle::before { content: '\2600'; }
   [data-theme="dark"] .theme-toggle::before { content: '\263D'; }
-  .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .theme-toggle:hover { color: var(--accent); }
 
   /* ── Controls ── */
   .controls-wrap {
@@ -302,16 +288,6 @@
   }
   [data-theme="dark"] .controls-wrap.scrolled {
     box-shadow: 0 2px 16px rgba(0,0,0,0.25);
-  }
-  .controls-wrap::after {
-    content: '';
-    position: absolute;
-    bottom: -20px;
-    left: 0;
-    right: 0;
-    height: 20px;
-    background: linear-gradient(var(--bg), transparent);
-    pointer-events: none;
   }
   .controls {
     max-width: 1140px;
@@ -688,7 +664,7 @@
 
   .card-dist {
     font-size: var(--text-sm);
-    color: var(--accent);
+    color: var(--secondary);
     font-weight: 500;
     white-space: nowrap;
   }
@@ -717,7 +693,7 @@
     flex-direction: column;
     gap: 0.45rem;
     cursor: pointer;
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    transition: border-color 0.25s ease;
     animation: cardIn 0.35s ease both;
     animation-delay: calc(min(var(--i, 0), 15) * 30ms);
   }
@@ -726,13 +702,9 @@
     padding-left: calc(1.5rem - 2px);
   }
   .card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.09);
-    border-color: var(--border);
+    border-color: var(--muted);
   }
   .card.expanded {
-    border-color: var(--border);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
     background: var(--accent-soft);
   }
   .card.reveal {
@@ -779,7 +751,7 @@
     align-items: center;
     justify-content: center;
   }
-  .fav-btn:hover { color: var(--accent); transform: scale(1.12); }
+  .fav-btn:hover { color: var(--accent); }
   .fav-btn.active { color: var(--accent); }
   .fav-btn.just-toggled { animation: heartBounce 0.35s ease; }
   @keyframes heartBounce {
@@ -815,17 +787,11 @@
     color: var(--border);
   }
 
-  .card-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.15rem; }
-  .tag {
-    font-size: var(--text-xs);
-    padding: 0.18rem 0.55rem;
-    background: var(--accent-soft);
-    color: var(--accent);
-    border-radius: var(--radius-pill);
-    font-weight: 500;
-    letter-spacing: 0.03em;
-    text-transform: lowercase;
-    white-space: nowrap;
+  .card-tags {
+    font-size: var(--text-sm);
+    color: var(--secondary);
+    margin-top: 0.15rem;
+    line-height: 1.45;
   }
 
   .card-actions {
@@ -895,43 +861,34 @@
   .no-results .clear-filters {
     display: inline-block;
     margin-top: 0.5rem;
-    padding: 0.5rem 1.2rem;
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-pill);
+    padding: 0.25rem 0;
+    border: none;
+    border-bottom: 1px solid var(--muted);
     background: transparent;
     color: var(--secondary);
     font-size: var(--text-sm);
     font-family: inherit;
     font-style: normal;
     cursor: pointer;
-    transition: border-color 0.25s, color 0.25s;
+    transition: color 0.25s, border-color 0.25s;
   }
-  .no-results .clear-filters:hover { border-color: var(--accent); color: var(--accent); }
+  .no-results .clear-filters:hover { color: var(--accent); border-bottom-color: var(--accent); }
 
   /* ── Load More ── */
   .load-more { grid-column: 1 / -1; text-align: center; padding: 2rem 0 0.5rem; }
   .load-more-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.6rem 1.8rem;
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-pill);
+    display: inline-block;
+    padding: 0.25rem 0;
+    border: none;
+    border-bottom: 1px solid var(--muted);
     background: transparent;
     color: var(--secondary);
     font-size: var(--text-sm);
     font-family: inherit;
     cursor: pointer;
-    transition: border-color 0.25s, color 0.25s, transform 0.2s;
+    transition: color 0.25s, border-color 0.25s;
   }
-  .load-more-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(1px); }
-  .load-more-btn::after {
-    content: '\2193';
-    font-size: var(--text-base);
-    opacity: 0.6;
-    transition: transform 0.2s ease;
-  }
-  .load-more-btn:hover::after { transform: rotate(180deg); }
+  .load-more-btn:hover { color: var(--accent); border-bottom-color: var(--accent); }
 
   .district-header {
     grid-column: 1 / -1;
@@ -948,10 +905,12 @@
     max-width: 1140px;
     margin: 1rem auto 0;
     padding: 0 2rem 3rem;
-    display: flex;
     gap: 0;
     position: relative;
     flex-wrap: wrap;
+  }
+  #map-container:not([hidden]) {
+    display: flex;
   }
   .map-head {
     width: 100%;
@@ -1136,12 +1095,9 @@
   }
   .map-popup-rating {
     display: inline-block;
-    background: var(--warm);
-    color: #fff;
-    font-size: var(--text-xs);
+    color: var(--warm);
+    font-size: var(--text-sm);
     font-weight: 500;
-    padding: 0.1rem 0.4rem;
-    border-radius: var(--radius-pill);
     margin-bottom: 0.35rem;
   }
   .map-popup-meta {
@@ -1151,18 +1107,10 @@
     margin-bottom: 0.3rem;
   }
   .map-popup-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem;
+    font-size: var(--text-sm);
+    color: var(--secondary);
     margin-bottom: 0.35rem;
-  }
-  .map-popup-tag {
-    font-size: var(--text-xs);
-    background: var(--accent-soft);
-    color: var(--accent);
-    padding: 0.1rem 0.4rem;
-    border-radius: var(--radius-pill);
-    white-space: nowrap;
+    line-height: 1.45;
   }
   .map-popup-link {
     display: inline-block;
@@ -1232,115 +1180,52 @@
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    border: 1.5px solid var(--border);
+    border: none;
     background: var(--surface);
     color: var(--muted);
     font-size: var(--text-base);
     cursor: pointer;
     opacity: 0;
     transform: translateY(8px);
-    transition: opacity 0.3s, transform 0.3s, color 0.25s, border-color 0.25s;
+    transition: opacity 0.3s, transform 0.3s, color 0.25s;
     pointer-events: none;
     z-index: 50;
     line-height: 1;
   }
   .btt.visible { opacity: 1; transform: none; pointer-events: auto; }
-  .btt:hover { color: var(--accent); border-color: var(--accent); }
+  .btt:hover { color: var(--accent); }
 
   /* ── Footer ── */
   footer {
     max-width: 1140px;
     margin: 0 auto;
-    padding: 2.5rem 2rem 2rem;
+    padding: 1.5rem 2rem;
     border-top: 1px solid var(--border);
-  }
-  .footer-inner {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 2rem;
-    flex-wrap: wrap;
-  }
-  .footer-brand-name {
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 600;
-    font-size: 1.35rem;
-    color: var(--text);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  .footer-brand-tagline {
-    font-size: var(--text-xs);
-    color: var(--muted);
-    margin-top: 0.2rem;
-    letter-spacing: 0.03em;
-  }
-  .footer-links {
-    display: flex;
-    gap: 2.5rem;
-  }
-  .footer-col-title {
-    font-size: var(--text-xs);
-    font-weight: 500;
-    color: var(--secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 0.5rem;
-  }
-  .footer-col ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  .footer-col li { margin-bottom: 0.3rem; }
-  .footer-col a {
     font-size: var(--text-sm);
     color: var(--muted);
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-  .footer-col a:hover { color: var(--accent); }
-  .footer-bottom {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border);
-    font-size: var(--text-xs);
-    color: var(--muted);
-    letter-spacing: 0.04em;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-  .footer-bottom a {
-    color: var(--muted);
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-  .footer-bottom a:hover { color: var(--accent); }
-  .footer-made {
-    font-size: var(--text-xs);
-    color: var(--muted);
+    text-align: center;
     letter-spacing: 0.02em;
   }
+  footer a {
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  footer a:hover { color: var(--accent); }
+  .footer-sep { margin: 0 0.4em; }
   @media (max-width: 640px) {
-    footer { padding: 2rem 1.25rem 1.5rem; }
-    .footer-inner { flex-direction: column; gap: 1.5rem; }
-    .footer-links { gap: 1.5rem; }
-    .footer-bottom { flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+    footer { padding: 1.25rem; font-size: var(--text-xs); }
   }
 
 
 
   /* ── Touch Feedback ── */
-  .card:active { transform: scale(0.99); }
   .btt:active { transform: scale(0.92); }
   .fav-btn:active { transform: scale(0.9); }
 
   /* ── Reduced Motion ── */
   @media (prefers-reduced-motion: reduce) {
-    .card, .logo, .subtitle, .stats, .divider { animation: none; }
+    .card { animation: none; }
     .card.reveal { opacity: 1; transform: none; transition: none; }
     .ms.open .ms-drop, .sort-wrap.open .sort-drop { animation: none; }
     .fav-btn.just-toggled { animation: none; }
@@ -1349,9 +1234,9 @@
 
   /* ── Responsive ── */
   @media (max-width: 640px) {
-    header { padding: 2.5rem 1.25rem 0; }
-    .logo { font-size: 3rem; letter-spacing: 0.15em; }
-    .subtitle { font-size: var(--text-xs); letter-spacing: 0.2em; }
+    header { padding: 1.25rem 1.25rem 0; }
+    .logo { font-size: 2.2rem; letter-spacing: 0.15em; }
+    .subtitle { font-size: var(--text-xs); letter-spacing: 0.1em; }
     .theme-toggle { top: 1rem; right: 1rem; }
     .controls { padding: 0.6rem 1.25rem; gap: 0.35rem; }
     .controls-row-1 { gap: 0.5rem; }
@@ -1378,7 +1263,6 @@
   <div class="logo">Last Eat</div>
   <div class="subtitle">Restaurantes en Madrid</div>
   <div class="stats" id="stats" aria-live="polite">Cargando...</div>
-  <div class="divider"></div>
   <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema"></button>
 </header>
 
@@ -1465,31 +1349,15 @@
 <button class="btt" id="btt" aria-label="Volver arriba">&uarr;</button>
 
 <footer id="footer">
-  <div class="footer-inner">
-    <div class="footer-brand">
-      <div class="footer-brand-name">Last Eat</div>
-      <div class="footer-brand-tagline">Descubre d&oacute;nde comer en Madrid</div>
-    </div>
-    <div class="footer-links">
-      <div class="footer-col">
-        <div class="footer-col-title">Proyecto</div>
-        <ul>
-          <li><a href="https://github.com/jcherranz/lasteat" target="_blank" rel="noopener">GitHub</a></li>
-          <li><a href="https://macarfi.com/es/madrid" target="_blank" rel="noopener">Fuente: Macarfi</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <div class="footer-col-title">Legal</div>
-        <ul>
-          <li><a href="https://github.com/jcherranz/lasteat/blob/main/LICENSE" target="_blank" rel="noopener">Licencia MIT</a></li>
-        </ul>
-      </div>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <span id="footer-updated">Actualizado feb 2026</span>
-    <span class="footer-made">Hecho en Madrid</span>
-  </div>
+  <a href="https://macarfi.com/es/madrid" target="_blank" rel="noopener">Fuente: Macarfi</a>
+  <span class="footer-sep">&middot;</span>
+  <a href="https://github.com/jcherranz/lasteat" target="_blank" rel="noopener">GitHub</a>
+  <span class="footer-sep">&middot;</span>
+  <a href="https://github.com/jcherranz/lasteat/blob/main/LICENSE" target="_blank" rel="noopener">MIT</a>
+  <span class="footer-sep">&middot;</span>
+  <span id="footer-updated">Actualizado feb 2026</span>
+  <span class="footer-sep">&middot;</span>
+  <span>Hecho en Madrid</span>
 </footer>
 
 <script src="app.js"></script>
@@ -1555,7 +1423,6 @@
   var userMarker   = null;
   var activePanelSlug = null;
   var quickFilter  = '';
-  var statsAnimated = false;
   var lastRenderedDistrict = '';
   var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var revealObserver = null;
@@ -1603,21 +1470,7 @@
     statsEl.textContent = count + ' de ' + total + ' restaurantes';
   }
   function updateStats(count, total) {
-    if (statsAnimated || prefersReducedMotion) {
-      setStatsText(count, total);
-      return;
-    }
-    var start = performance.now();
-    var duration = 400;
-    function tick(now) {
-      var t = Math.min(1, (now - start) / duration);
-      var eased = 1 - Math.pow(1 - t, 3);
-      var value = Math.round(count * eased);
-      setStatsText(value, total);
-      if (t < 1) requestAnimationFrame(tick);
-      else statsAnimated = true;
-    }
-    requestAnimationFrame(tick);
+    setStatsText(count, total);
   }
   function sortByService(list) {
     return list.slice().sort(function(a, b) {
@@ -1687,7 +1540,7 @@
         tileLayer.setUrl(getTileUrl());
         if (view === 'map') updateMap();
       }
-    }, 180);
+    }, 120);
     /* Remove overlay after animation */
     overlay.addEventListener('animationend', function() { overlay.remove(); });
   }
@@ -2195,8 +2048,8 @@
     var revealCls = absoluteIdx >= BATCH ? ' reveal' : '';
     var rText  = r.r && r.r !== '-' ? r.r : '\u2014';
     var tags   = r.c ? r.c.split(/[\u2022,]/).map(function(t) {
-      return '<span class="tag">' + esc(t.trim()) + '</span>';
-    }).join('') : '';
+      return t.trim();
+    }).filter(Boolean).join(', ') : '';
     var price  = r.p ? r.p + ' \u20ac' : '';
     var gmaps  = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent((r.n || '') + ', ' + (r.a || ''));
     var websiteUrl = safeHttpUrl(r.w);
@@ -2228,7 +2081,7 @@
         (price ? '<span>' + esc(price) + '</span>' : '') +
         (r._dist != null ? '<span class="card-dist">' + formatDist(r._dist) + '</span>' : '') +
       '</div>' +
-      (tags ? '<div class="card-tags">' + tags + '</div>' : '') +
+      (tags ? '<div class="card-tags">' + esc(tags) + '</div>' : '') +
       (hasDetail ? '<div class="card-expand"><div>' +
         '<div class="card-detail">' +
           (rDetail ? '<div class="card-ratings">' + rDetail + '</div>' : '') +
@@ -2396,11 +2249,7 @@
     html += parts.join(' \u00B7 ');
     html += '</div>';
     if (tags.length) {
-      html += '<div class="map-popup-tags">';
-      tags.slice(0, 3).forEach(function(t) {
-        html += '<span class="map-popup-tag">' + esc(t) + '</span>';
-      });
-      html += '</div>';
+      html += '<div class="map-popup-tags">' + esc(tags.slice(0, 3).join(', ')) + '</div>';
     }
     if (r.s) html += '<a class="map-popup-link" href="/r/' + encodeURIComponent(r.s) + '.html">Ver m\u00e1s \u2192</a>';
     html += '</div>';
