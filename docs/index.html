@@ -21,6 +21,11 @@
 <meta name="twitter:description" content="Descubre los mejores restaurantes de Madrid. 770+ restaurantes con valoraciones, precios y ubicaciones.">
 <meta name="twitter:image" content="https://lasteat.es/og.png">
 
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#376660">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300..500&display=swap" rel="stylesheet">
@@ -292,6 +297,14 @@
   }
   .ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
   .ctrl-btn.active { border-color: var(--accent); color: var(--accent); }
+  .ctrl-btn.loading { opacity: 0.5; pointer-events: none; }
+
+  .card-dist {
+    font-size: 0.7rem;
+    color: var(--accent);
+    font-weight: 500;
+    white-space: nowrap;
+  }
 
   .sep {
     width: 1px;
@@ -592,6 +605,7 @@
     </select>
 
     <button class="ctrl-btn" id="fav-filter" type="button" aria-label="Favoritos">&#9825;</button>
+    <button class="ctrl-btn" id="geo-btn" type="button" aria-label="Cerca de m&iacute;">&#9906;</button>
 
     <span class="sep"></span>
 
@@ -599,6 +613,7 @@
       <button class="sort-btn active" data-sort="rating">Ranking</button>
       <button class="sort-btn" data-sort="name">A-Z</button>
       <button class="sort-btn" data-sort="price">Precio</button>
+      <button class="sort-btn" data-sort="distance" id="sort-dist" hidden>Distancia</button>
     </div>
 
     <span class="sep"></span>
@@ -652,6 +667,9 @@
   var tileLayer  = null;
   var markers    = [];
   var leafletOk  = false;
+  var userLat    = null;
+  var userLng    = null;
+  var userMarker = null;
 
   /* ── Utilities ── */
   function esc(s) {
@@ -697,6 +715,79 @@
     favBtn.textContent = (favsOnly ? '\u2665' : '\u2661') + (favs.size ? ' ' + favs.size : '');
     favBtn.classList.toggle('active', favsOnly);
   }
+
+  /* ── Geolocation ── */
+  var geoBtn = document.getElementById('geo-btn');
+  var sortDistBtn = document.getElementById('sort-dist');
+
+  function haversine(lat1, lng1, lat2, lng2) {
+    var R = 6371;
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLng = (lng2 - lng1) * Math.PI / 180;
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLng/2) * Math.sin(dLng/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function computeDistances() {
+    if (userLat === null) return;
+    RESTAURANTS.forEach(function(r) {
+      if (r.lat && r.lng) {
+        r._dist = haversine(userLat, userLng, parseFloat(r.lat), parseFloat(r.lng));
+      } else {
+        r._dist = 99999;
+      }
+    });
+  }
+
+  function formatDist(km) {
+    if (km >= 99999) return '';
+    if (km < 1) return Math.round(km * 1000) + ' m';
+    return km.toFixed(1) + ' km';
+  }
+
+  function activateGeo() {
+    if (!navigator.geolocation) return;
+    geoBtn.classList.add('loading');
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      userLat = pos.coords.latitude;
+      userLng = pos.coords.longitude;
+      computeDistances();
+      geoBtn.classList.remove('loading');
+      geoBtn.classList.add('active');
+      sortDistBtn.hidden = false;
+      /* Auto-switch to distance sort */
+      sort = 'distance';
+      document.querySelectorAll('.sort-btn').forEach(function(b) {
+        b.classList.toggle('active', b.getAttribute('data-sort') === 'distance');
+      });
+      render();
+    }, function() {
+      geoBtn.classList.remove('loading');
+    }, { enableHighAccuracy: true, timeout: 10000 });
+  }
+
+  function deactivateGeo() {
+    userLat = null;
+    userLng = null;
+    RESTAURANTS.forEach(function(r) { delete r._dist; });
+    geoBtn.classList.remove('active');
+    sortDistBtn.hidden = true;
+    if (userMarker && map) { userMarker.remove(); userMarker = null; }
+    if (sort === 'distance') {
+      sort = 'rating';
+      document.querySelectorAll('.sort-btn').forEach(function(b) {
+        b.classList.toggle('active', b.getAttribute('data-sort') === 'rating');
+      });
+    }
+    render();
+  }
+
+  geoBtn.addEventListener('click', function() {
+    if (userLat !== null) deactivateGeo();
+    else activateGeo();
+  });
 
   /* ── Multi-Select ── */
   function setupMS(id, items, onChange) {
@@ -834,6 +925,7 @@
       if (key === 'rating') return (parseFloat(b.r)||0) - (parseFloat(a.r)||0);
       if (key === 'name')   return a.n.localeCompare(b.n, 'es');
       if (key === 'price')  return (parseInt(a.p)||9999) - (parseInt(b.p)||9999);
+      if (key === 'distance') return (a._dist||99999) - (b._dist||99999);
       return 0;
     });
   }
@@ -872,6 +964,7 @@
       '<div class="card-meta">' +
         (r.d ? '<span>' + r.d + '</span>' : '') +
         (price ? '<span>' + price + '</span>' : '') +
+        (r._dist != null ? '<span class="card-dist">' + formatDist(r._dist) + '</span>' : '') +
       '</div>' +
       (tags ? '<div class="card-tags">' + tags + '</div>' : '') +
       (hasDetail ? '<div class="card-expand"><div>' +
@@ -963,11 +1056,20 @@
         '<strong>' + r.n + '</strong>' +
         (r.r && r.r !== '-' ? '<br>' + r.r + '/10' : '') +
         (r.d ? '<br>' + r.d : '') +
-        (r.u ? '<br><a href="' + r.u + '" target="_blank">Ver fuente</a>' : '')
+        (r._dist != null ? '<br>' + formatDist(r._dist) : '') +
+        (r.s ? '<br><a href="/r/' + r.s + '.html">Ver m\u00e1s</a>' : '')
       );
       m.addTo(map);
       markers.push(m);
     });
+    /* User position marker */
+    if (userMarker) { userMarker.remove(); userMarker = null; }
+    if (userLat !== null) {
+      userMarker = L.circleMarker([userLat, userLng], {
+        radius: 8, fillColor: '#3B82F6', fillOpacity: 1, color: '#fff', weight: 2.5
+      }).bindPopup('Tu ubicaci\u00f3n').addTo(map);
+      markers.push(userMarker);
+    }
     /* Fit bounds if markers exist */
     if (markers.length) {
       var group = L.featureGroup(markers);
@@ -1057,6 +1159,11 @@
   updateFooter();
   render();
 })();
+
+/* ── Service Worker ── */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js');
+}
 </script>
 </body>
 </html>

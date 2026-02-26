@@ -112,7 +112,7 @@ _Goal: Make restaurants discoverable via search engines and shareable on social.
 ## Phase 3: User Experience Enhancements
 _Goal: Turn the site into a genuinely useful tool for people in Madrid._
 
-### 3A. "Near Me" Geolocation `[ ]`
+### 3A. "Near Me" Geolocation `[x]`
 **Why:** All 770 restaurants have coordinates but no proximity feature exists.
 **Scope:**
 - Add "Cerca de mi" button in controls bar
@@ -126,15 +126,15 @@ _Goal: Turn the site into a genuinely useful tool for people in Madrid._
 - `docs/index.html` — new button, distance calc, sort option, card display, map marker
 
 **Acceptance criteria:**
-- [ ] Button requests geolocation permission
-- [ ] Cards show distance when location is active
-- [ ] Distance sort works correctly
-- [ ] Map shows user position
-- [ ] Graceful fallback if permission denied
+- [x] Button requests geolocation permission
+- [x] Cards show distance when location is active
+- [x] Distance sort works correctly
+- [x] Map shows user position
+- [x] Graceful fallback if permission denied
 
 ---
 
-### 3B. Progressive Web App `[ ]`
+### 3B. Progressive Web App `[x]`
 **Why:** Madrid visitors have spotty data. Offline access makes this a pocket guide.
 **Scope:**
 - Create `docs/manifest.json` with app name, icons, theme color
@@ -152,10 +152,10 @@ _Goal: Turn the site into a genuinely useful tool for people in Madrid._
 - `docs/index.html` — register service worker, link manifest, add apple-touch-icon
 
 **Acceptance criteria:**
-- [ ] Lighthouse PWA audit passes
-- [ ] App installable on mobile
-- [ ] Site works offline after first visit
-- [ ] Cached data updates on next online visit
+- [x] Lighthouse PWA audit passes
+- [x] App installable on mobile
+- [x] Site works offline after first visit
+- [x] Cached data updates on next online visit
 
 ---
 

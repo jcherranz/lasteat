@@ -4,3 +4,5 @@ __pycache__/
 output/
 *.csv
 *.json
+# Allow specific JSON files in docs/
+!docs/manifest.json
