@@ -605,7 +605,7 @@
     </select>
 
     <button class="ctrl-btn" id="fav-filter" type="button" aria-label="Favoritos">&#9825;</button>
-    <button class="ctrl-btn" id="geo-btn" type="button" aria-label="Cerca de m&iacute;">&#9906;</button>
+    <button class="ctrl-btn" id="geo-btn" type="button" aria-label="Cerca de m&iacute;" title="Cerca de m&iacute;">&#8982;</button>
 
     <span class="sep"></span>
 
@@ -748,14 +748,20 @@
   }
 
   function activateGeo() {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      geoBtn.title = 'Geolocalizaci\u00f3n no disponible';
+      return;
+    }
     geoBtn.classList.add('loading');
+    geoBtn.textContent = '\u2026';
     navigator.geolocation.getCurrentPosition(function(pos) {
       userLat = pos.coords.latitude;
       userLng = pos.coords.longitude;
       computeDistances();
       geoBtn.classList.remove('loading');
       geoBtn.classList.add('active');
+      geoBtn.textContent = '\u2316';
+      geoBtn.title = 'Desactivar ubicaci\u00f3n';
       sortDistBtn.hidden = false;
       /* Auto-switch to distance sort */
       sort = 'distance';
@@ -763,9 +769,15 @@
         b.classList.toggle('active', b.getAttribute('data-sort') === 'distance');
       });
       render();
-    }, function() {
+    }, function(err) {
       geoBtn.classList.remove('loading');
-    }, { enableHighAccuracy: true, timeout: 10000 });
+      geoBtn.textContent = '\u2316';
+      if (err.code === 1) {
+        geoBtn.title = 'Permiso de ubicaci\u00f3n denegado';
+      } else {
+        geoBtn.title = 'No se pudo obtener la ubicaci\u00f3n';
+      }
+    }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 });
   }
 
   function deactivateGeo() {
@@ -773,6 +785,8 @@
     userLng = null;
     RESTAURANTS.forEach(function(r) { delete r._dist; });
     geoBtn.classList.remove('active');
+    geoBtn.textContent = '\u2316';
+    geoBtn.title = 'Cerca de m\u00ed';
     sortDistBtn.hidden = true;
     if (userMarker && map) { userMarker.remove(); userMarker = null; }
     if (sort === 'distance') {
