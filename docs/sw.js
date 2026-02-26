@@ -1,11 +1,18 @@
-var CACHE_NAME = 'lasteat-v2';
+var CACHE_NAME = 'lasteat-v3';
 var STATIC_ASSETS = [
   '/',
+  '/app.js',
   '/data.js',
   '/manifest.json',
   '/og.png',
   '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  '/icons/icon-512.png',
+  '/fonts/cormorant-garamond-300-latin.woff2',
+  '/fonts/cormorant-garamond-500-latin.woff2',
+  '/fonts/cormorant-garamond-600-latin.woff2',
+  '/fonts/dm-sans-300-latin.woff2',
+  '/fonts/dm-sans-400-latin.woff2',
+  '/fonts/dm-sans-500-latin.woff2'
 ];
 
 /* Install: cache static assets */
