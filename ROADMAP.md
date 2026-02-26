@@ -86,7 +86,7 @@ _Goal: match professional delivery sequencing for a live MVP._
 
 ### Remaining work
 1. **P0 Close open audits:** 6B/6C (axe + Lighthouse a11y), 8A (schema.org validator), 10B (Lighthouse perf)
-2. **P1 Visual design elevation:** 12A (design system), 12B (card hierarchy), 12C (rhythm + polish)
+2. **P1 Visual design elevation:** 12C (rhythm + polish) + performance verification
 3. **P1 Product discovery features:** 9A (smart search), 9B (analytics) — 9B before 9A
 4. **P2 Expansion:** 11A only after single-city KPI thresholds are met
 
@@ -383,7 +383,7 @@ _Goal: Fix all metadata issues found in audit. Maximize search engine and social
 ## Phase 9: Features & Discovery
 _Goal: Better ways to find restaurants. Expand content._
 
-### 9A. Smart Search & Discovery `[ ]`
+### 9A. Smart Search & Discovery `[~]`
 **Why:** Current search is exact substring match — typos fail, no serendipity.
 **Scope:**
 - Add fuzzy matching (lightweight trigram similarity on client)
@@ -395,9 +395,9 @@ _Goal: Better ways to find restaurants. Expand content._
 - `docs/index.html` (or `docs/app.js` if extracted in Phase 5B)
 
 **Acceptance criteria:**
-- [ ] "divesro" matches "Diverxo"
-- [ ] Surprise button picks a random restaurant and scrolls/highlights it
-- [ ] Quick-filter tags filter correctly and compose with other filters
+- [x] "divesro" matches "Diverxo"
+- [x] Surprise button picks a random restaurant and scrolls/highlights it
+- [x] Quick-filter tags filter correctly and compose with other filters
 - [ ] Performance remains smooth with 770 restaurants
 
 ---
@@ -496,7 +496,7 @@ _Goal: Serve Barcelona, Valencia, and other cities with minimal new code._
 ## Phase 12: Design Elevation
 _Goal: Evolve from "competent developer project" to "editorial dining platform" through systematic visual refinement._
 
-### 12A. Design System Foundation `[ ]`
+### 12A. Design System Foundation `[x]`
 **Why:** Teal accent does everything (ratings, tags, actions, hover, map) — monotone palette lacks hierarchy. ~25 distinct font-sizes between 0.55–3.4rem with no system. Thin 300-weight logo lacks presence.
 **Scope:**
 - Add `--warm` accent CSS variables (gold/amber ~#C4956A) for ratings/price/data display
@@ -512,16 +512,16 @@ _Goal: Evolve from "competent developer project" to "editorial dining platform" 
 - `docs/sw.js` — cache bump to `lasteat-v6`
 
 **Acceptance criteria:**
-- [ ] `--warm`, `--warm-soft`, `--warm-muted` defined for both light and dark themes
-- [ ] Typography scale variables in `:root`, no more than 8 hardcoded font-sizes remain
-- [ ] Logo 4.2rem/600 desktop, 3rem mobile
-- [ ] Header has warm radial gradient
-- [ ] Dark mode correct with new warm tones
-- [ ] Detail pages receive new variables after regeneration
+- [x] `--warm`, `--warm-soft`, `--warm-muted` defined for both light and dark themes
+- [x] Typography scale variables in `:root`, no more than 8 hardcoded font-sizes remain
+- [x] Logo 4.2rem/600 desktop, 3rem mobile
+- [x] Header has warm radial gradient
+- [x] Dark mode correct with new warm tones
+- [x] Detail pages receive new variables after regeneration
 
 ---
 
-### 12B. Card Hierarchy + Micro-interactions + Footer `[ ]`
+### 12B. Card Hierarchy + Micro-interactions + Footer `[x]`
 **Why:** Cards are a wall of small text with no visual tiers. No hover personality. Bland empty states. Footer is minimal.
 **Scope:**
 - Card name to `--text-lg` (0.95rem)/600 weight
@@ -539,16 +539,16 @@ _Goal: Evolve from "competent developer project" to "editorial dining platform" 
 - `docs/index.html` — CSS (card styles, animations, footer) + JS (buildCard, toggleFav)
 
 **Acceptance criteria:**
-- [ ] Card name 0.95rem/600, rating has warm pill, tags use warm accent
-- [ ] 9.0+ cards have left border accent
-- [ ] Heart bounces on toggle, arrow rotates on hover
-- [ ] Empty state has CSS illustration
-- [ ] Footer brand larger, "Hecho en Madrid" italic serif
-- [ ] Dark mode correct, reduced-motion respected
+- [x] Card name 0.95rem/600, rating has warm pill, tags use warm accent
+- [x] 9.0+ cards have left border accent
+- [x] Heart bounces on toggle, arrow rotates on hover
+- [x] Empty state has CSS illustration
+- [x] Footer brand larger, "Hecho en Madrid" italic serif
+- [x] Dark mode correct, reduced-motion respected
 
 ---
 
-### 12C. Content Rhythm + Scroll Reveals + Map Polish `[ ]`
+### 12C. Content Rhythm + Scroll Reveals + Map Polish `[~]`
 **Why:** 770 identical cards in a flat grid with no editorial punctuation. Static page feel with no scroll reveals. Map view lacks branding.
 **Scope:**
 - Decorative banner row between first and second card batch
@@ -562,12 +562,12 @@ _Goal: Evolve from "competent developer project" to "editorial dining platform" 
 - `docs/index.html` — CSS (banner, district headers, fade-in, map) + JS (renderBatch, IntersectionObserver, map header, count-up)
 
 **Acceptance criteria:**
-- [ ] Banner appears between first and second batch
-- [ ] District headers when sorted by name
-- [ ] Cards beyond initial batch fade in on scroll
-- [ ] Stats count-up on initial load
-- [ ] Map has "Explora Madrid" header, 36x36px zoom controls
-- [ ] All animations disabled under `prefers-reduced-motion`
+- [x] Banner appears between first and second batch
+- [x] District headers when sorted by name
+- [x] Cards beyond initial batch fade in on scroll
+- [x] Stats count-up on initial load
+- [x] Map has "Explora Madrid" header, 36x36px zoom controls
+- [x] All animations disabled under `prefers-reduced-motion`
 - [ ] No performance regression
 
 ---

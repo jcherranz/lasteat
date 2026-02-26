@@ -71,6 +71,9 @@
   var byQuery = app.getFiltered(restaurants, { query: 'diver', sort: 'rating' });
   assert('getFiltered query matches substring', byQuery.length === 1 && byQuery[0].n === 'Diverxo');
 
+  var byFuzzy = app.getFiltered(restaurants, { query: 'divesro', sort: 'rating', fuzzy: true });
+  assert('getFiltered fuzzy query matches typos', byFuzzy.length === 1 && byFuzzy[0].n === 'Diverxo');
+
   var byCuisine = app.getFiltered(restaurants, { selCuisine: new Set(['Japonesa']), sort: 'rating' });
   assert('getFiltered cuisine filter works', byCuisine.length === 1 && byCuisine[0].n === 'Kappo');
 

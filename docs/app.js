@@ -27,6 +27,65 @@
     return km.toFixed(1) + ' km';
   }
 
+  function foldText(value) {
+    var s = value == null ? '' : String(value);
+    if (typeof s.normalize === 'function') {
+      s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+    return s.toLowerCase();
+  }
+
+  function boundedEditDistance(a, b, maxDist) {
+    var al = a.length;
+    var bl = b.length;
+    if (Math.abs(al - bl) > maxDist) return maxDist + 1;
+
+    var prev = new Array(bl + 1);
+    var curr = new Array(bl + 1);
+    var j;
+    for (j = 0; j <= bl; j += 1) prev[j] = j;
+
+    var i;
+    for (i = 1; i <= al; i += 1) {
+      curr[0] = i;
+      var rowMin = curr[0];
+      for (j = 1; j <= bl; j += 1) {
+        var cost = a.charCodeAt(i - 1) === b.charCodeAt(j - 1) ? 0 : 1;
+        var val = Math.min(
+          prev[j] + 1,
+          curr[j - 1] + 1,
+          prev[j - 1] + cost
+        );
+        curr[j] = val;
+        if (val < rowMin) rowMin = val;
+      }
+      if (rowMin > maxDist) return maxDist + 1;
+      var tmp = prev;
+      prev = curr;
+      curr = tmp;
+    }
+    return prev[bl];
+  }
+
+  function fuzzyMatchQuery(query, haystack) {
+    var q = foldText(query).trim();
+    if (!q) return true;
+    var h = foldText(haystack);
+    if (h.indexOf(q) !== -1) return true;
+    if (q.length < 4) return false;
+
+    var tokens = h.split(/[^a-z0-9]+/).filter(Boolean);
+    var maxDist = q.length >= 7 ? 2 : 1;
+    var i;
+    for (i = 0; i < tokens.length; i += 1) {
+      var token = tokens[i];
+      if (token.length < 3) continue;
+      if (Math.abs(token.length - q.length) > maxDist) continue;
+      if (boundedEditDistance(q, token, maxDist) <= maxDist) return true;
+    }
+    return false;
+  }
+
   function sortList(list, key) {
     return list.slice().sort(function(a, b) {
       if (key === 'rating') return (parseFloat(b.r) || 0) - (parseFloat(a.r) || 0);
@@ -57,7 +116,8 @@
 
   function getFiltered(restaurants, options) {
     var opts = options || {};
-    var q = (opts.query || '').toLowerCase().trim();
+    var qRaw = opts.query || '';
+    var q = foldText(qRaw).trim();
     var selCuisine = toSet(opts.selCuisine);
     var selDistrict = toSet(opts.selDistrict);
     var priceValue = opts.priceValue || '';
@@ -65,11 +125,15 @@
     var favs = toSet(opts.favs);
     var sortKey = opts.sort || 'rating';
     var getFavKey = opts.getFavKey || defaultFavKey;
+    var useFuzzy = opts.fuzzy !== false;
 
     var list = restaurants.filter(function(r) {
       if (q) {
-        var haystack = (r.n + ' ' + (r.c || '') + ' ' + (r.d || '') + ' ' + (r.a || '')).toLowerCase();
-        if (haystack.indexOf(q) === -1) return false;
+        var haystack = (r.n + ' ' + (r.c || '') + ' ' + (r.d || '') + ' ' + (r.a || ''));
+        var foldedHaystack = foldText(haystack);
+        if (foldedHaystack.indexOf(q) === -1) {
+          if (!useFuzzy || !fuzzyMatchQuery(qRaw, haystack)) return false;
+        }
       }
 
       if (selCuisine.size) {
@@ -101,6 +165,7 @@
     formatDist: formatDist,
     sortList: sortList,
     getFiltered: getFiltered,
+    fuzzyMatchQuery: fuzzyMatchQuery,
   };
 
   if (typeof module !== 'undefined' && module.exports) {
