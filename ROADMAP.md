@@ -86,8 +86,8 @@ _Goal: match professional delivery sequencing for a live MVP._
 
 ### Remaining work
 1. **P0 Close open audits:** 6B/6C (axe + Lighthouse a11y), 8A (schema.org validator), 10B (Lighthouse perf)
-2. **P1 Visual design elevation:** 12C (rhythm + polish) + performance verification
-3. **P1 Product discovery features:** 9A (smart search), 9B (analytics) — 9B before 9A
+2. **P0 Performance verification:** 9A + 12C (confirm no regression with 770 restaurants)
+3. **P1 Analytics:** 9B (privacy-friendly analytics)
 4. **P2 Expansion:** 11A only after single-city KPI thresholds are met
 
 ### KPI gate before multi-city (11A)

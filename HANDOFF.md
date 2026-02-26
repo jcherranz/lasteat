@@ -4,41 +4,44 @@ Date: 2026-02-26
 
 ## Current Status
 
-All engineering fundamentals are solid (security, testing, CI, accessibility, performance). A professional outside-in assessment identified **visual design expression** as the weakest dimension — the site reads as "competent developer project" rather than "editorial dining platform."
+Phase 12 (Design Elevation) and Phase 9A (Smart Search & Discovery) are nearly complete. All code is implemented and pushed. Two performance verification checkboxes remain open.
 
-### Design Assessment Findings
-1. **Monotone color**: teal accent does everything (ratings, tags, actions, hover, map) — no visual hierarchy
-2. **Typography sprawl**: ~25 distinct font-sizes between 0.55–3.4rem, no systematic scale
-3. **Underpowered header**: thin 300-weight logo, near-invisible subtitle, no atmosphere
-4. **Cards are a wall of small text**: no visual tiers, no imagery-substitute personality
-5. **No content rhythm**: 770 identical cards in a flat grid with no editorial punctuation
-6. **Static page feel**: minimal hover personality, no scroll reveals, bland empty states
+### Recently Completed
+- **12A** Design System Foundation — warm accent palette, 6-step typography scale, hero upgrade
+- **12B** Card Hierarchy + Micro-interactions — rating pills, top-rated borders, heart bounce, empty state illustration, footer styling
+- **12C** Content Rhythm + Scroll Reveals — rhythm banner, district headers, IntersectionObserver fade-in, stats count-up, map "Explora Madrid" header, 36x36px zoom controls
+- **9A** Smart Search & Discovery — fuzzy matching (edit distance), surprise me button, quick-filter tags (Top 50, Cheap eats, Best service), URL state persistence
 
-## Next Work: Phase 12 (Design Elevation)
+### Open Checkboxes
+- **9A**: "Performance remains smooth with 770 restaurants" — needs manual testing with full dataset
+- **12C**: "No performance regression" — needs Lighthouse or manual verification
 
-Phase 12 has been added to ROADMAP.md with three sub-phases:
+## What the Next Session Should Do
 
-| Sub-phase | Focus | Key deliverables |
-|---|---|---|
-| **12A** | Design System Foundation | Warm accent palette, 6-step typography scale, hero section upgrade |
-| **12B** | Card Hierarchy + Micro-interactions | Card visual overhaul, hover/toggle animations, empty states, footer |
-| **12C** | Content Rhythm + Scroll Reveals | Editorial banners, district headers, scroll fade-ins, map polish |
+1. **Performance verification** — load the live site, test all features with 770 restaurants, check for jank during:
+   - Fuzzy search typing (edit distance calculation on keystrokes)
+   - Quick-filter toggling (re-filtering + re-rendering)
+   - Scroll reveals with IntersectionObserver
+   - Surprise button (expand + scroll + pulse animation)
+   - District headers when sorted by name (extra DOM elements)
 
-### Recommended Execution Order
-**12A first, then 12B, then 12C.** Strictly sequential — each sub-phase builds on the previous:
-- 12B depends on the `--warm` variables and `--text-*` scale from 12A
-- 12C depends on the card hierarchy from 12B for visual coherence
+2. **Close remaining audit items** if tools are available:
+   - 6B: axe DevTools → 0 critical/serious
+   - 6C: Lighthouse Accessibility ≥95
+   - 8A: schema.org validator on sample detail pages
+   - 10B: Lighthouse Performance ≥95
 
-### Known Caveats
-1. **Detail page CSS sync** — `scripts/generate_pages.py` template CSS must mirror homepage variable changes from 12A. Regenerating 770 pages creates a large diff — use a separate commit.
-2. **Warm accent WCAG** — the planned ~#C4956A needs contrast verification against `--surface` and `--bg` at implementation time. Adjust if needed for AA compliance.
-3. **IntersectionObserver history** (12C) — IntersectionObserver was previously used for infinite scroll and was deliberately removed when switching to load-more pagination. The 12C usage is different: reveal animations only (not loading), so reintroduction is appropriate but the session should note this history.
-4. **Service worker cache** — 12A bumps to `lasteat-v6`, 12C bumps to `lasteat-v7`. Each sub-phase commit should include the cache version bump.
+3. **Update ROADMAP.md** — check off performance items once verified, mark 9A and 12C as `[x]`
 
-## Previous Session Summary
-The last session completed a UX/UI polish pass (load-more pagination, controls bar redesign, theme crossfade, favicon, map prefetch, entrance animations). All commits pushed to main. 37 tests passing.
+## Commits Since Last Handoff
+```
+e9ca5d6 Implement discovery features and design elevation updates
+958dcf7 Phase 12A: Design system foundation — warm accent, typography scale, hero upgrade
+```
 
-## Other Pending Work
-- **P0 audits:** 6B/6C (axe + Lighthouse a11y), 8A (schema.org validator), 10B (Lighthouse perf) — these are tool-verification tasks, not code changes
-- **P1 features:** 9A (smart search), 9B (analytics)
-- **P2 expansion:** 11A (multi-city)
+## Known Caveats
+- Detail pages (`docs/r/*.html`) have NOT been regenerated — they have the CSS variables from 12A (via generate_pages.py template) but won't reflect them until `scripts/generate_pages.py` is run
+- Service worker cache is at `lasteat-v7`
+- The `fuzzyMatchQuery` function is bounded (maxDist=2 for queries ≥7 chars, 1 otherwise) to limit perf impact — but should still be verified with real typing patterns
+- Quick-filter badge counts recompute on every render; should be fine for 770 items but worth confirming
+- Cuisine parsing now splits on both `•` and `,` (regex `/[\u2022,]/`) — matches the data format
