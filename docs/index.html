@@ -1792,13 +1792,15 @@
     return html;
   }
 
-  /* Update visible counter */
+  /* Update counter + sync panel to visible bounds */
   function updateMapCounter() {
     if (!map) return;
     var bounds = map.getBounds();
     var count = 0;
     markerIndex.forEach(function(item) {
-      if (bounds.contains(item.marker.getLatLng())) count++;
+      var visible = bounds.contains(item.marker.getLatLng());
+      if (visible) count++;
+      if (item.panelEl) item.panelEl.style.display = visible ? '' : 'none';
     });
     mapCounter.textContent = count + ' restaurante' + (count !== 1 ? 's' : '') + ' en vista';
   }
