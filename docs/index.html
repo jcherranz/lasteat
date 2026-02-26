@@ -4,270 +4,331 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Macarfi Madrid — Restaurantes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300..500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #fafafa;
-    --card: #fff;
-    --text: #1a1a1a;
-    --muted: #6b7280;
-    --accent: #e63946;
-    --accent-light: #fef2f2;
-    --border: #e5e7eb;
-    --radius: 10px;
-    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --bg: #F7F5F0;
+    --surface: #FFFFFF;
+    --text: #1C1917;
+    --secondary: #57534E;
+    --muted: #A8A29E;
+    --accent: #B45A3C;
+    --accent-soft: rgba(180, 90, 60, 0.06);
+    --border: #E7E5E1;
+    --radius: 5px;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'DM Sans', sans-serif;
     background: var(--bg);
     color: var(--text);
-    line-height: 1.5;
+    line-height: 1.6;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Header */
+  /* ── Masthead ── */
   header {
-    background: var(--card);
-    border-bottom: 1px solid var(--border);
-    padding: 1.25rem 1.5rem;
+    padding: 3.5rem 2rem 0;
+    text-align: center;
+  }
+  .logo {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 2.8rem;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    line-height: 1.1;
+    color: var(--text);
+  }
+  .stats {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 0.75rem;
+    letter-spacing: 0.06em;
+    font-weight: 400;
+  }
+  .divider {
+    width: 36px;
+    height: 1px;
+    background: var(--border);
+    margin: 1.75rem auto 0;
+  }
+
+  /* ── Controls ── */
+  .controls-wrap {
     position: sticky;
     top: 0;
     z-index: 100;
+    background: var(--bg);
   }
-  .header-inner {
-    max-width: 1200px;
+  .controls-wrap::after {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(var(--bg), transparent);
+    pointer-events: none;
+  }
+  .controls {
+    max-width: 1100px;
     margin: 0 auto;
+    padding: 1.15rem 2rem;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
     flex-wrap: wrap;
-    gap: .75rem;
-  }
-  .logo {
-    font-size: 1.25rem;
-    font-weight: 700;
-    letter-spacing: -.02em;
-  }
-  .logo span { color: var(--accent); }
-  .stats {
-    font-size: .8rem;
-    color: var(--muted);
+    gap: 0.5rem;
+    align-items: center;
   }
 
-  /* Controls */
-  .controls {
-    max-width: 1200px;
-    margin: 1rem auto;
-    padding: 0 1.5rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: .5rem;
-    align-items: center;
-  }
   .search-box {
     flex: 1;
-    min-width: 200px;
-    padding: .55rem .85rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    font-size: .9rem;
+    min-width: 180px;
+    padding: 0.55rem 0;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+    font-family: inherit;
+    background: transparent;
     outline: none;
-    transition: border .2s;
+    transition: border-color 0.3s;
+    color: var(--text);
   }
-  .search-box:focus { border-color: var(--accent); }
+  .search-box::placeholder { color: var(--muted); }
+  .search-box:focus { border-bottom-color: var(--accent); }
 
   select {
-    padding: .55rem .75rem;
+    padding: 0.5rem 1.8rem 0.5rem 0.65rem;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    font-size: .85rem;
-    background: var(--card);
+    font-size: 0.8rem;
+    font-family: inherit;
+    background: var(--surface);
+    color: var(--secondary);
     outline: none;
     cursor: pointer;
-    max-width: 180px;
+    max-width: 170px;
+    transition: border-color 0.3s;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23A8A29E'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.65rem center;
   }
   select:focus { border-color: var(--accent); }
 
+  .sort-group {
+    display: flex;
+    align-items: center;
+    gap: 0.1rem;
+    margin-left: auto;
+  }
   .sort-btn {
-    padding: .55rem .75rem;
-    border: 1px solid var(--border);
+    padding: 0.4rem 0.6rem;
+    border: none;
     border-radius: var(--radius);
-    font-size: .85rem;
-    background: var(--card);
+    font-size: 0.78rem;
+    font-family: inherit;
+    background: transparent;
+    color: var(--muted);
     cursor: pointer;
     white-space: nowrap;
-    transition: all .15s;
+    transition: color 0.2s, background 0.2s;
   }
-  .sort-btn:hover { border-color: var(--accent); }
-  .sort-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .sort-btn:hover { color: var(--secondary); }
+  .sort-btn.active {
+    color: var(--text);
+    background: var(--surface);
+    font-weight: 500;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
 
-  /* Grid */
+  /* ── Grid ── */
   .grid {
-    max-width: 1200px;
-    margin: 1rem auto;
-    padding: 0 1.5rem 2rem;
+    max-width: 1100px;
+    margin: 0.75rem auto 0;
+    padding: 0 2rem 3rem;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: .75rem;
+    gap: 0.65rem;
   }
 
-  /* Card */
+  /* ── Card ── */
   .card {
-    background: var(--card);
-    border: 1px solid var(--border);
+    background: var(--surface);
     border-radius: var(--radius);
-    padding: 1rem 1.15rem;
-    transition: box-shadow .15s, transform .15s;
+    padding: 1.2rem 1.4rem;
     display: flex;
     flex-direction: column;
-    gap: .5rem;
+    gap: 0.45rem;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.03);
+    transition: box-shadow 0.25s ease;
   }
   .card:hover {
-    box-shadow: var(--shadow);
-    transform: translateY(-1px);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
   }
 
   .card-top {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    gap: .5rem;
+    align-items: baseline;
+    gap: 0.75rem;
   }
   .card-name {
-    font-size: .95rem;
-    font-weight: 600;
-    line-height: 1.3;
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.35;
   }
   .card-name a {
     color: inherit;
     text-decoration: none;
+    transition: color 0.2s;
   }
   .card-name a:hover { color: var(--accent); }
 
   .card-rating {
     flex-shrink: 0;
-    background: var(--accent);
-    color: #fff;
-    font-size: .8rem;
-    font-weight: 700;
-    padding: .2rem .5rem;
-    border-radius: 6px;
-    min-width: 2.2rem;
-    text-align: center;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.35rem;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1;
   }
   .card-rating.no-rating {
-    background: var(--border);
     color: var(--muted);
+    font-size: 1.1rem;
   }
 
   .card-meta {
-    font-size: .8rem;
+    font-size: 0.78rem;
     color: var(--muted);
     display: flex;
     flex-wrap: wrap;
-    gap: .25rem .75rem;
+    gap: 0;
   }
-  .card-meta span::before {
-    margin-right: .3rem;
+  .card-meta span { white-space: nowrap; }
+  .card-meta span + span::before {
+    content: '\00b7';
+    margin: 0 0.4rem;
+    color: var(--border);
   }
 
   .card-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: .3rem;
+    gap: 0.3rem;
   }
   .tag {
-    font-size: .7rem;
-    padding: .15rem .45rem;
-    background: var(--accent-light);
+    font-size: 0.67rem;
+    padding: 0.15rem 0.45rem;
+    background: var(--accent-soft);
     color: var(--accent);
-    border-radius: 4px;
+    border-radius: 3px;
     white-space: nowrap;
+    letter-spacing: 0.01em;
   }
 
   .card-ratings {
     display: flex;
-    gap: .75rem;
-    font-size: .75rem;
+    gap: 0.6rem;
+    font-size: 0.72rem;
     color: var(--muted);
   }
   .card-ratings strong {
-    color: var(--text);
-    font-weight: 600;
+    color: var(--secondary);
+    font-weight: 500;
   }
 
   .card-actions {
     display: flex;
-    gap: .4rem;
+    gap: 0.85rem;
     margin-top: auto;
-    padding-top: .25rem;
+    padding-top: 0.35rem;
   }
   .card-actions a {
-    font-size: .75rem;
-    color: var(--accent);
+    font-size: 0.72rem;
+    color: var(--muted);
     text-decoration: none;
-    padding: .25rem .5rem;
-    border: 1px solid var(--accent);
-    border-radius: 5px;
-    transition: all .15s;
-    white-space: nowrap;
+    transition: color 0.2s;
+    letter-spacing: 0.01em;
   }
-  .card-actions a:hover {
-    background: var(--accent);
-    color: #fff;
-  }
+  .card-actions a:hover { color: var(--accent); }
 
   .no-results {
     grid-column: 1 / -1;
     text-align: center;
-    padding: 3rem 1rem;
+    padding: 4rem 1.5rem;
     color: var(--muted);
-    font-size: .95rem;
+    font-size: 0.88rem;
+    background: var(--surface);
+    border-radius: var(--radius);
   }
 
-  /* Footer */
+  /* ── Footer ── */
   footer {
     text-align: center;
-    padding: 1.5rem;
-    font-size: .75rem;
+    padding: 2.5rem 1.5rem;
+    font-size: 0.72rem;
     color: var(--muted);
-    border-top: 1px solid var(--border);
+    letter-spacing: 0.04em;
   }
-  footer a { color: var(--accent); text-decoration: none; }
+  footer a {
+    color: var(--secondary);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+    transition: border-color 0.2s, color 0.2s;
+  }
+  footer a:hover {
+    border-bottom-color: var(--accent);
+    color: var(--accent);
+  }
 
+  /* ── Responsive ── */
   @media (max-width: 640px) {
-    .grid { grid-template-columns: 1fr; }
-    .controls { padding: 0 1rem; }
-    .grid { padding: 0 1rem 2rem; }
-    header { padding: 1rem; }
+    header { padding: 2.5rem 1.25rem 0; }
+    .logo { font-size: 2.1rem; }
+    .controls { padding: 0.85rem 1.25rem; }
+    .grid {
+      grid-template-columns: 1fr;
+      padding: 0 1.25rem 2rem;
+    }
+    .card { padding: 1rem 1.15rem; }
+    .sort-group { margin-left: 0; }
   }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="header-inner">
-    <div class="logo">Macarfi <span>Madrid</span></div>
-    <div class="stats" id="stats">Loading...</div>
-  </div>
+  <div class="logo">Macarfi Madrid</div>
+  <div class="stats" id="stats">Cargando...</div>
+  <div class="divider"></div>
 </header>
 
-<div class="controls">
-  <input type="text" class="search-box" id="search" placeholder="Buscar restaurante, cocina, zona...">
-  <select id="cuisine-filter"><option value="">Todas las cocinas</option></select>
-  <select id="district-filter"><option value="">Todas las zonas</option></select>
-  <select id="price-filter">
-    <option value="">Cualquier precio</option>
-    <option value="0-30">Hasta 30 &euro;</option>
-    <option value="0-50">Hasta 50 &euro;</option>
-    <option value="0-80">Hasta 80 &euro;</option>
-    <option value="80-999">Desde 80 &euro;</option>
-  </select>
-  <button class="sort-btn active" data-sort="rating">Ranking</button>
-  <button class="sort-btn" data-sort="name">A-Z</button>
-  <button class="sort-btn" data-sort="price">Precio</button>
+<div class="controls-wrap">
+  <div class="controls">
+    <input type="text" class="search-box" id="search" placeholder="Buscar restaurante, cocina, zona...">
+    <select id="cuisine-filter"><option value="">Cocina</option></select>
+    <select id="district-filter"><option value="">Zona</option></select>
+    <select id="price-filter">
+      <option value="">Precio</option>
+      <option value="0-30">Hasta 30 &euro;</option>
+      <option value="0-50">Hasta 50 &euro;</option>
+      <option value="0-80">Hasta 80 &euro;</option>
+      <option value="80-999">Desde 80 &euro;</option>
+    </select>
+    <div class="sort-group">
+      <button class="sort-btn active" data-sort="rating">Ranking</button>
+      <button class="sort-btn" data-sort="name">A-Z</button>
+      <button class="sort-btn" data-sort="price">Precio</button>
+    </div>
+  </div>
 </div>
 
 <div class="grid" id="grid"></div>
@@ -351,8 +412,8 @@
 
     grid.innerHTML = filtered.map(r => {
       const ratingClass = r.r && r.r !== '-' ? '' : ' no-rating';
-      const ratingText = r.r && r.r !== '-' ? r.r : '—';
-      const cuisineTags = r.c ? r.c.split('•').map(t =>
+      const ratingText = r.r && r.r !== '-' ? r.r : '\u2014';
+      const cuisineTags = r.c ? r.c.split('\u2022').map(t =>
         '<span class="tag">' + t.trim() + '</span>'
       ).join('') : '';
       const ratingsDetail = [
