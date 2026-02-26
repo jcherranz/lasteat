@@ -156,7 +156,7 @@
   }
 
   /* ── Theme Transitions ── */
-  body, .card, .controls-wrap, #map-view, header, footer {
+  body, .card, .controls-wrap, #map-view, #map-panel, header, footer {
     transition: background-color 0.3s, border-color 0.3s, color 0.2s;
   }
 
@@ -743,22 +743,76 @@
   .no-results .clear-filters:hover { border-color: var(--accent); color: var(--accent); }
 
   /* ── Map ── */
+  /* ── Map Layout ── */
   #map-container {
     max-width: 1140px;
     margin: 1rem auto 0;
     padding: 0 2rem 3rem;
+    display: flex;
+    gap: 0;
+    position: relative;
+  }
+  #map-panel {
+    width: 320px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-right: none;
+    border-radius: var(--radius) 0 0 var(--radius);
+    overflow-y: auto;
+    max-height: 70vh;
+  }
+  #map-panel-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .map-panel-item {
+    padding: 0.65rem 0.85rem;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+    font-size: 0.8rem;
+    line-height: 1.45;
+  }
+  .map-panel-item:hover { background: var(--accent-soft); }
+  .map-panel-item.active { background: var(--accent-muted); }
+  .map-panel-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text);
+    display: block;
+    margin-bottom: 0.1rem;
+  }
+  .map-panel-meta {
+    color: var(--secondary);
+    font-size: 0.72rem;
+  }
+  .map-panel-meta .map-panel-rating {
+    color: var(--accent);
+    font-weight: 500;
   }
   #map-view {
+    flex: 1;
     height: 70vh;
-    border-radius: var(--radius);
+    border-radius: 0 var(--radius) var(--radius) 0;
     border: 1px solid var(--border);
     background: var(--surface);
     position: relative;
+    min-width: 0;
   }
+  /* When panel is hidden (mobile), restore full radius */
+  @media (max-width: 768px) {
+    #map-panel { display: none; }
+    #map-view { border-radius: var(--radius); }
+  }
+
+  /* ── Map Loading State ── */
   #map-view:not(.loaded)::before {
     content: '';
     position: absolute;
-    top: 50%;
+    top: calc(50% - 12px);
     left: 50%;
     width: 10px;
     height: 10px;
@@ -768,10 +822,145 @@
     animation: mapPulse 1.2s ease-in-out infinite;
     z-index: 1;
   }
+  #map-view:not(.loaded)::after {
+    content: 'Cargando mapa\2026';
+    position: absolute;
+    top: calc(50% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    z-index: 1;
+  }
   @keyframes mapPulse {
     0%, 100% { opacity: 0.3; transform: scale(1); }
     50% { opacity: 1; transform: scale(2.5); }
   }
+
+  /* ── Map Counter Badge ── */
+  .map-counter {
+    position: absolute;
+    top: 12px;
+    left: 332px;
+    z-index: 1000;
+    background: var(--surface);
+    color: var(--secondary);
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 0.3rem 0.65rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    pointer-events: none;
+    letter-spacing: 0.02em;
+  }
+  @media (max-width: 768px) {
+    .map-counter {
+      top: auto;
+      bottom: 12px;
+      left: 12px;
+    }
+  }
+
+  /* ── Map Markers (SVG divIcon) ── */
+  .map-marker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .map-marker svg { filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2)); }
+
+  /* ── Cluster Overrides ── */
+  .marker-cluster-small,
+  .marker-cluster-medium,
+  .marker-cluster-large {
+    background: var(--accent-muted) !important;
+  }
+  .marker-cluster-small div,
+  .marker-cluster-medium div,
+  .marker-cluster-large div {
+    background: var(--accent) !important;
+    color: #fff !important;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 0.72rem;
+  }
+
+  /* ── Rich Popups ── */
+  .leaflet-popup-content-wrapper {
+    border-radius: var(--radius) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
+    background: var(--surface) !important;
+    color: var(--text) !important;
+  }
+  .leaflet-popup-tip { background: var(--surface) !important; }
+  .leaflet-popup-content { margin: 0 !important; padding: 0 !important; width: auto !important; }
+  .map-popup { padding: 0.75rem 0.85rem; min-width: 180px; max-width: 240px; }
+  .map-popup-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 1.05rem;
+    line-height: 1.25;
+    margin-bottom: 0.3rem;
+    color: var(--text);
+  }
+  .map-popup-rating {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 500;
+    padding: 0.1rem 0.4rem;
+    border-radius: var(--radius-pill);
+    margin-bottom: 0.35rem;
+  }
+  .map-popup-meta {
+    font-size: 0.72rem;
+    color: var(--secondary);
+    line-height: 1.5;
+    margin-bottom: 0.3rem;
+  }
+  .map-popup-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-bottom: 0.35rem;
+  }
+  .map-popup-tag {
+    font-size: 0.62rem;
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 0.1rem 0.4rem;
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+  }
+  .map-popup-link {
+    display: inline-block;
+    font-size: 0.72rem;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .map-popup-link:hover { text-decoration: underline; }
+
+  /* ── Map Tooltips ── */
+  .map-tooltip {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.72rem !important;
+    padding: 0.3rem 0.55rem !important;
+    border-radius: var(--radius) !important;
+    background: var(--surface) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+  }
+  .map-tooltip .map-tt-rating {
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .map-tooltip::before { border-top-color: var(--border) !important; }
 
   /* ── Back to top ── */
   .btt {
@@ -813,30 +1002,7 @@
   }
   footer a:hover { border-bottom-color: var(--accent); color: var(--accent); }
 
-  /* ── Leaflet overrides ── */
-  .leaflet-popup-content-wrapper {
-    border-radius: var(--radius) !important;
-    font-family: 'DM Sans', sans-serif !important;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
-  }
-  .leaflet-popup-content { margin: 12px 14px !important; font-size: 0.82rem; line-height: 1.5; }
-  .leaflet-popup-content strong { font-weight: 500; }
-  .leaflet-popup-content a { color: var(--accent); text-decoration: none; }
 
-  /* ── Card Expand Hint ── */
-  .card:first-child::after {
-    content: '';
-    display: block;
-    width: 12px;
-    height: 12px;
-    margin: 0.15rem auto 0;
-    border-left: 1.5px solid var(--muted);
-    border-bottom: 1.5px solid var(--muted);
-    transform: rotate(-45deg);
-    opacity: 0.4;
-    transition: opacity 0.3s;
-  }
-  .card:first-child.expanded::after { opacity: 0; }
 
   /* ── Touch Feedback ── */
   .card:active { transform: scale(0.99); }
@@ -866,7 +1032,7 @@
     .card { padding: 1.1rem 1.2rem; }
     .ms-drop { min-width: 220px; }
     #map-container { padding: 0 1rem 2rem; }
-    #map-view { height: 55vh; }
+    #map-view { height: 55vh; border-radius: var(--radius); }
     .sort-btn, .view-btn {
       font-size: 0.72rem;
       padding: 0.3rem 0.6rem;
@@ -946,7 +1112,11 @@
 <div class="grid" id="grid" tabindex="-1"></div>
 
 <div id="map-container" hidden>
+  <nav id="map-panel" aria-label="Lista de restaurantes en mapa">
+    <ul id="map-panel-list"></ul>
+  </nav>
   <div id="map-view"></div>
+  <div class="map-counter" id="map-counter" aria-live="polite"></div>
 </div>
 
 <button class="btt" id="btt" aria-label="Volver arriba">&uarr;</button>
@@ -965,6 +1135,10 @@
   var BATCH = 60;
   var LEAFLET_CSS_INTEGRITY = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
   var LEAFLET_JS_INTEGRITY = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
+  var MC_JS_INTEGRITY = 'sha256-Hk4dIpcqOSb0hZjgyvFOP+cEmDXUKKNE/tT542ZbNQg=';
+  var MC_CSS_INTEGRITY = 'sha256-YSWCMtmNZNwqex4CEw1nQhvFub2lmU7vcCKP+XVwwXA=';
+  var MC_CSS_BASE_INTEGRITY = 'sha256-YU3qCpj/P06tdPBJGPax0bm6Q1wltfwjsho5TR4+TYc=';
+  var MC_BASE = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3';
   var app = window.LastEatApp;
   if (!app) throw new Error('LastEatApp module is required');
 
@@ -976,6 +1150,8 @@
   var bttEl    = document.getElementById('btt');
   var favBtn   = document.getElementById('fav-filter');
   var mapCont  = document.getElementById('map-container');
+  var mapPanel = document.getElementById('map-panel-list');
+  var mapCounter = document.getElementById('map-counter');
   var geoBtn   = document.getElementById('geo-btn');
   var sortDistBtn = document.getElementById('sort-dist');
 
@@ -996,13 +1172,16 @@
   var selDistrict= new Set();
   var filtered   = [];
   var rendered   = 0;
-  var map        = null;
-  var tileLayer  = null;
-  var markers    = [];
-  var leafletOk  = false;
-  var userLat    = null;
-  var userLng    = null;
-  var userMarker = null;
+  var map          = null;
+  var tileLayer    = null;
+  var clusterGroup = null;
+  var markerIndex  = [];  /* {marker, data, panelEl} per restaurant */
+  var leafletOk    = false;
+  var clusterOk    = false;
+  var userLat      = null;
+  var userLng      = null;
+  var userMarker   = null;
+  var activePanelSlug = null;
 
   /* ── Utilities ── */
   var esc = app.esc;
@@ -1056,7 +1235,10 @@
     var t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     document.documentElement.dataset.theme = t;
     safeSetStorage('mf-theme', t);
-    if (map && tileLayer) tileLayer.setUrl(getTileUrl());
+    if (map && tileLayer) {
+      tileLayer.setUrl(getTileUrl());
+      if (view === 'map') updateMap();
+    }
   }
   function getTileUrl() {
     return document.documentElement.dataset.theme === 'dark'
@@ -1504,13 +1686,14 @@
       renderBatch();
     }
     syncURL();
-    if (view === 'map' && leafletOk) updateMap();
+    if (view === 'map' && leafletOk && clusterOk) updateMap();
   }
 
   /* ── Map ── */
   function loadLeaflet() {
     return new Promise(function(resolve) {
-      if (leafletOk) { resolve(); return; }
+      if (leafletOk && clusterOk) { resolve(); return; }
+      /* Leaflet core */
       var css = document.createElement('link');
       css.rel = 'stylesheet';
       css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
@@ -1521,10 +1704,108 @@
       js.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
       js.integrity = LEAFLET_JS_INTEGRITY;
       js.crossOrigin = 'anonymous';
-      js.onload = function() { leafletOk = true; resolve(); };
+      js.onload = function() {
+        leafletOk = true;
+        /* Chain-load MarkerCluster */
+        var mcCssBase = document.createElement('link');
+        mcCssBase.rel = 'stylesheet';
+        mcCssBase.href = MC_BASE + '/MarkerCluster.css';
+        mcCssBase.integrity = MC_CSS_BASE_INTEGRITY;
+        mcCssBase.crossOrigin = 'anonymous';
+        document.head.appendChild(mcCssBase);
+        var mcCss = document.createElement('link');
+        mcCss.rel = 'stylesheet';
+        mcCss.href = MC_BASE + '/MarkerCluster.Default.css';
+        mcCss.integrity = MC_CSS_INTEGRITY;
+        mcCss.crossOrigin = 'anonymous';
+        document.head.appendChild(mcCss);
+        var mcJs = document.createElement('script');
+        mcJs.src = MC_BASE + '/leaflet.markercluster.js';
+        mcJs.integrity = MC_JS_INTEGRITY;
+        mcJs.crossOrigin = 'anonymous';
+        mcJs.onload = function() { clusterOk = true; resolve(); };
+        document.head.appendChild(mcJs);
+      };
       document.head.appendChild(js);
     });
   }
+
+  /* Marker SVG icon by rating */
+  function markerIcon(rating) {
+    var r = parseFloat(rating) || 0;
+    var size, opacity;
+    if (r >= 9)      { size = 14; opacity = 0.95; }
+    else if (r >= 8) { size = 11; opacity = 0.88; }
+    else if (r >= 7) { size = 9;  opacity = 0.8;  }
+    else             { size = 7;  opacity = 0.7;  }
+    var svg = '<svg width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size +
+      '" xmlns="http://www.w3.org/2000/svg">' +
+      '<circle cx="' + (size / 2) + '" cy="' + (size / 2) + '" r="' + (size / 2 - 0.5) +
+      '" fill="currentColor" opacity="' + opacity + '" stroke="#fff" stroke-width="1"/></svg>';
+    return L.divIcon({
+      html: '<div class="map-marker" style="color:var(--accent)">' + svg + '</div>',
+      className: '',
+      iconSize: [size, size],
+      iconAnchor: [size / 2, size / 2]
+    });
+  }
+
+  /* Build rich popup HTML */
+  function buildPopup(r) {
+    var tags = (r.c || '').split(/[\u2022,]/).map(function(t) { return t.trim(); }).filter(Boolean);
+    var html = '<div class="map-popup">';
+    html += '<div class="map-popup-name">' + esc(r.n) + '</div>';
+    if (r.r && r.r !== '-') html += '<span class="map-popup-rating">' + esc(r.r) + '</span> ';
+    html += '<div class="map-popup-meta">';
+    var parts = [];
+    if (r.d) parts.push(esc(r.d));
+    if (r.p) parts.push(esc(r.p) + ' \u20AC');
+    html += parts.join(' \u00B7 ');
+    html += '</div>';
+    if (tags.length) {
+      html += '<div class="map-popup-tags">';
+      tags.slice(0, 3).forEach(function(t) {
+        html += '<span class="map-popup-tag">' + esc(t) + '</span>';
+      });
+      html += '</div>';
+    }
+    if (r.s) html += '<a class="map-popup-link" href="/r/' + encodeURIComponent(r.s) + '.html">Ver m\u00e1s \u2192</a>';
+    html += '</div>';
+    return html;
+  }
+
+  /* Build tooltip content */
+  function buildTooltip(r) {
+    var html = esc(r.n);
+    if (r.r && r.r !== '-') html += ' <span class="map-tt-rating">' + esc(r.r) + '</span>';
+    return html;
+  }
+
+  /* Update visible counter */
+  function updateMapCounter() {
+    if (!map) return;
+    var bounds = map.getBounds();
+    var count = 0;
+    markerIndex.forEach(function(item) {
+      if (bounds.contains(item.marker.getLatLng())) count++;
+    });
+    mapCounter.textContent = count + ' restaurante' + (count !== 1 ? 's' : '') + ' en vista';
+  }
+
+  /* Highlight panel item + scroll into view */
+  function highlightPanel(slug) {
+    if (activePanelSlug === slug) return;
+    activePanelSlug = slug;
+    markerIndex.forEach(function(item) {
+      if (item.panelEl) {
+        item.panelEl.classList.toggle('active', item.data.s === slug);
+        if (item.data.s === slug) {
+          item.panelEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
+      }
+    });
+  }
+
   function initMap() {
     mapCont.hidden = false;
     grid.style.display = 'none';
@@ -1533,41 +1814,86 @@
       map = L.map('map-view').setView([40.42, -3.7], 13);
       tileLayer = L.tileLayer(getTileUrl(), { attribution: '&copy; OpenStreetMap &copy; CartoDB' }).addTo(map);
       document.getElementById('map-view').classList.add('loaded');
+      map.on('moveend', updateMapCounter);
       updateMap();
     });
   }
+
   function updateMap() {
     if (!map) return;
-    markers.forEach(function(m) { m.remove(); });
-    markers = [];
-    var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+    /* Clear previous */
+    if (clusterGroup) { map.removeLayer(clusterGroup); }
+    markerIndex = [];
+    activePanelSlug = null;
+    mapPanel.innerHTML = '';
+
+    clusterGroup = L.markerClusterGroup({
+      maxClusterRadius: 45,
+      spiderfyOnMaxZoom: true,
+      showCoverageOnHover: false,
+      zoomToBoundsOnClick: true
+    });
+
+    var isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
     filtered.forEach(function(r) {
       if (!r.lat || !r.lng) return;
-      var popup = '<strong>' + esc(r.n) + '</strong>';
-      if (r.r && r.r !== '-') popup += '<br>' + esc(r.r) + '/10';
-      if (r.d) popup += '<br>' + esc(r.d);
-      if (r._dist != null) popup += '<br>' + formatDist(r._dist);
-      if (r.s) popup += '<br><a href="/r/' + encodeURIComponent(r.s) + '.html">Ver m\u00e1s</a>';
-      var m = L.circleMarker([parseFloat(r.lat), parseFloat(r.lng)], {
-        radius: 5, fillColor: accent, fillOpacity: 0.85, color: '#fff', weight: 1.5
-      }).bindPopup(popup);
-      m.addTo(map);
-      markers.push(m);
+      var latlng = L.latLng(parseFloat(r.lat), parseFloat(r.lng));
+      var m = L.marker(latlng, { icon: markerIcon(r.r) });
+      m.bindPopup(buildPopup(r), { maxWidth: 260, minWidth: 180 });
+      /* Tooltip only on non-touch devices */
+      if (!isTouchDevice) {
+        m.bindTooltip(buildTooltip(r), { className: 'map-tooltip', direction: 'top', offset: [0, -6] });
+      }
+
+      /* Panel item */
+      var li = document.createElement('li');
+      li.className = 'map-panel-item';
+      var meta = [];
+      if (r.d) meta.push(esc(r.d));
+      if (r.p) meta.push(esc(r.p) + ' \u20AC');
+      li.innerHTML = '<span class="map-panel-name">' + esc(r.n) + '</span>' +
+        '<span class="map-panel-meta">' +
+        (r.r && r.r !== '-' ? '<span class="map-panel-rating">' + esc(r.r) + '</span> ' : '') +
+        meta.join(' \u00B7 ') +
+        '</span>';
+      /* Click panel → fly to marker + open popup */
+      li.addEventListener('click', function() {
+        map.flyTo(latlng, 16, { duration: 0.6 });
+        clusterGroup.zoomToShowLayer(m, function() {
+          m.openPopup();
+        });
+        highlightPanel(r.s);
+      });
+      mapPanel.appendChild(li);
+
+      /* Click marker → highlight panel */
+      m.on('popupopen', function() { highlightPanel(r.s); });
+
+      markerIndex.push({ marker: m, data: r, panelEl: li });
+      clusterGroup.addLayer(m);
     });
+
+    map.addLayer(clusterGroup);
+
     /* User position marker */
     if (userMarker) { userMarker.remove(); userMarker = null; }
     if (userLat !== null) {
       userMarker = L.circleMarker([userLat, userLng], {
         radius: 8, fillColor: '#3B82F6', fillOpacity: 1, color: '#fff', weight: 2.5
       }).bindPopup('Tu ubicaci\u00f3n').addTo(map);
-      markers.push(userMarker);
     }
-    /* Fit bounds if markers exist */
-    if (markers.length) {
-      var group = L.featureGroup(markers);
+
+    /* Fit bounds */
+    var allMarkers = markerIndex.map(function(item) { return item.marker; });
+    if (userMarker) allMarkers.push(userMarker);
+    if (allMarkers.length) {
+      var group = L.featureGroup(allMarkers);
       map.fitBounds(group.getBounds().pad(0.1));
     }
+    updateMapCounter();
   }
+
   function showGrid() {
     mapCont.hidden = true;
     grid.style.display = '';
