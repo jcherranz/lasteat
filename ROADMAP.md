@@ -58,7 +58,7 @@ _Goal: Automate data freshness and prevent silent breakage._
 ## Phase 2: SEO & Shareability
 _Goal: Make restaurants discoverable via search engines and shareable on social._
 
-### 2A. Individual Restaurant Pages `[ ]`
+### 2A. Individual Restaurant Pages `[x]`
 **Why:** Can't link to or share a specific restaurant. Zero SEO surface.
 **Scope:**
 - Create `scripts/generate_pages.py` — generates `docs/r/{slug}.html` per restaurant
@@ -77,14 +77,14 @@ _Goal: Make restaurants discoverable via search engines and shareable on social.
 - `.gitignore` — consider whether generated pages are committed or built in CI
 
 **Acceptance criteria:**
-- [ ] Each restaurant has a `/r/{slug}.html` page
-- [ ] Pages have correct OG tags (test with https://opengraph.dev)
-- [ ] Pages have schema.org/Restaurant JSON-LD
-- [ ] Google can crawl individual pages (add `docs/sitemap.xml`)
+- [x] Each restaurant has a `/r/{slug}.html` page
+- [x] Pages have correct OG tags (test with https://opengraph.dev)
+- [x] Pages have schema.org/Restaurant JSON-LD
+- [x] Google can crawl individual pages (add `docs/sitemap.xml`)
 
 ---
 
-### 2B. Sitemap & SEO Metadata `[ ]`
+### 2B. Sitemap & SEO Metadata `[x]`
 **Why:** Search engines need a sitemap to discover all restaurant pages.
 **Scope:**
 - Generate `docs/sitemap.xml` listing all restaurant pages + homepage
@@ -102,9 +102,9 @@ _Goal: Make restaurants discoverable via search engines and shareable on social.
 - `docs/index.html` — add meta tags in `<head>`
 
 **Acceptance criteria:**
-- [ ] `sitemap.xml` lists all URLs
-- [ ] `robots.txt` exists and allows crawling
-- [ ] Homepage has OG tags with image
+- [x] `sitemap.xml` lists all URLs
+- [x] `robots.txt` exists and allows crawling
+- [x] Homepage has OG tags with image
 - [ ] Google Search Console can read the sitemap (manual verification)
 
 ---

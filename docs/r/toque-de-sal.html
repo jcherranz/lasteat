@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toque de Sal — Last Eat</title>
+<meta name="description" content="Toque de Sal — Española — Chamberí — 6.5/10 — ~30 €">
+<link rel="canonical" href="https://lasteat.es/r/toque-de-sal.html">
+
+<!-- Open Graph -->
+<meta property="og:type" content="restaurant">
+<meta property="og:title" content="Toque de Sal — Last Eat">
+<meta property="og:description" content="Toque de Sal — Española — Chamberí — 6.5/10 — ~30 €">
+<meta property="og:url" content="https://lasteat.es/r/toque-de-sal.html">
+<meta property="og:site_name" content="Last Eat">
+<meta property="og:image" content="https://lasteat.es/og.png">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Toque de Sal — Last Eat">
+<meta name="twitter:description" content="Toque de Sal — Española — Chamberí — 6.5/10 — ~30 €">
+<meta name="twitter:image" content="https://lasteat.es/og.png">
+
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Restaurant",
+  "name": "Toque de Sal",
+  "url": "https://lasteat.es/r/toque-de-sal.html",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Ponzano, 46, 28003 Madrid",
+    "addressLocality": "Madrid",
+    "addressCountry": "ES"
+  },
+  "servesCuisine": [
+    "Española"
+  ],
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "6.5",
+    "bestRating": "10",
+    "worstRating": "0"
+  },
+  "telephone": "+34-914266465",
+  "sameAs": "http://www.toquedesal.com",
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": "40.440300",
+    "longitude": "-3.699090"
+  },
+  "priceRange": "30 €"
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300..500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F4F1;
+    --surface: #FFFFFF;
+    --text: #1C1F1E;
+    --secondary: #545957;
+    --muted: #6E7472;
+    --accent: #376660;
+    --accent-soft: rgba(55, 102, 96, 0.06);
+    --border: #E2E0DC;
+    --radius: 5px;
+  }
+  [data-theme="dark"] {
+    --bg: #131615;
+    --surface: #1C201E;
+    --text: #E4E6E4;
+    --secondary: #9DA2A0;
+    --muted: #7E8482;
+    --accent: #45A194;
+    --accent-soft: rgba(69, 161, 148, 0.09);
+    --border: #292D2B;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+  }
+  .back {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: color 0.2s;
+  }
+  .back:hover { color: var(--accent); }
+  h1 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 2.2rem;
+    font-weight: 300;
+    line-height: 1.2;
+    margin: 1.5rem 0 0.5rem;
+  }
+  .meta {
+    font-size: 0.78rem;
+    color: var(--muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0;
+  }
+  .meta span + span::before {
+    content: '\00b7';
+    margin: 0 0.35rem;
+    color: var(--border);
+  }
+  .score {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 3rem;
+    font-weight: 500;
+    color: var(--text);
+    margin: 1.25rem 0 0.25rem;
+    line-height: 1;
+  }
+  .ratings {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+  .ratings strong { color: var(--secondary); font-weight: 500; }
+  .tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0.75rem 0; }
+  .tag {
+    font-size: 0.72rem;
+    padding: 0.15rem 0.5rem;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 3px;
+  }
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    margin: 1.25rem 0;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.03);
+  }
+  .card-label {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 0.25rem;
+  }
+  .card-value {
+    font-size: 0.88rem;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .card-value a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .card-value a:hover { text-decoration: underline; }
+  .contact {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin: 1rem 0;
+  }
+  .contact a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .contact a:hover { text-decoration: underline; }
+  .maps-btn {
+    display: inline-block;
+    margin: 1rem 0;
+    padding: 0.55rem 1.2rem;
+    background: var(--accent);
+    color: #fff;
+    border-radius: var(--radius);
+    font-size: 0.82rem;
+    font-family: inherit;
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .maps-btn:hover { opacity: 0.85; }
+  footer {
+    text-align: center;
+    padding: 2rem 1.5rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  footer a {
+    color: var(--secondary);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+    transition: border-color 0.2s, color 0.2s;
+  }
+  footer a:hover { border-bottom-color: var(--accent); color: var(--accent); }
+  .theme-toggle {
+    position: fixed;
+    top: 1.25rem;
+    right: 1.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: var(--muted);
+    padding: 0.25rem;
+    transition: color 0.2s;
+    line-height: 1;
+  }
+  .theme-toggle::before { content: '\263D'; }
+  [data-theme="dark"] .theme-toggle::before { content: '\2600'; }
+  .theme-toggle:hover { color: var(--accent); }
+  @media (max-width: 640px) {
+    .container { padding: 2rem 1.25rem; }
+    h1 { font-size: 1.7rem; }
+    .score { font-size: 2.4rem; }
+  }
+</style>
+</head>
+<body>
+<button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema"></button>
+<div class="container">
+  <a href="/" class="back">&larr; Last Eat</a>
+  <h1>Toque de Sal</h1>
+  <div class="meta">
+    <span>Chamberí</span>
+    <span>30 €</span>
+  </div>
+  <div class="tags"><span class="tag">Española</span></div>
+
+  <div class="score">6.5</div>
+  <div class="ratings">Comida <strong>6.5</strong> &middot; Decor <strong>7.0</strong> &middot; Servicio <strong>6.5</strong></div>
+
+  <div class="card">
+    <div class="card-label">Direcci&oacute;n</div>
+    <div class="card-value">Ponzano, 46, 28003 Madrid</div>
+  </div>
+
+  <div class="contact"><a href="tel:+34-914266465">+34-914266465</a> &middot; <a href="http://www.toquedesal.com" target="_blank" rel="noopener">Web</a> &middot; <a href="https://macarfi.com/es/mad/ficha-restaurante/toque-de-sal" target="_blank" rel="noopener">Fuente</a></div>
+
+  <a href="https://www.google.com/maps/search/?api=1&query=Toque%20de%20Sal%2C%20Ponzano%2C%2046%2C%2028003%20Madrid" class="maps-btn" target="_blank" rel="noopener">Ver en Google Maps</a>
+</div>
+
+<footer>
+  <a href="/">Last Eat</a> &mdash; Restaurantes en Madrid
+</footer>
+
+<script>
+(function() {
+  var saved = localStorage.getItem('mf-theme');
+  if (saved) document.documentElement.dataset.theme = saved;
+  else if (window.matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.dataset.theme = 'dark';
+  document.getElementById('theme-toggle').addEventListener('click', function() {
+    var t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = t;
+    localStorage.setItem('mf-theme', t);
+  });
+})();
+</script>
+</body>
+</html>

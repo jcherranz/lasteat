@@ -22,6 +22,7 @@ OUTPUT_PATH = PROJECT_ROOT / "docs" / "data.js"
 # Full key → abbreviated key mapping (must match frontend expectations)
 KEY_MAP = {
     "name": "n",
+    "slug": "s",
     "address": "a",
     "latitude": "lat",
     "longitude": "lng",

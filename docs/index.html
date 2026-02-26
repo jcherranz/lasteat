@@ -4,6 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Last Eat — Restaurantes en Madrid</title>
+<meta name="description" content="Descubre los mejores restaurantes de Madrid. 770+ restaurantes con valoraciones, precios y ubicaciones. Filtra por cocina, zona y precio.">
+<link rel="canonical" href="https://lasteat.es/">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Last Eat — Restaurantes en Madrid">
+<meta property="og:description" content="Descubre los mejores restaurantes de Madrid. 770+ restaurantes con valoraciones, precios y ubicaciones.">
+<meta property="og:url" content="https://lasteat.es/">
+<meta property="og:site_name" content="Last Eat">
+<meta property="og:image" content="https://lasteat.es/og.png">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Last Eat — Restaurantes en Madrid">
+<meta name="twitter:description" content="Descubre los mejores restaurantes de Madrid. 770+ restaurantes con valoraciones, precios y ubicaciones.">
+<meta name="twitter:image" content="https://lasteat.es/og.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300..500&display=swap" rel="stylesheet">
@@ -833,6 +850,7 @@
     }).join('') : '';
     var price  = r.p ? r.p + ' \u20ac' : '';
     var gmaps  = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(r.n + ', ' + r.a);
+    var pageUrl = r.s ? '/r/' + r.s + '.html' : r.u;
     var eName  = esc(r.n);
 
     /* Expandable detail */
@@ -847,7 +865,7 @@
 
     return '<div class="card">' +
       '<div class="card-top">' +
-        '<div class="card-name"><a href="' + r.u + '" target="_blank" rel="noopener">' + r.n + '</a></div>' +
+        '<div class="card-name"><a href="' + pageUrl + '">' + r.n + '</a></div>' +
         '<button class="fav-btn' + favCls + '" data-name="' + eName + '">' + heart + '</button>' +
         '<div class="card-rating' + rCls + '">' + rText + '</div>' +
       '</div>' +
