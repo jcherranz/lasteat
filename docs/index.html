@@ -53,22 +53,6 @@
   @font-face {
     font-family: 'Cormorant Garamond';
     font-style: normal;
-    font-weight: 500;
-    font-display: swap;
-    src: url('fonts/cormorant-garamond-500-latin-ext.woff2') format('woff2');
-    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-  }
-  @font-face {
-    font-family: 'Cormorant Garamond';
-    font-style: normal;
-    font-weight: 500;
-    font-display: swap;
-    src: url('fonts/cormorant-garamond-500-latin.woff2') format('woff2');
-    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-  }
-  @font-face {
-    font-family: 'Cormorant Garamond';
-    font-style: normal;
     font-weight: 600;
     font-display: swap;
     src: url('fonts/cormorant-garamond-600-latin-ext.woff2') format('woff2');
@@ -151,7 +135,7 @@
     --surface: #181C1A;
     --text: #E4E6E4;
     --secondary: #9EA3A0;
-    --muted: #6B706D;
+    --muted: #8A8F8C;
     --accent: #4CB0A1;
     --accent-hover: #5DC4B3;
     --accent-soft: rgba(76, 176, 161, 0.08);
@@ -169,6 +153,11 @@
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ── Theme Transitions ── */
+  body, .card, .controls-wrap, #map-view, header, footer {
+    transition: background-color 0.3s, border-color 0.3s, color 0.2s;
   }
 
   /* ── Accessibility ── */
@@ -239,7 +228,7 @@
     height: 1px;
     background: var(--accent);
     margin: 1.2rem auto 0;
-    opacity: 0.35;
+    opacity: 0.5;
   }
   .theme-toggle {
     position: absolute;
@@ -292,8 +281,6 @@
 
   /* ── Search ── */
   .search-box {
-    flex: 1;
-    min-width: 180px;
     padding: 0.55rem 0;
     min-height: 44px;
     border: none;
@@ -309,6 +296,34 @@
   }
   .search-box::placeholder { color: var(--muted); font-weight: 300; }
   .search-box:focus { border-bottom-color: var(--accent); }
+  .search-wrap {
+    flex: 1;
+    min-width: 180px;
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .search-wrap .search-box { flex: 1; min-width: 0; padding-right: 2rem; }
+  .search-clear {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0.3rem 0.4rem;
+    line-height: 1;
+    transition: color 0.2s;
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .search-clear:hover { color: var(--accent); }
 
   /* ── Select ── */
   select {
@@ -332,6 +347,9 @@
   }
   select:focus { border-color: var(--accent); }
   select:hover { border-color: var(--accent); color: var(--accent); }
+  [data-theme="dark"] select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238A8F8C'/%3E%3C/svg%3E");
+  }
 
   /* ── Multi-select ── */
   .ms { position: relative; }
@@ -353,6 +371,9 @@
     min-height: 44px;
   }
   .ms-trigger:hover { border-color: var(--accent); }
+  [data-theme="dark"] .ms-trigger {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238A8F8C'/%3E%3C/svg%3E");
+  }
   .ms.open .ms-trigger { border-color: var(--accent); color: var(--accent); }
   .ms.has-sel .ms-trigger {
     border-color: var(--accent);
@@ -557,7 +578,7 @@
     cursor: pointer;
     transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
     animation: cardIn 0.35s ease both;
-    animation-delay: calc(min(var(--i, 0), 11) * 30ms);
+    animation-delay: calc(min(var(--i, 0), 15) * 30ms);
   }
   .card:hover {
     transform: translateY(-2px);
@@ -704,6 +725,22 @@
     font-size: 0.88rem;
     font-style: italic;
   }
+  .no-results p { margin-bottom: 0.75rem; }
+  .no-results .clear-filters {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.5rem 1.2rem;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--secondary);
+    font-size: 0.78rem;
+    font-family: inherit;
+    font-style: normal;
+    cursor: pointer;
+    transition: border-color 0.25s, color 0.25s;
+  }
+  .no-results .clear-filters:hover { border-color: var(--accent); color: var(--accent); }
 
   /* ── Map ── */
   #map-container {
@@ -716,6 +753,24 @@
     border-radius: var(--radius);
     border: 1px solid var(--border);
     background: var(--surface);
+    position: relative;
+  }
+  #map-view:not(.loaded)::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    margin: -5px 0 0 -5px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: mapPulse 1.2s ease-in-out infinite;
+    z-index: 1;
+  }
+  @keyframes mapPulse {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 1; transform: scale(2.5); }
   }
 
   /* ── Back to top ── */
@@ -768,6 +823,27 @@
   .leaflet-popup-content strong { font-weight: 500; }
   .leaflet-popup-content a { color: var(--accent); text-decoration: none; }
 
+  /* ── Card Expand Hint ── */
+  .card:first-child::after {
+    content: '';
+    display: block;
+    width: 12px;
+    height: 12px;
+    margin: 0.15rem auto 0;
+    border-left: 1.5px solid var(--muted);
+    border-bottom: 1.5px solid var(--muted);
+    transform: rotate(-45deg);
+    opacity: 0.4;
+    transition: opacity 0.3s;
+  }
+  .card:first-child.expanded::after { opacity: 0; }
+
+  /* ── Touch Feedback ── */
+  .card:active { transform: scale(0.99); }
+  .ctrl-btn:active { transform: scale(0.92); }
+  .btt:active { transform: scale(0.92); }
+  .fav-btn:active { transform: scale(0.9); }
+
   /* ── Reduced Motion ── */
   @media (prefers-reduced-motion: reduce) {
     .card { animation: none; }
@@ -794,7 +870,7 @@
     .sort-btn, .view-btn {
       font-size: 0.72rem;
       padding: 0.3rem 0.6rem;
-      min-height: 34px;
+      min-height: 44px;
     }
     .btn-group { padding: 2px; }
   }
@@ -815,7 +891,10 @@
 <div class="controls-wrap">
   <div class="controls">
     <label class="sr-only" for="search">Buscar restaurantes</label>
-    <input type="text" class="search-box" id="search" placeholder="Buscar restaurante, cocina, zona...">
+    <div class="search-wrap">
+      <input type="text" class="search-box" id="search" placeholder="Buscar restaurante, cocina, zona...">
+      <button class="search-clear" id="search-clear" type="button" aria-label="Limpiar b&uacute;squeda" hidden>&times;</button>
+    </div>
 
     <div class="ms" id="ms-cuisine">
       <button class="ms-trigger" type="button" data-label="Cocina" aria-expanded="false" aria-haspopup="listbox">Cocina</button>
@@ -864,7 +943,7 @@
   </div>
 </div>
 
-<div class="grid" id="grid"></div>
+<div class="grid" id="grid" tabindex="-1"></div>
 
 <div id="map-container" hidden>
   <div id="map-view"></div>
@@ -1360,10 +1439,10 @@
     var addr  = r.a ? '<div class="card-address">' + esc(r.a) + '</div>' : '';
     var hasDetail = rDetail || r.ph || r.a;
 
-    return '<div class="card" tabindex="0" role="article" style="--i:' + Math.min(batchIdx || 0, 11) + '">' +
+    return '<div class="card" tabindex="0" role="article" aria-label="' + eName + '" style="--i:' + Math.min(batchIdx || 0, 15) + '">' +
       '<div class="card-top">' +
         '<div class="card-name"><a href="' + pageUrl + '">' + eName + '</a></div>' +
-        '<button class="fav-btn' + favCls + '" data-fav-key="' + eFavKey + '" aria-label="Favorito" aria-pressed="' + (isFav ? 'true' : 'false') + '">' + heart + '</button>' +
+        '<button class="fav-btn' + favCls + '" data-fav-key="' + eFavKey + '" aria-label="Favorito: ' + eName + '" aria-pressed="' + (isFav ? 'true' : 'false') + '">' + heart + '</button>' +
         '<div class="card-rating' + rCls + '">' + esc(rText) + '</div>' +
       '</div>' +
       '<div class="card-meta">' +
@@ -1416,7 +1495,11 @@
     grid.innerHTML = '';
     rendered = 0;
     if (!filtered.length) {
-      grid.innerHTML = '<div class="no-results">No se encontraron restaurantes con esos filtros.</div>';
+      if (favsOnly && !favs.size) {
+        grid.innerHTML = '<div class="no-results"><p>Marca restaurantes con el coraz\u00f3n para verlos aqu\u00ed.</p></div>';
+      } else {
+        grid.innerHTML = '<div class="no-results"><p>No se encontraron restaurantes con esos filtros.</p><button class="clear-filters" type="button">Limpiar filtros</button></div>';
+      }
     } else {
       renderBatch();
     }
@@ -1449,6 +1532,7 @@
     loadLeaflet().then(function() {
       map = L.map('map-view').setView([40.42, -3.7], 13);
       tileLayer = L.tileLayer(getTileUrl(), { attribution: '&copy; OpenStreetMap &copy; CartoDB' }).addTo(map);
+      document.getElementById('map-view').classList.add('loaded');
       updateMap();
     });
   }
@@ -1505,6 +1589,16 @@
 
   /* ── Card interactions (delegated) ── */
   grid.addEventListener('click', function(e) {
+    /* Clear filters button */
+    if (e.target.closest('.clear-filters')) {
+      searchEl.value = '';
+      priceEl.value = '';
+      selCuisine = new Set(); cuisineMS.setSelected([]);
+      selDistrict = new Set(); districtMS.setSelected([]);
+      if (favsOnly) { favsOnly = false; updateFavBtn(); }
+      render();
+      return;
+    }
     /* Favorite toggle */
     var fb = e.target.closest('.fav-btn');
     if (fb) { e.stopPropagation(); toggleFav(fb.getAttribute('data-fav-key')); return; }
@@ -1525,9 +1619,20 @@
 
   /* ── Event Listeners ── */
   var searchTimer;
+  var searchClear = document.getElementById('search-clear');
+  function updateSearchClear() {
+    searchClear.hidden = !searchEl.value;
+  }
   searchEl.addEventListener('input', function() {
     clearTimeout(searchTimer);
+    updateSearchClear();
     searchTimer = setTimeout(render, 150);
+  });
+  searchClear.addEventListener('click', function() {
+    searchEl.value = '';
+    updateSearchClear();
+    searchEl.focus();
+    render();
   });
   priceEl.addEventListener('change', render);
 
