@@ -314,8 +314,8 @@ def build_page(r: dict) -> str:
   .tag {{
     font-size: var(--text-xs);
     padding: 0.15rem 0.5rem;
-    background: var(--warm-soft);
-    color: var(--warm);
+    background: var(--accent-soft);
+    color: var(--accent);
     border-radius: var(--radius-pill);
     font-weight: 500;
     letter-spacing: 0.02em;

@@ -1,4 +1,4 @@
-var CACHE_NAME = 'lasteat-v7';
+var CACHE_NAME = 'lasteat-v8';
 var STATIC_ASSETS = [
   '/',
   '/app.js',

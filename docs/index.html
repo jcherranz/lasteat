@@ -232,7 +232,6 @@
     padding: 3rem 2rem 0;
     text-align: center;
     position: relative;
-    background: radial-gradient(ellipse at 50% 0%, var(--warm-soft) 0%, transparent 70%);
   }
   .logo {
     font-family: 'Cormorant Garamond', Georgia, serif;
@@ -251,7 +250,7 @@
     text-transform: uppercase;
     margin-top: 0.65rem;
     font-weight: 400;
-    animation: headerIn 0.6s ease 0.1s both;
+    animation: headerIn 0.6s ease both;
   }
   .stats {
     font-size: var(--text-sm);
@@ -259,15 +258,14 @@
     margin-top: 1.2rem;
     letter-spacing: 0.04em;
     font-weight: 400;
-    animation: headerIn 0.6s ease 0.2s both;
+    animation: headerIn 0.6s ease both;
   }
   .divider {
     width: 48px;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--warm), transparent);
+    height: 1px;
+    background: var(--border);
     margin: 1.2rem auto 0;
-    border-radius: 1px;
-    animation: headerIn 0.6s ease 0.3s both;
+    animation: headerIn 0.6s ease both;
   }
   .theme-toggle {
     position: absolute;
@@ -641,26 +639,10 @@
     color: var(--accent);
   }
   .quick-filter-btn.active {
-    border-color: var(--warm);
-    background: var(--warm-soft);
-    color: var(--warm);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
     font-weight: 500;
-  }
-  .quick-filter-badge {
-    min-width: 1.25rem;
-    height: 1.25rem;
-    padding: 0 0.25rem;
-    border-radius: var(--radius-pill);
-    background: var(--border);
-    color: var(--muted);
-    font-size: var(--text-xs);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .quick-filter-btn.active .quick-filter-badge {
-    background: var(--warm);
-    color: #fff;
   }
 
   /* ── Grid ── */
@@ -697,31 +679,23 @@
   }
   .card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.09), 0 4px 10px rgba(196,149,106,0.12);
-    border-color: var(--warm-muted);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.09);
+    border-color: var(--border);
   }
   .card.expanded {
-    border-color: var(--warm-muted);
+    border-color: var(--border);
     box-shadow: 0 8px 24px rgba(0,0,0,0.08);
   }
   .card.reveal {
     opacity: 0;
     transform: translateY(14px);
     animation: none;
-    transition: opacity 0.45s ease, transform 0.45s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease;
   }
   .card.reveal.in {
     opacity: 1;
     transform: translateY(0);
   }
-  .card.surprise-hit {
-    animation: surprisePulse 1s ease;
-  }
-  @keyframes surprisePulse {
-    0%, 100% { box-shadow: 0 0 0 rgba(196,149,106,0); }
-    30% { box-shadow: 0 0 0 6px rgba(196,149,106,0.25), 0 8px 20px rgba(0,0,0,0.14); }
-  }
-
   .card-top {
     display: flex;
     align-items: baseline;
@@ -771,20 +745,12 @@
     font-size: var(--text-xl);
     font-weight: 600;
     color: var(--warm);
-    background: var(--warm-soft);
-    border: 1px solid var(--warm-muted);
-    border-radius: var(--radius-pill);
-    min-width: 3rem;
-    padding: 0.1rem 0.45rem;
-    text-align: center;
     line-height: 1;
   }
   .card-rating.no-r {
     color: var(--muted);
     font-size: 1.1rem;
     font-weight: 400;
-    background: transparent;
-    border-color: var(--border);
   }
 
   .card-meta {
@@ -804,8 +770,8 @@
   .tag {
     font-size: var(--text-xs);
     padding: 0.18rem 0.55rem;
-    background: var(--warm-soft);
-    color: var(--warm);
+    background: var(--accent-soft);
+    color: var(--accent);
     border-radius: var(--radius-pill);
     font-weight: 500;
     letter-spacing: 0.03em;
@@ -877,32 +843,6 @@
     font-size: var(--text-base);
     font-style: italic;
   }
-  .empty-illustration {
-    width: 72px;
-    height: 50px;
-    margin: 0 auto 0.9rem;
-    position: relative;
-  }
-  .empty-illustration::before,
-  .empty-illustration::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    width: 12px;
-    height: 42px;
-    border: 2px solid var(--warm-muted);
-    border-radius: 10px;
-    background: linear-gradient(var(--warm-soft), transparent);
-  }
-  .empty-illustration::before {
-    left: 20px;
-    border-top-width: 6px;
-  }
-  .empty-illustration::after {
-    right: 20px;
-    transform: rotate(8deg);
-    border-top-width: 3px;
-  }
   .no-results p { margin-bottom: 0.75rem; }
   .no-results .clear-filters {
     display: inline-block;
@@ -954,27 +894,6 @@
     padding: 0.8rem 0 0.2rem;
     border-bottom: 1px solid var(--border);
   }
-  .rhythm-banner {
-    grid-column: 1 / -1;
-    margin: 0.5rem 0 0.25rem;
-    padding: 0.7rem 1rem;
-    border: 1px solid var(--warm-muted);
-    border-radius: var(--radius);
-    background: linear-gradient(120deg, var(--warm-soft), transparent 70%);
-    font-size: var(--text-sm);
-    color: var(--secondary);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    letter-spacing: 0.03em;
-  }
-  .rhythm-banner strong {
-    color: var(--warm);
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 1.05rem;
-    font-weight: 600;
-  }
-
   /* ── Map ── */
   /* ── Map Layout ── */
   #map-container {
@@ -999,7 +918,7 @@
     font-family: 'Cormorant Garamond', Georgia, serif;
     font-size: 1.35rem;
     font-weight: 600;
-    color: var(--warm);
+    color: var(--text);
   }
   .map-head-count {
     font-size: var(--text-sm);
@@ -1091,8 +1010,8 @@
     z-index: 1;
   }
   @keyframes mapPulse {
-    0%, 100% { opacity: 0.3; transform: scale(1); }
-    50% { opacity: 1; transform: scale(2.5); }
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
   }
 
   /* ── Map Markers (SVG divIcon) ── */
@@ -1191,8 +1110,8 @@
   }
   .map-popup-tag {
     font-size: var(--text-xs);
-    background: var(--warm-soft);
-    color: var(--warm);
+    background: var(--accent-soft);
+    color: var(--accent);
     padding: 0.1rem 0.4rem;
     border-radius: var(--radius-pill);
     white-space: nowrap;
@@ -1252,8 +1171,8 @@
     transition: color 0.2s, background 0.2s;
   }
   .leaflet-control-zoom a:hover {
-    background: var(--warm-soft) !important;
-    color: var(--warm) !important;
+    background: var(--accent-soft) !important;
+    color: var(--accent) !important;
   }
   .leaflet-control-zoom-in { border-bottom: 1px solid var(--border) !important; }
 
@@ -1353,10 +1272,8 @@
   }
   .footer-bottom a:hover { color: var(--accent); }
   .footer-made {
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-style: italic;
-    font-size: var(--text-base);
-    color: var(--warm);
+    font-size: var(--text-xs);
+    color: var(--muted);
     letter-spacing: 0.02em;
   }
   @media (max-width: 640px) {
@@ -1379,8 +1296,7 @@
     .card, .logo, .subtitle, .stats, .divider { animation: none; }
     .card.reveal { opacity: 1; transform: none; transition: none; }
     .ms.open .ms-drop { animation: none; }
-    .fav-btn.just-toggled,
-    .card.surprise-hit { animation: none; }
+    .fav-btn.just-toggled { animation: none; }
     *, *::before, *::after { transition-duration: 0.01ms !important; }
   }
 
@@ -1480,18 +1396,9 @@
 </div>
 
 <div class="quick-filters" id="quick-filters" role="group" aria-label="Filtros r&aacute;pidos">
-  <button class="quick-filter-btn" data-quick="top50" type="button">
-    Top 50
-    <span class="quick-filter-badge" hidden>0</span>
-  </button>
-  <button class="quick-filter-btn" data-quick="cheap" type="button">
-    Cheap eats (&lt;30 &euro;)
-    <span class="quick-filter-badge" hidden>0</span>
-  </button>
-  <button class="quick-filter-btn" data-quick="service" type="button">
-    Best service
-    <span class="quick-filter-badge" hidden>0</span>
-  </button>
+  <button class="quick-filter-btn" data-quick="top50" type="button">Top 50</button>
+  <button class="quick-filter-btn" data-quick="cheap" type="button">Cheap eats (&lt;30 &euro;)</button>
+  <button class="quick-filter-btn" data-quick="service" type="button">Best service</button>
 </div>
 
 <div class="grid" id="grid" tabindex="-1"></div>
@@ -1650,7 +1557,7 @@
       return;
     }
     var start = performance.now();
-    var duration = 800;
+    var duration = 400;
     function tick(now) {
       var t = Math.min(1, (now - start) / duration);
       var eased = 1 - Math.pow(1 - t, 3);
@@ -1683,24 +1590,9 @@
     }
     return list;
   }
-  function updateQuickFilterUI(baseList) {
-    var counts = {
-      top50: Math.min(50, baseList.length),
-      cheap: baseList.filter(function(r) {
-        var p = parseInt(r.p, 10);
-        return p > 0 && p <= 30;
-      }).length,
-      service: baseList.filter(function(r) { return (parseFloat(r.rs) || 0) >= 8.5; }).length,
-    };
+  function updateQuickFilterUI() {
     quickFilterBtns.forEach(function(btn) {
-      var key = btn.getAttribute('data-quick');
-      var active = key === quickFilter;
-      var badge = btn.querySelector('.quick-filter-badge');
-      btn.classList.toggle('active', active);
-      if (badge) {
-        badge.textContent = String(counts[key] || 0);
-        badge.hidden = !active;
-      }
+      btn.classList.toggle('active', btn.getAttribute('data-quick') === quickFilter);
     });
   }
   function ensureRevealObserver() {
@@ -2177,9 +2069,6 @@
   var loadMoreBtn = document.createElement('button');
   loadMoreBtn.className = 'load-more-btn';
   loadMoreBtn.type = 'button';
-  var rhythmBanner = document.createElement('div');
-  rhythmBanner.className = 'rhythm-banner';
-  rhythmBanner.innerHTML = '<strong>Selección curada</strong><span>Más hallazgos para seguir explorando</span>';
   loadMoreWrap.appendChild(loadMoreBtn);
   loadMoreBtn.addEventListener('click', function() {
     if (loadMoreWrap.parentNode) loadMoreWrap.remove();
@@ -2216,9 +2105,6 @@
     });
     grid.insertAdjacentHTML('beforeend', htmlParts.join(''));
     rendered += batch.length;
-    if (startIdx === 0 && rendered >= BATCH && filtered.length > BATCH && !rhythmBanner.parentNode) {
-      grid.appendChild(rhythmBanner);
-    }
     ensureRevealObserver();
     observeReveals();
     if (rendered < filtered.length) {
@@ -2228,9 +2114,8 @@
 
   function render() {
     if (loadMoreWrap.parentNode) loadMoreWrap.remove();
-    if (rhythmBanner.parentNode) rhythmBanner.remove();
     var baseFiltered = getFiltered(true);
-    updateQuickFilterUI(baseFiltered);
+    updateQuickFilterUI();
     filtered = applyQuickFilter(baseFiltered, quickFilter);
     updateStats(filtered.length, RESTAURANTS.length);
     grid.innerHTML = '';
@@ -2238,9 +2123,9 @@
     lastRenderedDistrict = '';
     if (!filtered.length) {
       if (favsOnly && !favs.size) {
-        grid.innerHTML = '<div class="no-results"><div class="empty-illustration" aria-hidden="true"></div><p>Marca restaurantes con el coraz\u00f3n para verlos aqu\u00ed.</p></div>';
+        grid.innerHTML = '<div class="no-results"><p>Marca restaurantes con el coraz\u00f3n para verlos aqu\u00ed.</p></div>';
       } else {
-        grid.innerHTML = '<div class="no-results"><div class="empty-illustration" aria-hidden="true"></div><p>No se encontraron restaurantes con esos filtros.</p><button class="clear-filters" type="button">Limpiar filtros</button></div>';
+        grid.innerHTML = '<div class="no-results"><p>No se encontraron restaurantes con esos filtros.</p><button class="clear-filters" type="button">Limpiar filtros</button></div>';
       }
     } else {
       renderBatch();
@@ -2549,9 +2434,6 @@
     var cards = grid.querySelectorAll('.card');
     var card = cards[idx];
     if (!card) return;
-    card.classList.remove('surprise-hit');
-    card.offsetWidth;
-    card.classList.add('surprise-hit');
     card.classList.add('expanded');
     card.scrollIntoView({
       behavior: prefersReducedMotion ? 'auto' : 'smooth',
