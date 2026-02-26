@@ -25,6 +25,10 @@
 <meta name="twitter:description" content="Descubre los mejores restaurantes de Madrid. 770+ restaurantes con valoraciones, precios y ubicaciones.">
 <meta name="twitter:image" content="https://lasteat.es/og.png">
 
+<!-- Favicon -->
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/icons/icon-192.png" type="image/png">
+
 <!-- PWA -->
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2E6058">
@@ -156,8 +160,13 @@
   }
 
   /* ── Theme Transitions ── */
-  body, .card, .controls-wrap, #map-view, #map-panel, header, footer {
-    transition: background-color 0.3s, border-color 0.3s, color 0.2s;
+  body.theme-transition,
+  body.theme-transition *,
+  body.theme-transition *::before,
+  body.theme-transition *::after {
+    transition: background-color 0.4s ease, border-color 0.4s ease,
+                color 0.3s ease, fill 0.3s ease, box-shadow 0.4s ease,
+                background 0.4s ease !important;
   }
 
   /* ── Accessibility ── */
@@ -194,8 +203,12 @@
   }
 
   /* ── Masthead ── */
+  @keyframes headerIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
   header {
-    padding: 3.5rem 2rem 0;
+    padding: 3rem 2rem 0;
     text-align: center;
     position: relative;
   }
@@ -207,6 +220,7 @@
     text-transform: uppercase;
     line-height: 1;
     color: var(--text);
+    animation: headerIn 0.6s ease both;
   }
   .subtitle {
     font-size: 0.7rem;
@@ -215,6 +229,7 @@
     text-transform: uppercase;
     margin-top: 0.65rem;
     font-weight: 400;
+    animation: headerIn 0.6s ease 0.1s both;
   }
   .stats {
     font-size: 0.75rem;
@@ -222,6 +237,7 @@
     margin-top: 1.2rem;
     letter-spacing: 0.04em;
     font-weight: 400;
+    animation: headerIn 0.6s ease 0.2s both;
   }
   .divider {
     width: 32px;
@@ -229,6 +245,7 @@
     background: var(--accent);
     margin: 1.2rem auto 0;
     opacity: 0.5;
+    animation: headerIn 0.6s ease 0.3s both;
   }
   .theme-toggle {
     position: absolute;
@@ -248,8 +265,8 @@
     transition: border-color 0.25s, color 0.25s;
     line-height: 1;
   }
-  .theme-toggle::before { content: '³D'; }
-  [data-theme="dark"] .theme-toggle::before { content: '°0'; }
+  .theme-toggle::before { content: '\2600'; }
+  [data-theme="dark"] .theme-toggle::before { content: '\263D'; }
   .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
 
   /* ── Controls ── */
@@ -258,6 +275,13 @@
     top: 0;
     z-index: 100;
     background: var(--bg);
+    transition: box-shadow 0.3s;
+  }
+  .controls-wrap.scrolled {
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  }
+  [data-theme="dark"] .controls-wrap.scrolled {
+    box-shadow: 0 2px 16px rgba(0,0,0,0.25);
   }
   .controls-wrap::after {
     content: '';
@@ -580,13 +604,13 @@
     animation-delay: calc(min(var(--i, 0), 15) * 30ms);
   }
   .card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
     border-color: var(--accent-muted);
   }
   .card.expanded {
     border-color: var(--accent-muted);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.06);
   }
 
   .card-top {
@@ -648,15 +672,16 @@
     color: var(--border);
   }
 
-  .card-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.1rem; }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.15rem; }
   .tag {
-    font-size: 0.66rem;
-    padding: 0.15rem 0.5rem;
+    font-size: 0.64rem;
+    padding: 0.18rem 0.55rem;
     background: var(--accent-soft);
     color: var(--accent);
     border-radius: var(--radius-pill);
     font-weight: 500;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.03em;
+    text-transform: lowercase;
     white-space: nowrap;
   }
 
@@ -744,8 +769,10 @@
   /* ── Load More ── */
   .load-more { grid-column: 1 / -1; text-align: center; padding: 2rem 0 0.5rem; }
   .load-more-btn {
-    display: inline-block;
-    padding: 0.55rem 1.6rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1.8rem;
     border: 1.5px solid var(--border);
     border-radius: var(--radius-pill);
     background: transparent;
@@ -753,9 +780,14 @@
     font-size: 0.78rem;
     font-family: inherit;
     cursor: pointer;
-    transition: border-color 0.25s, color 0.25s;
+    transition: border-color 0.25s, color 0.25s, transform 0.2s;
   }
-  .load-more-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .load-more-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(1px); }
+  .load-more-btn::after {
+    content: '\2193';
+    font-size: 0.85rem;
+    opacity: 0.6;
+  }
 
   /* ── Map ── */
   /* ── Map Layout ── */
@@ -1131,7 +1163,7 @@
 
   /* ── Reduced Motion ── */
   @media (prefers-reduced-motion: reduce) {
-    .card { animation: none; }
+    .card, .logo, .subtitle, .stats, .divider { animation: none; }
     .ms.open .ms-drop { animation: none; }
     *, *::before, *::after { transition-duration: 0.01ms !important; }
   }
@@ -1274,8 +1306,7 @@
   'use strict';
 
   /* ── Constants ── */
-  var INITIAL_BATCH = 9;
-  var BATCH = 60;
+  var BATCH = 9;
   var LEAFLET_CSS_INTEGRITY = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
   var LEAFLET_JS_INTEGRITY = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
   var MC_JS_INTEGRITY = 'sha256-Hk4dIpcqOSb0hZjgyvFOP+cEmDXUKKNE/tT542ZbNQg=';
@@ -1374,9 +1405,11 @@
     }
   }
   function toggleTheme() {
+    document.body.classList.add('theme-transition');
     var t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     document.documentElement.dataset.theme = t;
     safeSetStorage('mf-theme', t);
+    setTimeout(function() { document.body.classList.remove('theme-transition'); }, 500);
     if (map && tileLayer) {
       tileLayer.setUrl(getTileUrl());
       if (view === 'map') updateMap();
@@ -1798,7 +1831,10 @@
   loadMoreWrap.appendChild(loadMoreBtn);
   loadMoreBtn.addEventListener('click', function() {
     if (loadMoreWrap.parentNode) loadMoreWrap.remove();
+    var firstNew = grid.querySelectorAll('.card').length;
     renderBatch();
+    var newCard = grid.querySelectorAll('.card')[firstNew];
+    if (newCard) newCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   });
 
   function showLoadMore() {
@@ -1810,8 +1846,7 @@
   }
 
   function renderBatch() {
-    var size = (rendered === 0) ? INITIAL_BATCH : BATCH;
-    var batch = filtered.slice(rendered, rendered + size);
+    var batch = filtered.slice(rendered, rendered + BATCH);
     if (!batch.length) return;
     if (loadMoreWrap.parentNode) loadMoreWrap.remove();
     grid.insertAdjacentHTML('beforeend', batch.map(function(r, i) { return buildCard(r, i); }).join(''));
@@ -2066,12 +2101,14 @@
     view = 'grid';
   }
 
-  /* ── Back to Top ── */
+  /* ── Back to Top + Sticky Shadow ── */
+  var controlsWrap = document.querySelector('.controls-wrap');
   var scrollTick = false;
   window.addEventListener('scroll', function() {
     if (!scrollTick) {
       requestAnimationFrame(function() {
         bttEl.classList.toggle('visible', window.scrollY > 500);
+        controlsWrap.classList.toggle('scrolled', window.scrollY > 80);
         scrollTick = false;
       });
       scrollTick = true;

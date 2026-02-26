@@ -194,6 +194,8 @@ def build_page(r: dict) -> str:
 
 <link rel="preload" href="/fonts/cormorant-garamond-300-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/dm-sans-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/icons/icon-192.png" type="image/png">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#2E6058">
 <style>
