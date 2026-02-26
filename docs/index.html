@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Macarfi Madrid — Restaurantes</title>
+<title>Last Eat — Restaurantes en Madrid</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300..500&display=swap" rel="stylesheet">
@@ -538,7 +538,7 @@
 <body>
 
 <header>
-  <div class="logo">Macarfi Madrid</div>
+  <div class="logo">Last Eat</div>
   <div class="stats" id="stats">Cargando...</div>
   <div class="divider"></div>
   <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema"></button>
@@ -602,8 +602,7 @@
 <button class="btt" id="btt" aria-label="Volver arriba">&uarr;</button>
 
 <footer>
-  Datos de <a href="https://macarfi.com/es/mad/restaurantes" target="_blank" rel="noopener">Macarfi</a>
-  &middot; Actualizado feb 2026
+  Actualizado feb 2026
 </footer>
 
 <script src="data.js"></script>
@@ -866,7 +865,7 @@
       '<div class="card-actions">' +
         '<a href="' + gmaps + '" target="_blank" rel="noopener">Maps</a>' +
         (r.w ? '<a href="' + r.w + '" target="_blank" rel="noopener">Web</a>' : '') +
-        '<a href="' + r.u + '" target="_blank" rel="noopener">Macarfi</a>' +
+        (r.u ? '<a href="' + r.u + '" target="_blank" rel="noopener">Fuente</a>' : '') +
       '</div>' +
     '</div>';
   }
@@ -946,7 +945,7 @@
         '<strong>' + r.n + '</strong>' +
         (r.r && r.r !== '-' ? '<br>' + r.r + '/10' : '') +
         (r.d ? '<br>' + r.d : '') +
-        '<br><a href="' + r.u + '" target="_blank">Ver en Macarfi</a>'
+        (r.u ? '<br><a href="' + r.u + '" target="_blank">Ver fuente</a>' : '')
       );
       m.addTo(map);
       markers.push(m);
