@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Last Eat Frontend Logic Tests</title>
+<style>
+  body { font-family: sans-serif; padding: 1rem; }
+  .ok { color: #0a7a2f; }
+  .fail { color: #b00020; }
+  code { background: #f2f2f2; padding: 0.1rem 0.25rem; }
+</style>
+</head>
+<body>
+<h1>Frontend Logic Tests</h1>
+<p id="summary">Running...</p>
+<ul id="results"></ul>
+<script src="../docs/app.js"></script>
+<script>
+(function() {
+  'use strict';
+
+  var app = window.LastEatApp;
+  var resultsEl = document.getElementById('results');
+  var summaryEl = document.getElementById('summary');
+  var assertions = 0;
+  var failures = 0;
+
+  function assert(name, condition) {
+    assertions += 1;
+    var li = document.createElement('li');
+    li.textContent = name;
+    li.className = condition ? 'ok' : 'fail';
+    resultsEl.appendChild(li);
+    if (!condition) failures += 1;
+  }
+
+  function approxEqual(a, b, epsilon) {
+    return Math.abs(a - b) <= epsilon;
+  }
+
+  var restaurants = [
+    { n: 'Diverxo', s: 'diverxo', c: 'Creativa\u2022De autor', d: 'Chamartín', a: 'Padre Damián 23', r: '9.4', p: '120', _dist: 3.2 },
+    { n: 'Casa Paco', s: 'casa-paco', c: 'Castiza\u2022Tapas', d: 'Centro', a: 'Atocha 10', r: '8.1', p: '28', _dist: 0.35 },
+    { n: 'Kappo', s: 'kappo', c: 'Japonesa', d: 'Retiro', a: 'General Díaz Porlier 99', r: '9.1', p: '80', _dist: 1.4 },
+    { n: 'Sin Precio', s: 'sin-precio', c: 'Mediterránea', d: 'Centro', a: 'Gran Vía 1', r: '7.5', p: '', _dist: 0.2 }
+  ];
+
+  assert('app exports esc', typeof app.esc === 'function');
+  assert('app exports haversine', typeof app.haversine === 'function');
+  assert('app exports formatDist', typeof app.formatDist === 'function');
+  assert('app exports sortList', typeof app.sortList === 'function');
+  assert('app exports getFiltered', typeof app.getFiltered === 'function');
+
+  assert('esc escapes html/special chars', app.esc('<"&\'>') === '&lt;&quot;&amp;&#39;&gt;');
+  assert('esc handles null', app.esc(null) === '');
+  assert('esc handles number', app.esc(42) === '42');
+
+  assert('haversine same point is zero', approxEqual(app.haversine(40.4, -3.7, 40.4, -3.7), 0, 1e-9));
+  assert('haversine Madrid-Barcelona is ~505km', app.haversine(40.4168, -3.7038, 41.3874, 2.1686) > 500 && app.haversine(40.4168, -3.7038, 41.3874, 2.1686) < 510);
+
+  assert('formatDist <1km uses meters', app.formatDist(0.45) === '450 m');
+  assert('formatDist >=1km uses one decimal', app.formatDist(2.34) === '2.3 km');
+  assert('formatDist sentinel hides distance', app.formatDist(99999) === '');
+
+  assert('sortList rating descending', app.sortList(restaurants, 'rating')[0].n === 'Diverxo');
+  assert('sortList name ascending', app.sortList(restaurants, 'name')[0].n === 'Casa Paco');
+  assert('sortList price ascending with missing at end', app.sortList(restaurants, 'price')[0].n === 'Casa Paco' && app.sortList(restaurants, 'price')[3].n === 'Sin Precio');
+  assert('sortList distance ascending', app.sortList(restaurants, 'distance')[0].n === 'Sin Precio');
+
+  var byQuery = app.getFiltered(restaurants, { query: 'diver', sort: 'rating' });
+  assert('getFiltered query matches substring', byQuery.length === 1 && byQuery[0].n === 'Diverxo');
+
+  var byCuisine = app.getFiltered(restaurants, { selCuisine: new Set(['Japonesa']), sort: 'rating' });
+  assert('getFiltered cuisine filter works', byCuisine.length === 1 && byCuisine[0].n === 'Kappo');
+
+  var commaRestaurants = [{ n: 'Pizzetta', s: 'pizzetta', c: 'Italiana, Pizza', d: 'Centro', a: 'Callao 1', r: '7.0', p: '24' }];
+  var byCuisineComma = app.getFiltered(commaRestaurants, { selCuisine: new Set(['Pizza']), sort: 'rating' });
+  assert('getFiltered cuisine filter supports comma-separated tags', byCuisineComma.length === 1 && byCuisineComma[0].n === 'Pizzetta');
+
+  var byDistrict = app.getFiltered(restaurants, { selDistrict: new Set(['Centro']), sort: 'name' });
+  assert('getFiltered district filter works', byDistrict.length === 2 && byDistrict[0].n === 'Casa Paco');
+
+  var byPrice = app.getFiltered(restaurants, { priceValue: '0-30', sort: 'price' });
+  assert('getFiltered price filter excludes missing/expensive', byPrice.length === 1 && byPrice[0].n === 'Casa Paco');
+
+  var byFavs = app.getFiltered(restaurants, {
+    favsOnly: true,
+    favs: new Set(['kappo']),
+    sort: 'rating',
+    getFavKey: function(r) { return r.s; }
+  });
+  assert('getFiltered favorites-only works', byFavs.length === 1 && byFavs[0].n === 'Kappo');
+
+  var combined = app.getFiltered(restaurants, {
+    query: 'centro',
+    selDistrict: new Set(['Centro']),
+    favsOnly: true,
+    favs: new Set(['casa-paco']),
+    sort: 'name',
+    getFavKey: function(r) { return r.s; }
+  });
+  assert('getFiltered combined filters compose', combined.length === 1 && combined[0].n === 'Casa Paco');
+
+  if (failures === 0) {
+    summaryEl.textContent = assertions + ' assertions passed';
+    summaryEl.className = 'ok';
+  } else {
+    summaryEl.textContent = failures + ' / ' + assertions + ' assertions failed';
+    summaryEl.className = 'fail';
+  }
+})();
+</script>
+</body>
+</html>

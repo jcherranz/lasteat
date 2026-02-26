@@ -1,0 +1,62 @@
+{
+  "generated_at": "2026-02-26T15:20:24Z",
+  "total": 770,
+  "fields": {
+    "slug": {
+      "count": 770,
+      "pct": 1.0
+    },
+    "name": {
+      "count": 770,
+      "pct": 1.0
+    },
+    "address": {
+      "count": 770,
+      "pct": 1.0
+    },
+    "latitude": {
+      "count": 770,
+      "pct": 1.0
+    },
+    "longitude": {
+      "count": 770,
+      "pct": 1.0
+    },
+    "cuisine": {
+      "count": 769,
+      "pct": 0.9987
+    },
+    "district": {
+      "count": 769,
+      "pct": 0.9987
+    },
+    "rating": {
+      "count": 762,
+      "pct": 0.9896
+    },
+    "rating_food": {
+      "count": 761,
+      "pct": 0.9883
+    },
+    "rating_decor": {
+      "count": 761,
+      "pct": 0.9883
+    },
+    "rating_service": {
+      "count": 761,
+      "pct": 0.9883
+    },
+    "price_eur": {
+      "count": 0,
+      "pct": 0.0
+    },
+    "phone": {
+      "count": 0,
+      "pct": 0.0
+    },
+    "website": {
+      "count": 0,
+      "pct": 0.0
+    }
+  }
+}

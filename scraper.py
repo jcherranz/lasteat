@@ -18,6 +18,7 @@ import json
 import re
 import sys
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -47,7 +48,7 @@ def get_client() -> httpx.Client:
     return httpx.Client(
         headers=HEADERS,
         follow_redirects=True,
-        timeout=30.0,
+        timeout=60.0,
     )
 
 
@@ -144,14 +145,14 @@ def _fetch_with_retry(client: httpx.Client, url: str, retries: int = 3) -> httpx
                 continue
             resp.raise_for_status()
             return resp
-        except httpx.TimeoutException:
+        except (httpx.TimeoutException, httpx.RequestError) as err:
             if attempt < retries - 1:
                 wait = 2 ** attempt
-                print(f"  Timeout, retrying in {wait}s...")
+                print(f"  {err.__class__.__name__}, retrying in {wait}s...")
                 time.sleep(wait)
                 continue
             raise
-    return resp  # unreachable, but satisfies type checker
+    raise RuntimeError("Unreachable retry state")
 
 
 def enrich_from_detail(client: httpx.Client, restaurant: dict) -> dict:
@@ -159,7 +160,7 @@ def enrich_from_detail(client: httpx.Client, restaurant: dict) -> dict:
     url = f"{BASE_URL}/es/mad/ficha-restaurante/{restaurant['slug']}"
     try:
         resp = _fetch_with_retry(client, url)
-    except Exception as e:
+    except (httpx.TimeoutException, httpx.RequestError, httpx.HTTPStatusError) as e:
         restaurant["_enrich_error"] = str(e)
         return restaurant
 
@@ -207,8 +208,12 @@ def merge_data(
 ) -> list[dict]:
     """Merge API map data with HTML card extras into clean records."""
     merged = []
+    skipped_missing_slug = 0
     for r in map_restaurants:
-        slug = r.get("slug", "")
+        slug = (r.get("slug") or "").strip()
+        if not slug:
+            skipped_missing_slug += 1
+            continue
         entry = {
             "name": r.get("name", ""),
             "slug": slug,
@@ -227,6 +232,8 @@ def merge_data(
         entry["rating_service"] = extras.get("rating_service", "")
         entry["price_eur"] = extras.get("price_eur", "")
         merged.append(entry)
+    if skipped_missing_slug:
+        print(f"Warning: skipped {skipped_missing_slug} restaurants with missing slug.")
     return merged
 
 
@@ -328,6 +335,7 @@ def fetch_all_html_cards(client: httpx.Client, total_pages: int) -> str:
 
 MIN_RESTAURANTS = 700
 MIN_CUISINE_PCT = 0.90
+STRICT_MIN_FIELD_PCT = 0.80
 
 
 def validate_data(restaurants: list[dict[str, Any]]) -> list[str]:
@@ -353,6 +361,154 @@ def validate_data(restaurants: list[dict[str, Any]]) -> list[str]:
     return errors
 
 
+def strict_coverage_errors(restaurants: list[dict[str, Any]]) -> list[str]:
+    """Return strict-mode errors when key fields drop below minimum coverage."""
+    errors = []
+    total = len(restaurants)
+    if total == 0:
+        return ["No restaurants found for strict validation"]
+
+    fields = {
+        "cuisine": lambda r: bool(r.get("cuisine")),
+        "district": lambda r: bool(r.get("district")),
+        "rating": lambda r: bool(r.get("rating")) and r.get("rating") != "-",
+        "rating_food": lambda r: bool(r.get("rating_food")),
+        "rating_decor": lambda r: bool(r.get("rating_decor")),
+        "rating_service": lambda r: bool(r.get("rating_service")),
+        "price_eur": lambda r: bool(r.get("price_eur")),
+    }
+    for field_name, predicate in fields.items():
+        count = sum(1 for r in restaurants if predicate(r))
+        pct = count / total
+        if pct < STRICT_MIN_FIELD_PCT:
+            errors.append(
+                f"{field_name} coverage {pct:.0%} below {STRICT_MIN_FIELD_PCT:.0%} "
+                f"({count}/{total})"
+            )
+
+    return errors
+
+
+def log_missing_field_warnings(restaurants: list[dict[str, Any]], sample_limit: int = 10):
+    """Print per-field warnings (with sample slugs) for key parsed fields."""
+    checks = {
+        "cuisine": lambda r: bool(r.get("cuisine")),
+        "district": lambda r: bool(r.get("district")),
+        "rating": lambda r: bool(r.get("rating")) and r.get("rating") != "-",
+    }
+    for field_name, predicate in checks.items():
+        missing_slugs = [r.get("slug", "<missing-slug>") for r in restaurants if not predicate(r)]
+        if not missing_slugs:
+            continue
+        print(f"Warning: missing {field_name} for {len(missing_slugs)} restaurants.")
+        for slug in missing_slugs[:sample_limit]:
+            print(f"  - No {field_name} found for {slug}")
+        if len(missing_slugs) > sample_limit:
+            print(f"  - ... and {len(missing_slugs) - sample_limit} more")
+
+
+def build_quality_report(restaurants: list[dict[str, Any]]) -> dict[str, Any]:
+    """Build per-field coverage report for scraper quality monitoring."""
+    total = len(restaurants)
+    fields = {
+        "slug": lambda r: bool(r.get("slug")),
+        "name": lambda r: bool(r.get("name")),
+        "address": lambda r: bool(r.get("address")),
+        "latitude": lambda r: bool(r.get("latitude")),
+        "longitude": lambda r: bool(r.get("longitude")),
+        "cuisine": lambda r: bool(r.get("cuisine")),
+        "district": lambda r: bool(r.get("district")),
+        "rating": lambda r: bool(r.get("rating")) and r.get("rating") != "-",
+        "rating_food": lambda r: bool(r.get("rating_food")),
+        "rating_decor": lambda r: bool(r.get("rating_decor")),
+        "rating_service": lambda r: bool(r.get("rating_service")),
+        "price_eur": lambda r: bool(r.get("price_eur")),
+        "phone": lambda r: bool(r.get("phone")),
+        "website": lambda r: bool(r.get("website")),
+    }
+
+    coverage: dict[str, dict[str, Any]] = {}
+    for field_name, predicate in fields.items():
+        count = sum(1 for r in restaurants if predicate(r))
+        pct = (count / total) if total else 0.0
+        coverage[field_name] = {"count": count, "pct": round(pct, 4)}
+
+    return {
+        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "total": total,
+        "fields": coverage,
+    }
+
+
+def export_quality_report(report: dict[str, Any], path: Path):
+    """Write quality report JSON for CI trend checks."""
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(report, f, ensure_ascii=False, indent=2)
+    print(f"Quality report saved to: {path}")
+
+
+def compare_restaurant_sets(previous: list[dict[str, Any]], current: list[dict[str, Any]]) -> dict[str, Any]:
+    """Compare previous vs current datasets by slug and report added/removed/changed."""
+    old_by_slug = {r.get("slug"): r for r in previous if r.get("slug")}
+    new_by_slug = {r.get("slug"): r for r in current if r.get("slug")}
+
+    old_slugs = set(old_by_slug)
+    new_slugs = set(new_by_slug)
+    added = sorted(new_slugs - old_slugs)
+    removed = sorted(old_slugs - new_slugs)
+
+    compare_fields = [
+        "name",
+        "address",
+        "latitude",
+        "longitude",
+        "cuisine",
+        "district",
+        "rating",
+        "rating_food",
+        "rating_decor",
+        "rating_service",
+        "price_eur",
+        "phone",
+        "website",
+    ]
+    changed: list[dict[str, Any]] = []
+    for slug in sorted(old_slugs & new_slugs):
+        old = old_by_slug[slug]
+        new = new_by_slug[slug]
+        changed_fields = [
+            field
+            for field in compare_fields
+            if str(old.get(field, "")) != str(new.get(field, ""))
+        ]
+        if changed_fields:
+            changed.append({"slug": slug, "fields": changed_fields})
+
+    return {
+        "old_count": len(previous),
+        "new_count": len(current),
+        "added_count": len(added),
+        "removed_count": len(removed),
+        "changed_count": len(changed),
+        "added": added,
+        "removed": removed,
+        "changed": changed,
+    }
+
+
+def _flag_value(flag: str) -> str | None:
+    """Return value passed after a flag, if present and not another flag."""
+    if flag not in sys.argv:
+        return None
+    idx = sys.argv.index(flag)
+    if idx + 1 >= len(sys.argv):
+        return None
+    value = sys.argv[idx + 1]
+    if value.startswith("--"):
+        return None
+    return value
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 
@@ -360,9 +516,29 @@ def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     enrich = "--enrich" in sys.argv
     fresh = "--fresh" in sys.argv
+    strict = "--strict" in sys.argv
+    compare = "--compare" in sys.argv
+    compare_path_value = _flag_value("--compare")
+    compare_path = Path(compare_path_value) if compare_path_value else OUTPUT_DIR / "madrid_restaurants.json"
 
     client = get_client()
     cache_path = OUTPUT_DIR / "api_data.json"
+    previous_for_compare: list[dict[str, Any]] | None = None
+
+    if compare:
+        if compare_path.exists():
+            try:
+                with open(compare_path, encoding="utf-8") as f:
+                    loaded = json.load(f)
+                if isinstance(loaded, list):
+                    previous_for_compare = loaded
+                    print(f"Loaded comparison baseline from {compare_path} ({len(loaded)} records).")
+                else:
+                    print(f"Warning: compare baseline is not a list: {compare_path}")
+            except json.JSONDecodeError as err:
+                print(f"Warning: could not parse compare baseline {compare_path}: {err}")
+        else:
+            print(f"Warning: compare baseline not found: {compare_path}")
 
     if cache_path.exists() and not fresh:
         print(f"Loading cached data from {cache_path}")
@@ -397,6 +573,8 @@ def main():
         # Cache
         export_json(restaurants, cache_path)
 
+    log_missing_field_warnings(restaurants)
+
     # Optional: enrich with phone/website from detail pages
     if enrich:
         restaurants = enrich_all_details(client, restaurants)
@@ -408,6 +586,29 @@ def main():
 
     json_path = OUTPUT_DIR / "madrid_restaurants.json"
     export_json(restaurants, json_path)
+
+    quality_report_path = OUTPUT_DIR / "quality_report.json"
+    quality_report = build_quality_report(restaurants)
+    export_quality_report(quality_report, quality_report_path)
+
+    if compare:
+        if previous_for_compare is None:
+            print("Compare requested but no valid baseline was available.")
+        else:
+            diff = compare_restaurant_sets(previous_for_compare, restaurants)
+            print("\nCOMPARE REPORT")
+            print(
+                f"  old={diff['old_count']} new={diff['new_count']} "
+                f"added={diff['added_count']} removed={diff['removed_count']} "
+                f"changed={diff['changed_count']}"
+            )
+            if diff["added"]:
+                print(f"  Added sample: {', '.join(diff['added'][:10])}")
+            if diff["removed"]:
+                print(f"  Removed sample: {', '.join(diff['removed'][:10])}")
+            if diff["changed"]:
+                for item in diff["changed"][:10]:
+                    print(f"  Changed {item['slug']}: {', '.join(item['fields'])}")
 
     # Stats & warnings
     total = len(restaurants)
@@ -439,8 +640,16 @@ def main():
         for e in errors:
             print(f"  - {e}")
         sys.exit(1)
-    else:
-        print(f"\nValidation passed.")
+    print(f"\nValidation passed.")
+
+    if strict:
+        strict_errors = strict_coverage_errors(restaurants)
+        if strict_errors:
+            print(f"\nSTRICT VALIDATION FAILED:")
+            for e in strict_errors:
+                print(f"  - {e}")
+            sys.exit(1)
+        print("Strict validation passed.")
 
 
 if __name__ == "__main__":

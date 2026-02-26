@@ -39,9 +39,23 @@ KEY_MAP = {
 }
 
 
+def canonical_macarfi_url(slug: str) -> str:
+    return f"https://macarfi.com/es/mad/ficha-restaurante/{slug}"
+
+
 def abbreviate(record: dict) -> dict:
     """Convert a full-key restaurant record to abbreviated keys."""
-    return {short: record.get(full, "") for full, short in KEY_MAP.items()}
+    out = {}
+    for full, short in KEY_MAP.items():
+        value = record.get(full, "")
+        if value is None or value == "":
+            continue
+        if full == "macarfi_url":
+            slug = record.get("slug", "")
+            if slug and value == canonical_macarfi_url(slug):
+                continue
+        out[short] = value
+    return out
 
 
 def generate(input_path: Path, output_path: Path) -> int:

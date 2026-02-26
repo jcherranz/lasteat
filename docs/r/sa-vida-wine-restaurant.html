@@ -14,9 +14,11 @@
 <meta property="og:url" content="https://lasteat.es/r/sa-vida-wine-restaurant.html">
 <meta property="og:site_name" content="Last Eat">
 <meta property="og:image" content="https://lasteat.es/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 
 <!-- Twitter Card -->
-<meta name="twitter:card" content="summary">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Sa Vida Wine Restaurant — Last Eat">
 <meta name="twitter:description" content="Sa Vida Wine Restaurant — Mediterránea,Fusión — Chamartín — 7.1/10 — ~45 €">
 <meta name="twitter:image" content="https://lasteat.es/og.png">
@@ -35,29 +37,26 @@
     "addressCountry": "ES"
   },
   "servesCuisine": [
-    "Mediterránea",
-    "Fusión"
+    "Mediterránea•Fusión"
   ],
   "aggregateRating": {
     "@type": "AggregateRating",
-    "ratingValue": "7.1",
-    "bestRating": "10",
-    "worstRating": "0"
+    "ratingValue": 7.1,
+    "bestRating": 10,
+    "worstRating": 0,
+    "ratingCount": 1
   },
   "telephone": "+34-682344481",
   "sameAs": "http://www.sa-vida.es",
   "geo": {
     "@type": "GeoCoordinates",
-    "latitude": "40.463628",
-    "longitude": "-3.687964"
+    "latitude": 40.463628,
+    "longitude": -3.687964
   },
   "priceRange": "45 €"
 }
 </script>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300..500&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #F5F4F1;
@@ -245,9 +244,9 @@
     <div class="card-value">Calle del Dr. Fleming, 51, Chamartín, 28036 Madrid, Spain</div>
   </div>
 
-  <div class="contact"><a href="tel:+34-682344481">+34-682344481</a> &middot; <a href="http://www.sa-vida.es" target="_blank" rel="noopener">Web</a> &middot; <a href="https://macarfi.com/es/mad/ficha-restaurante/sa-vida-wine-restaurant" target="_blank" rel="noopener">Fuente</a></div>
+  <div class="contact"><a href="tel:+34-682344481">+34-682344481</a> &middot; <a href="http://www.sa-vida.es" target="_blank" rel="noopener noreferrer">Web</a> &middot; <a href="https://macarfi.com/es/mad/ficha-restaurante/sa-vida-wine-restaurant" target="_blank" rel="noopener noreferrer">Fuente</a></div>
 
-  <a href="https://www.google.com/maps/search/?api=1&query=Sa%20Vida%20Wine%20Restaurant%2C%20Calle%20del%20Dr.%20Fleming%2C%2051%2C%20Chamart%C3%ADn%2C%2028036%20Madrid%2C%20Spain" class="maps-btn" target="_blank" rel="noopener">Ver en Google Maps</a>
+  <a href="https://www.google.com/maps/search/?api=1&query=Sa%20Vida%20Wine%20Restaurant%2C%20Calle%20del%20Dr.%20Fleming%2C%2051%2C%20Chamart%C3%ADn%2C%2028036%20Madrid%2C%20Spain" class="maps-btn" target="_blank" rel="noopener noreferrer">Ver en Google Maps</a>
 </div>
 
 <footer>
@@ -256,13 +255,14 @@
 
 <script>
 (function() {
-  var saved = localStorage.getItem('mf-theme');
+  var saved = null;
+  try { saved = localStorage.getItem('mf-theme'); } catch (_err) {}
   if (saved) document.documentElement.dataset.theme = saved;
   else if (window.matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.dataset.theme = 'dark';
   document.getElementById('theme-toggle').addEventListener('click', function() {
     var t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     document.documentElement.dataset.theme = t;
-    localStorage.setItem('mf-theme', t);
+    try { localStorage.setItem('mf-theme', t); } catch (_err) {}
   });
 })();
 </script>

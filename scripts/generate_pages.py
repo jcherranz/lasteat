@@ -15,7 +15,7 @@ import sys
 from datetime import datetime, timezone
 from html import escape
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_INPUT = PROJECT_ROOT / "output" / "enriched_details.json"
@@ -23,6 +23,29 @@ FALLBACK_INPUT = PROJECT_ROOT / "output" / "madrid_restaurants.json"
 PAGES_DIR = PROJECT_ROOT / "docs" / "r"
 SITEMAP_PATH = PROJECT_ROOT / "docs" / "sitemap.xml"
 BASE_URL = "https://lasteat.es"
+
+
+def sanitize_external_url(url: str) -> str:
+    """Allow only absolute http(s) external URLs."""
+    if not url:
+        return ""
+    parsed = urlparse(url)
+    if parsed.scheme.lower() in {"http", "https"} and parsed.netloc:
+        return url
+    return ""
+
+
+def parse_float(value):
+    """Parse numeric-like strings to float, returning None when invalid."""
+    if value is None:
+        return None
+    text = str(value).strip().replace(",", ".")
+    if not text or text == "-":
+        return None
+    try:
+        return float(text)
+    except ValueError:
+        return None
 
 
 def build_meta_description(r: dict) -> str:
@@ -55,25 +78,28 @@ def build_jsonld(r: dict) -> str:
             "addressCountry": "ES",
         }
     if r.get("cuisine"):
-        ld["servesCuisine"] = [
-            c.strip() for c in r["cuisine"].replace("\u2022", ",").split(",") if c.strip()
-        ]
-    if r.get("rating") and r["rating"] != "-":
+        ld["servesCuisine"] = [c.strip() for c in r["cuisine"].split(",") if c.strip()]
+
+    rating_value = parse_float(r.get("rating"))
+    if rating_value is not None:
         ld["aggregateRating"] = {
             "@type": "AggregateRating",
-            "ratingValue": r["rating"],
-            "bestRating": "10",
-            "worstRating": "0",
+            "ratingValue": rating_value,
+            "bestRating": 10,
+            "worstRating": 0,
+            "ratingCount": 1,
         }
     if r.get("phone"):
         ld["telephone"] = r["phone"]
     if r.get("website"):
         ld["sameAs"] = r["website"]
-    if r.get("latitude") and r.get("longitude"):
+    latitude = parse_float(r.get("latitude"))
+    longitude = parse_float(r.get("longitude"))
+    if latitude is not None and longitude is not None:
         ld["geo"] = {
             "@type": "GeoCoordinates",
-            "latitude": r["latitude"],
-            "longitude": r["longitude"],
+            "latitude": latitude,
+            "longitude": longitude,
         }
     if r.get("price_eur"):
         ld["priceRange"] = f'{r["price_eur"]} \u20ac'
@@ -93,8 +119,8 @@ def build_page(r: dict) -> str:
     rating_service = r.get("rating_service", "")
     price = r.get("price_eur", "")
     phone = r.get("phone", "")
-    website = r.get("website", "")
-    macarfi_url = r.get("macarfi_url", "")
+    website = sanitize_external_url(r.get("website", ""))
+    macarfi_url = sanitize_external_url(r.get("macarfi_url", ""))
     lat = r.get("latitude", "")
     lng = r.get("longitude", "")
 
@@ -126,9 +152,9 @@ def build_page(r: dict) -> str:
     if phone:
         contact_parts.append(f'<a href="tel:{phone.replace(" ", "")}">{escape(phone)}</a>')
     if website:
-        contact_parts.append(f'<a href="{escape(website)}" target="_blank" rel="noopener">Web</a>')
+        contact_parts.append(f'<a href="{escape(website)}" target="_blank" rel="noopener noreferrer">Web</a>')
     if macarfi_url:
-        contact_parts.append(f'<a href="{escape(macarfi_url)}" target="_blank" rel="noopener">Fuente</a>')
+        contact_parts.append(f'<a href="{escape(macarfi_url)}" target="_blank" rel="noopener noreferrer">Fuente</a>')
     contact_html = ""
     if contact_parts:
         contact_html = f'<div class="contact">{" &middot; ".join(contact_parts)}</div>'
@@ -152,9 +178,11 @@ def build_page(r: dict) -> str:
 <meta property="og:url" content="{canonical}">
 <meta property="og:site_name" content="Last Eat">
 <meta property="og:image" content="{BASE_URL}/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 
 <!-- Twitter Card -->
-<meta name="twitter:card" content="summary">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{name} — Last Eat">
 <meta name="twitter:description" content="{meta_desc}">
 <meta name="twitter:image" content="{BASE_URL}/og.png">
@@ -164,9 +192,6 @@ def build_page(r: dict) -> str:
 {jsonld}
 </script>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300..500&display=swap" rel="stylesheet">
 <style>
   :root {{
     --bg: #F5F4F1;
@@ -356,7 +381,7 @@ def build_page(r: dict) -> str:
 
   {contact_html}
 
-  {f'<a href="{gmaps_url}" class="maps-btn" target="_blank" rel="noopener">Ver en Google Maps</a>' if lat and lng else ''}
+  {f'<a href="{gmaps_url}" class="maps-btn" target="_blank" rel="noopener noreferrer">Ver en Google Maps</a>' if lat and lng else ''}
 </div>
 
 <footer>
@@ -365,13 +390,14 @@ def build_page(r: dict) -> str:
 
 <script>
 (function() {{
-  var saved = localStorage.getItem('mf-theme');
+  var saved = null;
+  try {{ saved = localStorage.getItem('mf-theme'); }} catch (_err) {{}}
   if (saved) document.documentElement.dataset.theme = saved;
   else if (window.matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.dataset.theme = 'dark';
   document.getElementById('theme-toggle').addEventListener('click', function() {{
     var t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     document.documentElement.dataset.theme = t;
-    localStorage.setItem('mf-theme', t);
+    try {{ localStorage.setItem('mf-theme', t); }} catch (_err) {{}}
   }});
 }})();
 </script>

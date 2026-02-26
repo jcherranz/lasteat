@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
 <title>Last Eat — Restaurantes en Madrid</title>
 <meta name="description" content="Descubre los mejores restaurantes de Madrid. 770+ restaurantes con valoraciones, precios y ubicaciones. Filtra por cocina, zona y precio.">
 <link rel="canonical" href="https://lasteat.es/">
+<link rel="preload" href="data.js" as="script">
 
 <!-- Open Graph -->
 <meta property="og:type" content="website">
@@ -14,6 +16,8 @@
 <meta property="og:url" content="https://lasteat.es/">
 <meta property="og:site_name" content="Last Eat">
 <meta property="og:image" content="https://lasteat.es/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
@@ -26,9 +30,6 @@
 <meta name="theme-color" content="#376660">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300..500&display=swap" rel="stylesheet">
 <style>
   /* ── Theme Variables ── */
   :root {
@@ -48,7 +49,7 @@
     --surface: #1C201E;
     --text: #E4E6E4;
     --secondary: #9DA2A0;
-    --muted: #7E8482;
+    --muted: #95A09D;
     --accent: #45A194;
     --accent-soft: rgba(69, 161, 148, 0.09);
     --border: #292D2B;
@@ -63,6 +64,41 @@
     line-height: 1.6;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
+  }
+  .skip-link {
+    position: absolute;
+    left: 1rem;
+    top: -40px;
+    padding: 0.45rem 0.7rem;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.78rem;
+    text-decoration: none;
+    z-index: 400;
+  }
+  .skip-link:focus {
+    top: 1rem;
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+    white-space: nowrap;
+  }
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  .card:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 
   /* ── Masthead ── */
@@ -103,6 +139,11 @@
     padding: 0.25rem;
     transition: color 0.2s;
     line-height: 1;
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
   .theme-toggle::before { content: '\263D'; }
   [data-theme="dark"] .theme-toggle::before { content: '\2600'; }
@@ -138,6 +179,7 @@
     flex: 1;
     min-width: 160px;
     padding: 0.5rem 0;
+    min-height: 44px;
     border: none;
     border-bottom: 1px solid var(--border);
     font-size: 0.85rem;
@@ -166,6 +208,7 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236E7472'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.55rem center;
+    min-height: 44px;
   }
   select:focus { border-color: var(--accent); }
 
@@ -185,6 +228,7 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236E7472'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.55rem center;
+    min-height: 44px;
   }
   .ms-trigger:hover, .ms.open .ms-trigger { border-color: var(--accent); }
   .ms.has-sel .ms-trigger { border-color: var(--accent); color: var(--accent); }
@@ -212,6 +256,7 @@
   .ms-search {
     width: 100%;
     padding: 0.5rem 0.6rem;
+    min-height: 44px;
     border: none;
     border-bottom: 1px solid var(--border);
     font-size: 0.78rem;
@@ -240,6 +285,7 @@
     gap: 0.4rem;
   }
   .ms-opts label:hover { background: var(--accent-soft); }
+  .ms-opts label.active { background: var(--accent-soft); }
   .ms-opts input[type="checkbox"] {
     -webkit-appearance: none;
     appearance: none;
@@ -269,6 +315,7 @@
   .ms-clear {
     display: none;
     width: 100%;
+    min-height: 44px;
     padding: 0.35rem;
     border: none;
     border-top: 1px solid var(--border);
@@ -294,6 +341,11 @@
     cursor: pointer;
     transition: all 0.2s;
     line-height: 1;
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
   .ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
   .ctrl-btn.active { border-color: var(--accent); color: var(--accent); }
@@ -319,7 +371,7 @@
     gap: 0.1rem;
   }
   .sort-btn, .view-btn {
-    padding: 0.38rem 0.55rem;
+    padding: 0.38rem 0.7rem;
     border: none;
     border-radius: var(--radius);
     font-size: 0.76rem;
@@ -329,6 +381,11 @@
     cursor: pointer;
     white-space: nowrap;
     transition: color 0.2s, background 0.2s;
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
   .sort-btn:hover, .view-btn:hover { color: var(--secondary); }
   .sort-btn.active, .view-btn.active {
@@ -385,13 +442,18 @@
   .fav-btn {
     background: none;
     border: none;
-    padding: 0;
+    padding: 0.4rem;
     cursor: pointer;
     font-size: 0.85rem;
     color: var(--muted);
     transition: color 0.15s, transform 0.15s;
     line-height: 1;
     flex-shrink: 0;
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
   .fav-btn:hover { color: var(--accent); transform: scale(1.15); }
   .fav-btn.active { color: var(--accent); }
@@ -438,6 +500,9 @@
     color: var(--muted);
     text-decoration: none;
     transition: color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
   }
   .card-actions a:hover { color: var(--accent); }
 
@@ -504,8 +569,8 @@
     position: fixed;
     bottom: 1.5rem;
     right: 1.5rem;
-    width: 34px;
-    height: 34px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     border: 1px solid var(--border);
     background: var(--surface);
@@ -567,36 +632,39 @@
 </head>
 <body>
 
+<a href="#grid" class="skip-link">Saltar al contenido</a>
+
 <header>
   <div class="logo">Last Eat</div>
-  <div class="stats" id="stats">Cargando...</div>
+  <div class="stats" id="stats" aria-live="polite">Cargando...</div>
   <div class="divider"></div>
   <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema"></button>
 </header>
 
 <div class="controls-wrap">
   <div class="controls">
+    <label class="sr-only" for="search">Buscar restaurantes</label>
     <input type="text" class="search-box" id="search" placeholder="Buscar restaurante, cocina, zona...">
 
     <div class="ms" id="ms-cuisine">
-      <button class="ms-trigger" type="button" data-label="Cocina">Cocina</button>
+      <button class="ms-trigger" type="button" data-label="Cocina" aria-expanded="false" aria-haspopup="listbox">Cocina</button>
       <div class="ms-drop">
-        <input class="ms-search" type="text" placeholder="Buscar cocina...">
-        <div class="ms-opts"></div>
+        <input class="ms-search" type="text" placeholder="Buscar cocina..." aria-label="Buscar cocina">
+        <div class="ms-opts" role="listbox" aria-multiselectable="true"></div>
         <button class="ms-clear" type="button">Limpiar</button>
       </div>
     </div>
 
     <div class="ms" id="ms-district">
-      <button class="ms-trigger" type="button" data-label="Zona">Zona</button>
+      <button class="ms-trigger" type="button" data-label="Zona" aria-expanded="false" aria-haspopup="listbox">Zona</button>
       <div class="ms-drop">
-        <input class="ms-search" type="text" placeholder="Buscar zona...">
-        <div class="ms-opts"></div>
+        <input class="ms-search" type="text" placeholder="Buscar zona..." aria-label="Buscar zona">
+        <div class="ms-opts" role="listbox" aria-multiselectable="true"></div>
         <button class="ms-clear" type="button">Limpiar</button>
       </div>
     </div>
 
-    <select id="price-filter">
+    <select id="price-filter" aria-label="Filtrar por precio">
       <option value="">Precio</option>
       <option value="0-30">Hasta 30 &euro;</option>
       <option value="0-50">Hasta 50 &euro;</option>
@@ -604,12 +672,12 @@
       <option value="80-999">Desde 80 &euro;</option>
     </select>
 
-    <button class="ctrl-btn" id="fav-filter" type="button" aria-label="Favoritos">&#9825;</button>
-    <button class="ctrl-btn" id="geo-btn" type="button" aria-label="Cerca de m&iacute;" title="Cerca de m&iacute;">&#8982;</button>
+    <button class="ctrl-btn" id="fav-filter" type="button" aria-label="Favoritos" aria-pressed="false">&#9825;</button>
+    <button class="ctrl-btn" id="geo-btn" type="button" aria-label="Cerca de m&iacute;" aria-pressed="false" title="Cerca de m&iacute;">&#8982;</button>
 
     <span class="sep"></span>
 
-    <div class="btn-group">
+    <div class="btn-group" role="group" aria-label="Ordenar por">
       <button class="sort-btn active" data-sort="rating">Ranking</button>
       <button class="sort-btn" data-sort="name">A-Z</button>
       <button class="sort-btn" data-sort="price">Precio</button>
@@ -618,7 +686,7 @@
 
     <span class="sep"></span>
 
-    <div class="btn-group">
+    <div class="btn-group" role="group" aria-label="Modo de vista">
       <button class="view-btn active" data-view="grid">Lista</button>
       <button class="view-btn" data-view="map">Mapa</button>
     </div>
@@ -637,6 +705,7 @@
   Actualizado feb 2026
 </footer>
 
+<script src="app.js"></script>
 <script src="data.js"></script>
 <script>
 (function() {
@@ -644,6 +713,10 @@
 
   /* ── Constants ── */
   var BATCH = 60;
+  var LEAFLET_CSS_INTEGRITY = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+  var LEAFLET_JS_INTEGRITY = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
+  var app = window.LastEatApp;
+  if (!app) throw new Error('LastEatApp module is required');
 
   /* ── DOM ── */
   var grid     = document.getElementById('grid');
@@ -653,11 +726,21 @@
   var bttEl    = document.getElementById('btt');
   var favBtn   = document.getElementById('fav-filter');
   var mapCont  = document.getElementById('map-container');
+  var geoBtn   = document.getElementById('geo-btn');
+  var sortDistBtn = document.getElementById('sort-dist');
+
+  /* ── Data Maps ── */
+  var slugSet = new Set();
+  var nameToSlug = Object.create(null);
+  RESTAURANTS.forEach(function(r) {
+    if (r && r.s) slugSet.add(r.s);
+    if (r && r.n && r.s && !nameToSlug[r.n]) nameToSlug[r.n] = r.s;
+  });
 
   /* ── State ── */
   var sort       = 'rating';
   var view       = 'grid';
-  var favs       = new Set(JSON.parse(localStorage.getItem('mf-fav') || '[]'));
+  var favs       = new Set();
   var favsOnly   = false;
   var selCuisine = new Set();
   var selDistrict= new Set();
@@ -672,13 +755,48 @@
   var userMarker = null;
 
   /* ── Utilities ── */
-  function esc(s) {
-    return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  var esc = app.esc;
+  var haversine = app.haversine;
+  var formatDist = app.formatDist;
+  function safeGetStorage(key) {
+    try { return localStorage.getItem(key); } catch (_err) { return null; }
+  }
+  function safeSetStorage(key, value) {
+    try { localStorage.setItem(key, value); } catch (_err) {}
+  }
+  function safeGetJSON(key, fallback) {
+    var raw = safeGetStorage(key);
+    if (!raw) return fallback;
+    try { return JSON.parse(raw); } catch (_err) { return fallback; }
+  }
+  function safeHttpUrl(url) {
+    if (!url || typeof url !== 'string') return '';
+    try {
+      var parsed = new URL(url, window.location.origin);
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') return parsed.href;
+    } catch (_err) {}
+    return '';
+  }
+  function getFavKey(r) {
+    return (r && r.s) ? r.s : (r && r.n ? r.n : '');
+  }
+  function normalizeFavValue(value) {
+    if (typeof value !== 'string' || !value) return '';
+    if (slugSet.has(value)) return value;
+    return nameToSlug[value] || '';
+  }
+  function loadFavs() {
+    var raw = safeGetJSON('mf-fav', []);
+    if (!Array.isArray(raw)) return;
+    raw.forEach(function(item) {
+      var key = normalizeFavValue(item);
+      if (key) favs.add(key);
+    });
   }
 
   /* ── Theme ── */
   function initTheme() {
-    var saved = localStorage.getItem('mf-theme');
+    var saved = safeGetStorage('mf-theme');
     if (saved) { document.documentElement.dataset.theme = saved; return; }
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
       document.documentElement.dataset.theme = 'dark';
@@ -687,7 +805,7 @@
   function toggleTheme() {
     var t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     document.documentElement.dataset.theme = t;
-    localStorage.setItem('mf-theme', t);
+    safeSetStorage('mf-theme', t);
     if (map && tileLayer) tileLayer.setUrl(getTileUrl());
   }
   function getTileUrl() {
@@ -697,16 +815,18 @@
   }
 
   /* ── Favorites ── */
-  function saveFavs() { localStorage.setItem('mf-fav', JSON.stringify([...favs])); }
-  function toggleFav(name) {
-    if (favs.has(name)) favs.delete(name); else favs.add(name);
+  function saveFavs() { safeSetStorage('mf-fav', JSON.stringify(Array.from(favs))); }
+  function toggleFav(favKey) {
+    if (!favKey) return;
+    if (favs.has(favKey)) favs.delete(favKey); else favs.add(favKey);
     saveFavs();
     /* Update visible hearts */
     grid.querySelectorAll('.fav-btn').forEach(function(b) {
-      var n = b.getAttribute('data-name');
-      var active = favs.has(n);
+      var key = b.getAttribute('data-fav-key');
+      var active = favs.has(key);
       b.classList.toggle('active', active);
       b.textContent = active ? '\u2665' : '\u2661';
+      b.setAttribute('aria-pressed', active ? 'true' : 'false');
     });
     updateFavBtn();
     if (favsOnly) render();
@@ -714,22 +834,11 @@
   function updateFavBtn() {
     favBtn.textContent = (favsOnly ? '\u2665' : '\u2661') + (favs.size ? ' ' + favs.size : '');
     favBtn.classList.toggle('active', favsOnly);
+    favBtn.setAttribute('aria-pressed', favsOnly ? 'true' : 'false');
   }
+  loadFavs();
 
   /* ── Geolocation ── */
-  var geoBtn = document.getElementById('geo-btn');
-  var sortDistBtn = document.getElementById('sort-dist');
-
-  function haversine(lat1, lng1, lat2, lng2) {
-    var R = 6371;
-    var dLat = (lat2 - lat1) * Math.PI / 180;
-    var dLng = (lng2 - lng1) * Math.PI / 180;
-    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLng/2) * Math.sin(dLng/2);
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  }
-
   function computeDistances() {
     if (userLat === null) return;
     RESTAURANTS.forEach(function(r) {
@@ -741,15 +850,10 @@
     });
   }
 
-  function formatDist(km) {
-    if (km >= 99999) return '';
-    if (km < 1) return Math.round(km * 1000) + ' m';
-    return km.toFixed(1) + ' km';
-  }
-
   function activateGeo() {
     if (!navigator.geolocation) {
       geoBtn.title = 'Geolocalizaci\u00f3n no disponible';
+      geoBtn.setAttribute('aria-pressed', 'false');
       return;
     }
     geoBtn.classList.add('loading');
@@ -762,6 +866,7 @@
       geoBtn.classList.add('active');
       geoBtn.textContent = '\u2316';
       geoBtn.title = 'Desactivar ubicaci\u00f3n';
+      geoBtn.setAttribute('aria-pressed', 'true');
       sortDistBtn.hidden = false;
       /* Auto-switch to distance sort */
       sort = 'distance';
@@ -777,6 +882,7 @@
       } else {
         geoBtn.title = 'No se pudo obtener la ubicaci\u00f3n';
       }
+      geoBtn.setAttribute('aria-pressed', 'false');
     }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 });
   }
 
@@ -787,6 +893,7 @@
     geoBtn.classList.remove('active');
     geoBtn.textContent = '\u2316';
     geoBtn.title = 'Cerca de m\u00ed';
+    geoBtn.setAttribute('aria-pressed', 'false');
     sortDistBtn.hidden = true;
     if (userMarker && map) { userMarker.remove(); userMarker = null; }
     if (sort === 'distance') {
@@ -807,28 +914,101 @@
   function setupMS(id, items, onChange) {
     var el      = document.getElementById(id);
     var trigger = el.querySelector('.ms-trigger');
-    var drop    = el.querySelector('.ms-drop');
     var search  = el.querySelector('.ms-search');
     var opts    = el.querySelector('.ms-opts');
     var clear   = el.querySelector('.ms-clear');
     var label   = trigger.getAttribute('data-label');
+    var activeLabel = null;
+    var listboxId = id + '-listbox';
+    opts.id = listboxId;
+    trigger.setAttribute('aria-controls', listboxId);
+
+    function closeDropdown(focusTrigger) {
+      el.classList.remove('open');
+      trigger.setAttribute('aria-expanded', 'false');
+      if (activeLabel) {
+        activeLabel.classList.remove('active');
+        activeLabel = null;
+      }
+      if (focusTrigger) trigger.focus();
+    }
+
+    function openDropdown() {
+      document.querySelectorAll('.ms.open').forEach(function(m) {
+        if (m !== el) {
+          m.classList.remove('open');
+          var otherTrigger = m.querySelector('.ms-trigger');
+          if (otherTrigger) otherTrigger.setAttribute('aria-expanded', 'false');
+        }
+      });
+      el.classList.add('open');
+      trigger.setAttribute('aria-expanded', 'true');
+      search.focus();
+    }
+
+    function visibleLabels() {
+      return [].slice.call(opts.querySelectorAll('label')).filter(function(l) { return !l.hidden; });
+    }
+
+    function setActiveLabel(nextLabel) {
+      if (activeLabel) activeLabel.classList.remove('active');
+      activeLabel = nextLabel || null;
+      if (activeLabel) activeLabel.classList.add('active');
+    }
+
+    function focusByStep(step) {
+      var labels = visibleLabels();
+      if (!labels.length) return;
+      var current = document.activeElement && document.activeElement.closest('label');
+      var idx = labels.indexOf(current);
+      var nextIdx = idx + step;
+      if (idx === -1) nextIdx = step > 0 ? 0 : labels.length - 1;
+      if (nextIdx < 0) nextIdx = labels.length - 1;
+      if (nextIdx >= labels.length) nextIdx = 0;
+      var next = labels[nextIdx].querySelector('input');
+      if (next) {
+        next.focus();
+        setActiveLabel(labels[nextIdx]);
+      }
+    }
 
     items.forEach(function(item) {
       var lbl = document.createElement('label');
       var cb  = document.createElement('input');
       cb.type = 'checkbox';
       cb.value = item;
+      lbl.setAttribute('role', 'option');
+      lbl.setAttribute('aria-selected', 'false');
       lbl.appendChild(cb);
       lbl.appendChild(document.createTextNode(item));
       opts.appendChild(lbl);
-      cb.addEventListener('change', function() { sync(); onChange(getSelected()); });
+      cb.addEventListener('change', function() {
+        lbl.setAttribute('aria-selected', cb.checked ? 'true' : 'false');
+        sync();
+        onChange(getSelected());
+      });
+    });
+
+    el.addEventListener('click', function(e) {
+      e.stopPropagation();
     });
 
     trigger.addEventListener('click', function(e) {
       e.stopPropagation();
-      document.querySelectorAll('.ms.open').forEach(function(m) { if (m !== el) m.classList.remove('open'); });
-      el.classList.toggle('open');
-      if (el.classList.contains('open')) search.focus();
+      if (el.classList.contains('open')) closeDropdown(false);
+      else openDropdown();
+    });
+
+    trigger.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (!el.classList.contains('open')) openDropdown();
+        focusByStep(e.key === 'ArrowDown' ? 1 : -1);
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeDropdown(true);
+      }
     });
 
     search.addEventListener('input', function() {
@@ -836,12 +1016,52 @@
       opts.querySelectorAll('label').forEach(function(l) {
         l.hidden = l.textContent.toLowerCase().indexOf(q) === -1;
       });
+      setActiveLabel(null);
+    });
+
+    search.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeDropdown(true);
+      }
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        focusByStep(e.key === 'ArrowDown' ? 1 : -1);
+      }
     });
 
     clear.addEventListener('click', function() {
-      opts.querySelectorAll('input').forEach(function(cb) { cb.checked = false; });
+      opts.querySelectorAll('input').forEach(function(cb) {
+        cb.checked = false;
+        var row = cb.closest('label');
+        if (row) row.setAttribute('aria-selected', 'false');
+      });
       sync();
       onChange(getSelected());
+    });
+
+    opts.addEventListener('focusin', function(e) {
+      var row = e.target.closest('label');
+      if (row) setActiveLabel(row);
+    });
+
+    opts.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeDropdown(true);
+        return;
+      }
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        focusByStep(e.key === 'ArrowDown' ? 1 : -1);
+        return;
+      }
+      if (e.key === 'Enter' && e.target && e.target.matches('input[type=\"checkbox\"]')) {
+        e.preventDefault();
+        e.target.checked = !e.target.checked;
+        sync();
+        onChange(getSelected());
+      }
     });
 
     function getSelected() {
@@ -856,10 +1076,15 @@
     return {
       setSelected: function(vals) {
         var set = new Set(vals);
-        opts.querySelectorAll('input').forEach(function(cb) { cb.checked = set.has(cb.value); });
+        opts.querySelectorAll('input').forEach(function(cb) {
+          cb.checked = set.has(cb.value);
+          var row = cb.closest('label');
+          if (row) row.setAttribute('aria-selected', cb.checked ? 'true' : 'false');
+        });
         sync();
       },
-      getSelected: getSelected
+      getSelected: getSelected,
+      close: function() { closeDropdown(false); }
     };
   }
 
@@ -879,15 +1104,21 @@
 
   /* Close dropdowns on outside click */
   document.addEventListener('click', function() {
-    document.querySelectorAll('.ms.open').forEach(function(m) { m.classList.remove('open'); });
+    cuisineMS.close();
+    districtMS.close();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key !== 'Escape') return;
+    cuisineMS.close();
+    districtMS.close();
   });
 
   /* ── URL State ── */
   function syncURL() {
     var p = new URLSearchParams();
     if (searchEl.value.trim()) p.set('q', searchEl.value.trim());
-    if (selCuisine.size)  p.set('c', [].slice.call(selCuisine).join(','));
-    if (selDistrict.size) p.set('d', [].slice.call(selDistrict).join(','));
+    if (selCuisine.size) [].slice.call(selCuisine).forEach(function(c) { p.append('c', c); });
+    if (selDistrict.size) [].slice.call(selDistrict).forEach(function(d) { p.append('d', d); });
     if (priceEl.value)    p.set('p', priceEl.value);
     if (sort !== 'rating') p.set('s', sort);
     if (favsOnly) p.set('f', '1');
@@ -897,8 +1128,12 @@
   function readURL() {
     var p = new URLSearchParams(location.search);
     if (p.has('q')) searchEl.value = p.get('q');
-    if (p.has('c')) { var v = p.get('c').split(','); selCuisine = new Set(v); cuisineMS.setSelected(v); }
-    if (p.has('d')) { var v2 = p.get('d').split(','); selDistrict = new Set(v2); districtMS.setSelected(v2); }
+    var v = p.getAll('c');
+    if (v.length === 1 && v[0].indexOf(',') !== -1) v = v[0].split(',');
+    if (v.length) { selCuisine = new Set(v); cuisineMS.setSelected(v); }
+    var v2 = p.getAll('d');
+    if (v2.length === 1 && v2[0].indexOf(',') !== -1) v2 = v2[0].split(',');
+    if (v2.length) { selDistrict = new Set(v2); districtMS.setSelected(v2); }
     if (p.has('p')) priceEl.value = p.get('p');
     if (p.has('s')) {
       sort = p.get('s');
@@ -911,73 +1146,58 @@
 
   /* ── Filter & Sort ── */
   function getFiltered() {
-    var q = searchEl.value.toLowerCase().trim();
-    var pv = priceEl.value;
-    var list = RESTAURANTS.filter(function(r) {
-      if (q) {
-        var h = (r.n + ' ' + (r.c||'') + ' ' + (r.d||'') + ' ' + (r.a||'')).toLowerCase();
-        if (h.indexOf(q) === -1) return false;
-      }
-      if (selCuisine.size) {
-        var tags = r.c ? r.c.split('\u2022').map(function(t){return t.trim();}) : [];
-        if (!tags.some(function(t){ return selCuisine.has(t); })) return false;
-      }
-      if (selDistrict.size && !selDistrict.has(r.d)) return false;
-      if (pv) {
-        var parts = pv.split('-').map(Number);
-        var price = parseInt(r.p) || 0;
-        if (!r.p || price < parts[0] || price > parts[1]) return false;
-      }
-      if (favsOnly && !favs.has(r.n)) return false;
-      return true;
-    });
-    return sortList(list, sort);
-  }
-
-  function sortList(list, key) {
-    return list.slice().sort(function(a, b) {
-      if (key === 'rating') return (parseFloat(b.r)||0) - (parseFloat(a.r)||0);
-      if (key === 'name')   return a.n.localeCompare(b.n, 'es');
-      if (key === 'price')  return (parseInt(a.p)||9999) - (parseInt(b.p)||9999);
-      if (key === 'distance') return (a._dist||99999) - (b._dist||99999);
-      return 0;
+    return app.getFiltered(RESTAURANTS, {
+      query: searchEl.value,
+      priceValue: priceEl.value,
+      selCuisine: selCuisine,
+      selDistrict: selDistrict,
+      favsOnly: favsOnly,
+      favs: favs,
+      sort: sort,
+      getFavKey: getFavKey,
     });
   }
 
   /* ── Card Builder ── */
   function buildCard(r) {
-    var isFav  = favs.has(r.n);
+    var favKey = getFavKey(r);
+    var isFav  = favs.has(favKey);
     var heart  = isFav ? '\u2665' : '\u2661';
     var favCls = isFav ? ' active' : '';
     var rCls   = r.r && r.r !== '-' ? '' : ' no-r';
     var rText  = r.r && r.r !== '-' ? r.r : '\u2014';
-    var tags   = r.c ? r.c.split('\u2022').map(function(t) {
-      return '<span class="tag">' + t.trim() + '</span>';
+    var tags   = r.c ? r.c.split(/[\u2022,]/).map(function(t) {
+      return '<span class="tag">' + esc(t.trim()) + '</span>';
     }).join('') : '';
     var price  = r.p ? r.p + ' \u20ac' : '';
-    var gmaps  = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(r.n + ', ' + r.a);
-    var pageUrl = r.s ? '/r/' + r.s + '.html' : r.u;
+    var gmaps  = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent((r.n || '') + ', ' + (r.a || ''));
+    var websiteUrl = safeHttpUrl(r.w);
+    var sourceUrl = safeHttpUrl(r.u || (r.s ? ('https://macarfi.com/es/mad/ficha-restaurante/' + encodeURIComponent(r.s)) : ''));
+    var pageUrl = r.s ? '/r/' + encodeURIComponent(r.s) + '.html' : sourceUrl;
+    if (!pageUrl) pageUrl = '#';
     var eName  = esc(r.n);
+    var eFavKey = esc(favKey);
 
     /* Expandable detail */
     var rDetail = [
-      r.rf ? 'Comida <strong>' + r.rf + '</strong>' : '',
-      r.rd ? 'Decor <strong>' + r.rd + '</strong>' : '',
-      r.rs ? 'Servicio <strong>' + r.rs + '</strong>' : ''
+      r.rf ? 'Comida <strong>' + esc(r.rf) + '</strong>' : '',
+      r.rd ? 'Decor <strong>' + esc(r.rd) + '</strong>' : '',
+      r.rs ? 'Servicio <strong>' + esc(r.rs) + '</strong>' : ''
     ].filter(Boolean).join(' \u00b7 ');
-    var phone = r.ph ? '<div class="card-phone"><a href="tel:' + r.ph.replace(/\s/g,'') + '">' + r.ph + '</a></div>' : '';
-    var addr  = r.a  ? '<div class="card-address">' + r.a + '</div>' : '';
+    var phoneValue = r.ph ? String(r.ph).replace(/\s/g,'') : '';
+    var phone = phoneValue ? '<div class="card-phone"><a href="tel:' + esc(phoneValue) + '">' + esc(r.ph) + '</a></div>' : '';
+    var addr  = r.a ? '<div class="card-address">' + esc(r.a) + '</div>' : '';
     var hasDetail = rDetail || r.ph || r.a;
 
-    return '<div class="card">' +
+    return '<div class="card" tabindex="0" role="article">' +
       '<div class="card-top">' +
-        '<div class="card-name"><a href="' + pageUrl + '">' + r.n + '</a></div>' +
-        '<button class="fav-btn' + favCls + '" data-name="' + eName + '">' + heart + '</button>' +
-        '<div class="card-rating' + rCls + '">' + rText + '</div>' +
+        '<div class="card-name"><a href="' + pageUrl + '">' + eName + '</a></div>' +
+        '<button class="fav-btn' + favCls + '" data-fav-key="' + eFavKey + '" aria-label="Favorito" aria-pressed="' + (isFav ? 'true' : 'false') + '">' + heart + '</button>' +
+        '<div class="card-rating' + rCls + '">' + esc(rText) + '</div>' +
       '</div>' +
       '<div class="card-meta">' +
-        (r.d ? '<span>' + r.d + '</span>' : '') +
-        (price ? '<span>' + price + '</span>' : '') +
+        (r.d ? '<span>' + esc(r.d) + '</span>' : '') +
+        (price ? '<span>' + esc(price) + '</span>' : '') +
         (r._dist != null ? '<span class="card-dist">' + formatDist(r._dist) + '</span>' : '') +
       '</div>' +
       (tags ? '<div class="card-tags">' + tags + '</div>' : '') +
@@ -988,9 +1208,9 @@
         '</div>' +
       '</div></div>' : '') +
       '<div class="card-actions">' +
-        '<a href="' + gmaps + '" target="_blank" rel="noopener">Maps</a>' +
-        (r.w ? '<a href="' + r.w + '" target="_blank" rel="noopener">Web</a>' : '') +
-        (r.u ? '<a href="' + r.u + '" target="_blank" rel="noopener">Fuente</a>' : '') +
+        '<a href="' + gmaps + '" target="_blank" rel="noopener noreferrer">Maps</a>' +
+        (websiteUrl ? '<a href="' + websiteUrl + '" target="_blank" rel="noopener noreferrer">Web</a>' : '') +
+        (sourceUrl ? '<a href="' + sourceUrl + '" target="_blank" rel="noopener noreferrer">Fuente</a>' : '') +
       '</div>' +
     '</div>';
   }
@@ -1040,9 +1260,13 @@
       var css = document.createElement('link');
       css.rel = 'stylesheet';
       css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      css.integrity = LEAFLET_CSS_INTEGRITY;
+      css.crossOrigin = 'anonymous';
       document.head.appendChild(css);
       var js = document.createElement('script');
       js.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      js.integrity = LEAFLET_JS_INTEGRITY;
+      js.crossOrigin = 'anonymous';
       js.onload = function() { leafletOk = true; resolve(); };
       document.head.appendChild(js);
     });
@@ -1064,15 +1288,14 @@
     var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
     filtered.forEach(function(r) {
       if (!r.lat || !r.lng) return;
+      var popup = '<strong>' + esc(r.n) + '</strong>';
+      if (r.r && r.r !== '-') popup += '<br>' + esc(r.r) + '/10';
+      if (r.d) popup += '<br>' + esc(r.d);
+      if (r._dist != null) popup += '<br>' + formatDist(r._dist);
+      if (r.s) popup += '<br><a href="/r/' + encodeURIComponent(r.s) + '.html">Ver m\u00e1s</a>';
       var m = L.circleMarker([parseFloat(r.lat), parseFloat(r.lng)], {
         radius: 5, fillColor: accent, fillOpacity: 0.85, color: '#fff', weight: 1.5
-      }).bindPopup(
-        '<strong>' + r.n + '</strong>' +
-        (r.r && r.r !== '-' ? '<br>' + r.r + '/10' : '') +
-        (r.d ? '<br>' + r.d : '') +
-        (r._dist != null ? '<br>' + formatDist(r._dist) : '') +
-        (r.s ? '<br><a href="/r/' + r.s + '.html">Ver m\u00e1s</a>' : '')
-      );
+      }).bindPopup(popup);
       m.addTo(map);
       markers.push(m);
     });
@@ -1113,12 +1336,20 @@
   grid.addEventListener('click', function(e) {
     /* Favorite toggle */
     var fb = e.target.closest('.fav-btn');
-    if (fb) { e.stopPropagation(); toggleFav(fb.getAttribute('data-name')); return; }
+    if (fb) { e.stopPropagation(); toggleFav(fb.getAttribute('data-fav-key')); return; }
     /* Links pass through */
     if (e.target.closest('a')) return;
     /* Expand/collapse */
     var card = e.target.closest('.card');
     if (card) card.classList.toggle('expanded');
+  });
+  grid.addEventListener('keydown', function(e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    var card = e.target.closest('.card');
+    if (!card) return;
+    if (e.target.closest('a') || e.target.closest('.fav-btn')) return;
+    e.preventDefault();
+    card.classList.toggle('expanded');
   });
 
   /* ── Event Listeners ── */

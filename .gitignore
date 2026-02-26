@@ -6,3 +6,4 @@ output/
 *.json
 # Allow specific JSON files in docs/
 !docs/manifest.json
+!docs/quality_report.json

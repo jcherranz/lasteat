@@ -14,9 +14,11 @@
 <meta property="og:url" content="https://lasteat.es/r/meson-txistu.html">
 <meta property="og:site_name" content="Last Eat">
 <meta property="og:image" content="https://lasteat.es/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 
 <!-- Twitter Card -->
-<meta name="twitter:card" content="summary">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Mesón Txistu — Last Eat">
 <meta name="twitter:description" content="Mesón Txistu — Vasca — Tetuán — 6.6/10 — ~70 €">
 <meta name="twitter:image" content="https://lasteat.es/og.png">
@@ -39,24 +41,22 @@
   ],
   "aggregateRating": {
     "@type": "AggregateRating",
-    "ratingValue": "6.6",
-    "bestRating": "10",
-    "worstRating": "0"
+    "ratingValue": 6.6,
+    "bestRating": 10,
+    "worstRating": 0,
+    "ratingCount": 1
   },
   "telephone": "+34-915701006",
   "sameAs": "http://www.mesontxistu.com",
   "geo": {
     "@type": "GeoCoordinates",
-    "latitude": "40.462600",
-    "longitude": "-3.693940"
+    "latitude": 40.4626,
+    "longitude": -3.69394
   },
   "priceRange": "70 €"
 }
 </script>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300..500&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #F5F4F1;
@@ -244,9 +244,9 @@
     <div class="card-value">Plaza Ángel Carbajo, 6, 28020 Madrid</div>
   </div>
 
-  <div class="contact"><a href="tel:+34-915701006">+34-915701006</a> &middot; <a href="http://www.mesontxistu.com" target="_blank" rel="noopener">Web</a> &middot; <a href="https://macarfi.com/es/mad/ficha-restaurante/meson-txistu" target="_blank" rel="noopener">Fuente</a></div>
+  <div class="contact"><a href="tel:+34-915701006">+34-915701006</a> &middot; <a href="http://www.mesontxistu.com" target="_blank" rel="noopener noreferrer">Web</a> &middot; <a href="https://macarfi.com/es/mad/ficha-restaurante/meson-txistu" target="_blank" rel="noopener noreferrer">Fuente</a></div>
 
-  <a href="https://www.google.com/maps/search/?api=1&query=Mes%C3%B3n%20Txistu%2C%20Plaza%20%C3%81ngel%20Carbajo%2C%206%2C%2028020%20Madrid" class="maps-btn" target="_blank" rel="noopener">Ver en Google Maps</a>
+  <a href="https://www.google.com/maps/search/?api=1&query=Mes%C3%B3n%20Txistu%2C%20Plaza%20%C3%81ngel%20Carbajo%2C%206%2C%2028020%20Madrid" class="maps-btn" target="_blank" rel="noopener noreferrer">Ver en Google Maps</a>
 </div>
 
 <footer>
@@ -255,13 +255,14 @@
 
 <script>
 (function() {
-  var saved = localStorage.getItem('mf-theme');
+  var saved = null;
+  try { saved = localStorage.getItem('mf-theme'); } catch (_err) {}
   if (saved) document.documentElement.dataset.theme = saved;
   else if (window.matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.dataset.theme = 'dark';
   document.getElementById('theme-toggle').addEventListener('click', function() {
     var t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     document.documentElement.dataset.theme = t;
-    localStorage.setItem('mf-theme', t);
+    try { localStorage.setItem('mf-theme', t); } catch (_err) {}
   });
 })();
 </script>

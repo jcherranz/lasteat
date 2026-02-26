@@ -71,10 +71,38 @@ A  @  185.199.111.153
 
 ---
 
+## Re-prioritized Execution Order (2026-02-26)
+_Goal: match professional delivery sequencing for a live MVP._
+
+### Current sprint (in progress) `[~]`
+1. Security + correctness baseline (Phase 4A + critical UI fixes)
+2. Scraper reliability cleanup (targeted Phase 4B items)
+3. Establish CI safety gates before shipping new features
+
+### Professional order from this point
+1. **P0 Hardening first:** 4A, then highest-risk parts of 4B
+2. **P1 Release safety:** 5A + 7B (tests + CI gates + PR-based data updates)
+3. **P2 Compliance baseline:** privacy/legal pages + analytics consent posture
+4. **P3 Accessibility:** 6A-6C (WCAG 2.1 AA baseline)
+5. **P4 SEO/performance polish:** 8A, 10A, 10B
+6. **P5 Product discovery features:** 9B (analytics) before 9A
+7. **P6 Expansion:** 11A only after single-city KPI thresholds are met
+
+### KPI gate before multi-city (11A)
+- 4 consecutive weekly scraper runs without incident
+- 0 critical security findings open
+- Test suite green in CI on every automated data update
+- Verified demand signal from analytics (city-level expansion justified)
+
+### Live Session Snapshot
+- For current in-progress context, verification notes, and caveats, read `HANDOFF.md`.
+
+---
+
 ## Phase 4: Security & Robustness
 _Goal: Eliminate all security vulnerabilities and harden defensive code._
 
-### 4A. Fix Security Vulnerabilities `[ ]`
+### 4A. Fix Security Vulnerabilities `[x]`
 **Why:** CDN compromise is undetected, incomplete HTML escaping, localStorage can crash the page.
 **Scope:**
 - Add Subresource Integrity (SRI) hashes to all CDN resources (Leaflet JS/CSS, Google Fonts)
@@ -93,15 +121,19 @@ curl -s https://unpkg.com/leaflet@1.9.4/dist/leaflet.css | openssl dgst -sha384 
 ```
 
 **Acceptance criteria:**
-- [ ] All CDN `<script>` and `<link>` tags have `integrity` + `crossorigin` attributes
-- [ ] `esc()` escapes `&`, `"`, `<`, `>`, and `'`
-- [ ] Corrupted localStorage doesn't crash the page (test by setting `mf-fav` to `"broken"`)
-- [ ] `javascript:` URLs in restaurant data are not rendered as links
-- [ ] All external `<a>` tags have `rel="noopener noreferrer"`
+- [x] All CDN `<script>` and `<link>` tags have `integrity` + `crossorigin` attributes
+- [x] `esc()` escapes `&`, `"`, `<`, `>`, and `'`
+- [x] Corrupted localStorage doesn't crash the page (test by setting `mf-fav` to `"broken"`)
+- [x] `javascript:` URLs in restaurant data are not rendered as links
+- [x] All external `<a>` tags have `rel="noopener noreferrer"`
+- [x] Favorites keying no longer breaks for names with HTML entities
+- [x] Multi-select URL state handles values containing commas
+
+Current note: Leaflet runtime assets include `integrity` + `crossorigin`; unresolved Google Fonts CDN dependency was removed from homepage runtime and page template.
 
 ---
 
-### 4B. Harden Scraper Error Handling `[ ]`
+### 4B. Harden Scraper Error Handling `[x]`
 **Why:** Bare `except Exception` silently masks bugs. Brittle HTML parsing fails without warning.
 **Scope:**
 - Replace `except Exception` with specific exceptions (`httpx.RequestError`, `httpx.HTTPStatusError`)
@@ -115,17 +147,17 @@ curl -s https://unpkg.com/leaflet@1.9.4/dist/leaflet.css | openssl dgst -sha384 
 - `scraper.py` — exception specificity, field warnings, strict mode, timeout
 
 **Acceptance criteria:**
-- [ ] No bare `except Exception` in codebase
-- [ ] Scraper logs warnings for missing cuisine/district/rating fields
-- [ ] `--strict` mode fails if any field drops below 80%
-- [ ] httpx timeout is 60s
+- [x] No bare `except Exception` in codebase
+- [x] Scraper logs warnings for missing cuisine/district/rating fields
+- [x] `--strict` mode fails if any field drops below 80%
+- [x] httpx timeout is 60s
 
 ---
 
 ## Phase 5: Testing
 _Goal: Automated test coverage for scraper, data pipeline, and frontend logic._
 
-### 5A. Scraper & Pipeline Tests `[ ]`
+### 5A. Scraper & Pipeline Tests `[x]`
 **Why:** Zero test coverage. Scraper changes are deployed blind.
 **Scope:**
 - Create `tests/` directory with pytest configuration
@@ -157,16 +189,16 @@ _Goal: Automated test coverage for scraper, data pipeline, and frontend logic._
 - `.github/workflows/scrape.yml` — add `pytest` step before scraping
 
 **Acceptance criteria:**
-- [ ] `pytest` runs and passes with ≥20 tests
-- [ ] parse_html_cards has fixture-based tests
-- [ ] validate_data has positive and negative test cases
-- [ ] generate_data_js output format is tested
-- [ ] generate_pages HTML output validated for OG tags and JSON-LD
-- [ ] CI runs tests before scraping
+- [x] `pytest` runs and passes with ≥20 tests
+- [x] parse_html_cards has fixture-based tests
+- [x] validate_data has positive and negative test cases
+- [x] generate_data_js output format is tested
+- [x] generate_pages HTML output validated for OG tags and JSON-LD
+- [x] CI runs tests before scraping
 
 ---
 
-### 5B. Frontend Logic Tests `[ ]`
+### 5B. Frontend Logic Tests `[x]`
 **Why:** Filter, sort, and search logic is untested. Regressions are invisible.
 **Scope:**
 - Extract core logic functions from index.html into a testable `docs/app.js` module
@@ -184,17 +216,17 @@ _Goal: Automated test coverage for scraper, data pipeline, and frontend logic._
 - `docs/index.html` — import app.js, remove duplicated logic
 
 **Acceptance criteria:**
-- [ ] Core logic is in a separate testable file
-- [ ] ≥15 frontend test assertions pass
-- [ ] haversine, esc, sortList, getFiltered all tested
-- [ ] index.html still works identically after extraction
+- [x] Core logic is in a separate testable file
+- [x] ≥15 frontend test assertions pass
+- [x] haversine, esc, sortList, getFiltered all tested
+- [x] index.html still works identically after extraction
 
 ---
 
 ## Phase 6: Accessibility
 _Goal: WCAG 2.1 AA compliance. Usable by keyboard and screen reader users._
 
-### 6A. Keyboard Navigation & Focus Management `[ ]`
+### 6A. Keyboard Navigation & Focus Management `[x]`
 **Why:** Cards aren't keyboard-reachable. No skip links. No focus indicators.
 **Scope:**
 - Add skip link: `<a href="#grid" class="skip-link">Saltar al contenido</a>`
@@ -207,15 +239,15 @@ _Goal: WCAG 2.1 AA compliance. Usable by keyboard and screen reader users._
 - `docs/index.html` — skip link HTML, card tabindex, focus styles, keyboard handlers, ARIA
 
 **Acceptance criteria:**
-- [ ] Can Tab through all controls and reach restaurant cards
-- [ ] Enter/Space expands a focused card
-- [ ] Escape closes open dropdowns
-- [ ] Skip link jumps to grid, visible on focus
-- [ ] All interactive elements have visible focus ring (`:focus-visible`)
+- [x] Can Tab through all controls and reach restaurant cards
+- [x] Enter/Space expands a focused card
+- [x] Escape closes open dropdowns
+- [x] Skip link jumps to grid, visible on focus
+- [x] All interactive elements have visible focus ring (`:focus-visible`)
 
 ---
 
-### 6B. ARIA Labels & Screen Reader Support `[ ]`
+### 6B. ARIA Labels & Screen Reader Support `[~]`
 **Why:** Missing labels, unexpanded states, and unlabeled inputs exclude screen reader users.
 **Scope:**
 - Add `<label>` (visually hidden) for search input
@@ -231,14 +263,14 @@ _Goal: WCAG 2.1 AA compliance. Usable by keyboard and screen reader users._
 
 **Acceptance criteria:**
 - [ ] axe DevTools reports 0 critical/serious issues
-- [ ] Screen reader announces filter count changes
-- [ ] Dropdown open/close state communicated via `aria-expanded`
-- [ ] All form inputs have associated labels
-- [ ] Favorite and geo buttons announce their toggle state
+- [x] Screen reader announces filter count changes
+- [x] Dropdown open/close state communicated via `aria-expanded`
+- [x] All form inputs have associated labels
+- [x] Favorite and geo buttons announce their toggle state
 
 ---
 
-### 6C. Color Contrast & Touch Targets `[ ]`
+### 6C. Color Contrast & Touch Targets `[~]`
 **Why:** Dark mode muted text fails WCAG AA. Touch targets are too small on mobile.
 **Scope:**
 - Audit all text/background combinations with WebAIM contrast checker
@@ -259,7 +291,7 @@ _Goal: WCAG 2.1 AA compliance. Usable by keyboard and screen reader users._
 ## Phase 7: Scraper Resilience & DevOps
 _Goal: The pipeline detects, alerts, and recovers from data quality issues._
 
-### 7A. Data Quality Monitoring `[ ]`
+### 7A. Data Quality Monitoring `[x]`
 **Why:** CI validates thresholds but can't detect gradual degradation or compare against previous runs.
 **Scope:**
 - Save a `output/quality_report.json` after each scrape with per-field coverage stats
@@ -275,14 +307,14 @@ _Goal: The pipeline detects, alerts, and recovers from data quality issues._
 - `.github/workflows/scrape.yml` — add comparison step, conditional failure
 
 **Acceptance criteria:**
-- [ ] quality_report.json generated on each run
-- [ ] CI detects and warns on >5% field coverage drop
-- [ ] CI fails if >50% restaurant count drops
-- [ ] compare_data.py reports added/removed/changed restaurants
+- [x] quality_report.json generated on each run
+- [x] CI detects and warns on >5% field coverage drop
+- [x] CI fails if >50% restaurant count drops
+- [x] compare_data.py reports added/removed/changed restaurants
 
 ---
 
-### 7B. CI Improvements `[ ]`
+### 7B. CI Improvements `[x]`
 **Why:** No rollback strategy, no PR review for data changes, no test step.
 **Scope:**
 - Add pytest step to CI workflow (run before scraping)
@@ -294,17 +326,17 @@ _Goal: The pipeline detects, alerts, and recovers from data quality issues._
 - `.github/workflows/scrape.yml` — test step, PR creation, size check, SHA pinning
 
 **Acceptance criteria:**
-- [ ] CI runs pytest before scraping
-- [ ] Data updates create a PR (not direct push)
-- [ ] GitHub Actions are pinned to SHA
-- [ ] Data.js size anomaly triggers a warning
+- [x] CI runs pytest before scraping
+- [x] Data updates create a PR (not direct push)
+- [x] GitHub Actions are pinned to SHA
+- [x] Data.js size anomaly triggers a warning
 
 ---
 
 ## Phase 8: SEO & Metadata Polish
 _Goal: Fix all metadata issues found in audit. Maximize search engine and social performance._
 
-### 8A. Fix SEO Metadata Issues `[ ]`
+### 8A. Fix SEO Metadata Issues `[~]`
 **Why:** JSON-LD has string values instead of numbers, Twitter card format suboptimal, OG image dimensions missing.
 **Scope:**
 - Fix JSON-LD in generate_pages.py: `ratingValue`, `bestRating`, `worstRating` as numbers not strings
@@ -318,14 +350,14 @@ _Goal: Fix all metadata issues found in audit. Maximize search engine and social
 - `scripts/generate_pages.py` — JSON-LD fixes, OG image dimensions, Twitter card type
 
 **Acceptance criteria:**
-- [ ] JSON-LD rating values are numbers
-- [ ] og:image:width and og:image:height present on all pages
-- [ ] Twitter card is `summary_large_image` on restaurant pages
+- [x] JSON-LD rating values are numbers
+- [x] og:image:width and og:image:height present on all pages
+- [x] Twitter card is `summary_large_image` on restaurant pages
 - [ ] schema.org validator reports no errors for sample pages
 
 ---
 
-### 8B. Branded OG Image `[ ]`
+### 8B. Branded OG Image `[x]`
 **Why:** Current OG image is a solid teal rectangle. Social sharing looks generic.
 **Scope:**
 - Design a proper OG image with "Last Eat" text, "Restaurantes en Madrid" subtitle
@@ -340,9 +372,9 @@ _Goal: Fix all metadata issues found in audit. Maximize search engine and social
 - `docs/og.png` — replaced with branded version
 
 **Acceptance criteria:**
-- [ ] OG image shows "Last Eat" text and subtitle
-- [ ] Image renders clearly at 1200x630 and when scaled down to thumbnails
-- [ ] OG image is <100KB
+- [x] OG image shows "Last Eat" text and subtitle
+- [x] Image renders clearly at 1200x630 and when scaled down to thumbnails
+- [x] OG image is <100KB
 
 ---
 
@@ -411,7 +443,7 @@ _Goal: Lighthouse 95+ across all categories. Fast on 3G._
 
 ---
 
-### 10B. Data & Rendering Optimization `[ ]`
+### 10B. Data & Rendering Optimization `[~]`
 **Why:** 256KB data.js on slow connections. Small gains compound on mobile.
 **Scope:**
 - Strip empty string values from data.js (e.g. `"ph":""` → omit key entirely)
@@ -424,7 +456,7 @@ _Goal: Lighthouse 95+ across all categories. Fast on 3G._
 - `docs/index.html` — preload hint, color-scheme meta
 
 **Acceptance criteria:**
-- [ ] data.js is ≥15% smaller after stripping empty values
+- [x] data.js is ≥15% smaller after stripping empty values
 - [ ] Lighthouse Performance score ≥95
 - [ ] No layout shift from theme detection (CLS = 0)
 
@@ -480,10 +512,11 @@ After completing all phases, the project should achieve:
 ## Session Hand-off Protocol
 
 When starting a new session on this project:
-1. Read `CLAUDE.md` for project conventions
-2. Read `ROADMAP.md` (this file) to find the next incomplete phase
-3. Check `git log --oneline -10` for recent changes
-4. Check `git status` for any uncommitted work
-5. Work on the next `[ ]` item within the current incomplete phase
-6. After completing a task, update its checkboxes to `[x]` in this file
-7. Commit the roadmap update along with the implementation
+1. Read `HANDOFF.md` if present for current session state
+2. Read `CLAUDE.md` for project conventions
+3. Read `ROADMAP.md` (this file) to find the next incomplete phase
+4. Check `git log --oneline -10` for recent changes
+5. Check `git status` for any uncommitted work
+6. Work on the next `[ ]` item within the current incomplete phase
+7. After completing a task, update its checkboxes to `[x]` in this file
+8. Commit the roadmap update along with the implementation
