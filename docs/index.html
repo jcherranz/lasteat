@@ -6,8 +6,9 @@
 <title>Macarfi Madrid — Restaurantes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300..500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300..500&display=swap" rel="stylesheet">
 <style>
+  /* ── Theme Variables ── */
   :root {
     --bg: #F7F5F0;
     --surface: #FFFFFF;
@@ -18,10 +19,21 @@
     --accent-soft: rgba(180, 90, 60, 0.06);
     --border: #E7E5E1;
     --radius: 5px;
+    --tile: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
+  }
+  [data-theme="dark"] {
+    --bg: #1A1917;
+    --surface: #252320;
+    --text: #E7E5E0;
+    --secondary: #B0ADA7;
+    --muted: #6D6962;
+    --accent: #D4845A;
+    --accent-soft: rgba(212, 132, 90, 0.1);
+    --border: #33312C;
   }
 
+  /* ── Base ── */
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   body {
     font-family: 'DM Sans', sans-serif;
     background: var(--bg);
@@ -29,13 +41,13 @@
     line-height: 1.6;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
 
   /* ── Masthead ── */
   header {
-    padding: 3.5rem 2rem 0;
+    padding: 3rem 2rem 0;
     text-align: center;
+    position: relative;
   }
   .logo {
     font-family: 'Cormorant Garamond', Georgia, serif;
@@ -44,21 +56,35 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     line-height: 1.1;
-    color: var(--text);
   }
   .stats {
     font-size: 0.78rem;
     color: var(--muted);
-    margin-top: 0.75rem;
+    margin-top: 0.6rem;
     letter-spacing: 0.06em;
-    font-weight: 400;
   }
   .divider {
     width: 36px;
     height: 1px;
     background: var(--border);
-    margin: 1.75rem auto 0;
+    margin: 1.5rem auto 0;
   }
+  .theme-toggle {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: var(--muted);
+    padding: 0.25rem;
+    transition: color 0.2s;
+    line-height: 1;
+  }
+  .theme-toggle::before { content: '\263D'; }
+  [data-theme="dark"] .theme-toggle::before { content: '\2600'; }
+  .theme-toggle:hover { color: var(--accent); }
 
   /* ── Controls ── */
   .controls-wrap {
@@ -70,27 +96,26 @@
   .controls-wrap::after {
     content: '';
     position: absolute;
-    bottom: -20px;
+    bottom: -16px;
     left: 0;
     right: 0;
-    height: 20px;
+    height: 16px;
     background: linear-gradient(var(--bg), transparent);
     pointer-events: none;
   }
   .controls {
     max-width: 1100px;
     margin: 0 auto;
-    padding: 1.15rem 2rem;
+    padding: 1rem 2rem;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.45rem;
     align-items: center;
   }
-
   .search-box {
     flex: 1;
-    min-width: 180px;
-    padding: 0.55rem 0;
+    min-width: 160px;
+    padding: 0.5rem 0;
     border: none;
     border-bottom: 1px solid var(--border);
     font-size: 0.85rem;
@@ -104,36 +129,170 @@
   .search-box:focus { border-bottom-color: var(--accent); }
 
   select {
-    padding: 0.5rem 1.8rem 0.5rem 0.65rem;
+    padding: 0.45rem 1.7rem 0.45rem 0.6rem;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-family: inherit;
     background: var(--surface);
     color: var(--secondary);
     outline: none;
     cursor: pointer;
-    max-width: 170px;
     transition: border-color 0.3s;
     -webkit-appearance: none;
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23A8A29E'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 0.65rem center;
+    background-position: right 0.55rem center;
   }
   select:focus { border-color: var(--accent); }
 
-  .sort-group {
+  /* ── Multi-select ── */
+  .ms { position: relative; }
+  .ms-trigger {
+    padding: 0.45rem 1.7rem 0.45rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.78rem;
+    font-family: inherit;
+    background: var(--surface);
+    color: var(--secondary);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.3s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23A8A29E'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.55rem center;
+  }
+  .ms-trigger:hover, .ms.open .ms-trigger { border-color: var(--accent); }
+  .ms.has-sel .ms-trigger { border-color: var(--accent); color: var(--accent); }
+  .ms-drop {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 220px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    z-index: 200;
+    overflow: hidden;
+  }
+  .ms.open .ms-drop {
+    display: block;
+    animation: dropIn 0.15s ease;
+  }
+  @keyframes dropIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .ms-search {
+    width: 100%;
+    padding: 0.5rem 0.6rem;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.78rem;
+    font-family: inherit;
+    outline: none;
+    background: transparent;
+    color: var(--text);
+  }
+  .ms-search::placeholder { color: var(--muted); }
+  .ms-opts {
+    max-height: 200px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .ms-opts::-webkit-scrollbar { width: 4px; }
+  .ms-opts::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .ms-opts label {
+    display: flex;
+    align-items: center;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.78rem;
+    color: var(--secondary);
+    cursor: pointer;
+    transition: background 0.1s;
+    gap: 0.4rem;
+  }
+  .ms-opts label:hover { background: var(--accent-soft); }
+  .ms-opts input[type="checkbox"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 13px;
+    height: 13px;
+    border: 1.5px solid var(--border);
+    border-radius: 3px;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .ms-opts input:checked {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .ms-opts input:checked::after {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 0px;
+    width: 4px;
+    height: 7px;
+    border: solid #fff;
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
+  }
+  .ms-clear {
+    display: none;
+    width: 100%;
+    padding: 0.35rem;
+    border: none;
+    border-top: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .ms.has-sel .ms-clear { display: block; }
+  .ms-clear:hover { color: var(--accent); }
+
+  /* ── Control buttons ── */
+  .ctrl-btn {
+    padding: 0.4rem 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+    font-family: inherit;
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    line-height: 1;
+  }
+  .ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .ctrl-btn.active { border-color: var(--accent); color: var(--accent); }
+
+  .sep {
+    width: 1px;
+    height: 18px;
+    background: var(--border);
+    margin: 0 0.15rem;
+  }
+
+  .btn-group {
     display: flex;
     align-items: center;
     gap: 0.1rem;
-    margin-left: auto;
   }
-  .sort-btn {
-    padding: 0.4rem 0.6rem;
+  .sort-btn, .view-btn {
+    padding: 0.38rem 0.55rem;
     border: none;
     border-radius: var(--radius);
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     font-family: inherit;
     background: transparent;
     color: var(--muted);
@@ -141,8 +300,8 @@
     white-space: nowrap;
     transition: color 0.2s, background 0.2s;
   }
-  .sort-btn:hover { color: var(--secondary); }
-  .sort-btn.active {
+  .sort-btn:hover, .view-btn:hover { color: var(--secondary); }
+  .sort-btn.active, .view-btn.active {
     color: var(--text);
     background: var(--surface);
     font-weight: 500;
@@ -155,35 +314,37 @@
     margin: 0.75rem auto 0;
     padding: 0 2rem 3rem;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 0.65rem;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 0.6rem;
   }
+  .sentinel { height: 1px; grid-column: 1 / -1; }
 
   /* ── Card ── */
   .card {
     background: var(--surface);
     border-radius: var(--radius);
-    padding: 1.2rem 1.4rem;
+    padding: 1.1rem 1.3rem;
     display: flex;
     flex-direction: column;
-    gap: 0.45rem;
+    gap: 0.4rem;
     box-shadow: 0 0 0 1px rgba(0,0,0,0.03);
-    transition: box-shadow 0.25s ease;
+    transition: box-shadow 0.25s;
+    cursor: pointer;
   }
-  .card:hover {
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-  }
+  .card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+  .card.expanded { box-shadow: 0 3px 16px rgba(0,0,0,0.08); }
 
   .card-top {
     display: flex;
-    justify-content: space-between;
     align-items: baseline;
-    gap: 0.75rem;
+    gap: 0.5rem;
   }
   .card-name {
-    font-size: 0.9rem;
+    flex: 1;
+    font-size: 0.88rem;
     font-weight: 500;
     line-height: 1.35;
+    min-width: 0;
   }
   .card-name a {
     color: inherit;
@@ -191,74 +352,100 @@
     transition: color 0.2s;
   }
   .card-name a:hover { color: var(--accent); }
-
+  .fav-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--muted);
+    transition: color 0.15s, transform 0.15s;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .fav-btn:hover { color: var(--accent); transform: scale(1.15); }
+  .fav-btn.active { color: var(--accent); }
   .card-rating {
     flex-shrink: 0;
     font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 1.35rem;
+    font-size: 1.3rem;
     font-weight: 500;
     color: var(--text);
     line-height: 1;
   }
-  .card-rating.no-rating {
-    color: var(--muted);
-    font-size: 1.1rem;
-  }
+  .card-rating.no-r { color: var(--muted); font-size: 1rem; }
 
   .card-meta {
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     color: var(--muted);
     display: flex;
     flex-wrap: wrap;
-    gap: 0;
   }
-  .card-meta span { white-space: nowrap; }
   .card-meta span + span::before {
     content: '\00b7';
-    margin: 0 0.4rem;
+    margin: 0 0.35rem;
     color: var(--border);
   }
 
-  .card-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem;
-  }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 0.25rem; }
   .tag {
-    font-size: 0.67rem;
-    padding: 0.15rem 0.45rem;
+    font-size: 0.66rem;
+    padding: 0.12rem 0.4rem;
     background: var(--accent-soft);
     color: var(--accent);
     border-radius: 3px;
     white-space: nowrap;
-    letter-spacing: 0.01em;
-  }
-
-  .card-ratings {
-    display: flex;
-    gap: 0.6rem;
-    font-size: 0.72rem;
-    color: var(--muted);
-  }
-  .card-ratings strong {
-    color: var(--secondary);
-    font-weight: 500;
   }
 
   .card-actions {
     display: flex;
-    gap: 0.85rem;
+    gap: 0.75rem;
     margin-top: auto;
-    padding-top: 0.35rem;
+    padding-top: 0.2rem;
   }
   .card-actions a {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     color: var(--muted);
     text-decoration: none;
     transition: color 0.2s;
-    letter-spacing: 0.01em;
   }
   .card-actions a:hover { color: var(--accent); }
+
+  /* ── Card Expand ── */
+  .card-expand {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.25s ease;
+  }
+  .card.expanded .card-expand { grid-template-rows: 1fr; }
+  .card-expand > div { overflow: hidden; }
+  .card-detail {
+    padding-top: 0.45rem;
+    margin-top: 0.15rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .card-ratings {
+    font-size: 0.72rem;
+    color: var(--muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .card-ratings strong { color: var(--secondary); font-weight: 500; }
+  .card-address {
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .card-phone a {
+    font-size: 0.72rem;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .card-phone a:hover { text-decoration: underline; }
 
   .no-results {
     grid-column: 1 / -1;
@@ -270,10 +457,45 @@
     border-radius: var(--radius);
   }
 
+  /* ── Map ── */
+  #map-container {
+    max-width: 1100px;
+    margin: 0.75rem auto 0;
+    padding: 0 2rem 3rem;
+  }
+  #map-view {
+    height: 70vh;
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  /* ── Back to top ── */
+  .btt {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.9rem;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.3s, transform 0.3s, color 0.2s, border-color 0.2s;
+    pointer-events: none;
+    z-index: 50;
+    line-height: 1;
+  }
+  .btt.visible { opacity: 1; transform: none; pointer-events: auto; }
+  .btt:hover { color: var(--accent); border-color: var(--accent); }
+
   /* ── Footer ── */
   footer {
     text-align: center;
-    padding: 2.5rem 1.5rem;
+    padding: 2rem 1.5rem;
     font-size: 0.72rem;
     color: var(--muted);
     letter-spacing: 0.04em;
@@ -284,22 +506,32 @@
     border-bottom: 1px solid var(--border);
     transition: border-color 0.2s, color 0.2s;
   }
-  footer a:hover {
-    border-bottom-color: var(--accent);
-    color: var(--accent);
+  footer a:hover { border-bottom-color: var(--accent); color: var(--accent); }
+
+  /* ── Leaflet overrides ── */
+  .leaflet-popup-content-wrapper {
+    border-radius: var(--radius) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.1) !important;
   }
+  .leaflet-popup-content { margin: 10px 12px !important; font-size: 0.82rem; line-height: 1.45; }
+  .leaflet-popup-content strong { font-weight: 500; }
+  .leaflet-popup-content a { color: var(--accent); text-decoration: none; }
 
   /* ── Responsive ── */
   @media (max-width: 640px) {
-    header { padding: 2.5rem 1.25rem 0; }
+    header { padding: 2.25rem 1.25rem 0; }
     .logo { font-size: 2.1rem; }
-    .controls { padding: 0.85rem 1.25rem; }
+    .theme-toggle { top: 1rem; right: 1rem; }
+    .controls { padding: 0.75rem 1.25rem; gap: 0.4rem; }
     .grid {
       grid-template-columns: 1fr;
       padding: 0 1.25rem 2rem;
     }
-    .card { padding: 1rem 1.15rem; }
-    .sort-group { margin-left: 0; }
+    .card { padding: 0.95rem 1.1rem; }
+    .ms-drop { min-width: 200px; }
+    #map-container { padding: 0 1.25rem 2rem; }
+    #map-view { height: 55vh; }
   }
 </style>
 </head>
@@ -309,13 +541,31 @@
   <div class="logo">Macarfi Madrid</div>
   <div class="stats" id="stats">Cargando...</div>
   <div class="divider"></div>
+  <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema"></button>
 </header>
 
 <div class="controls-wrap">
   <div class="controls">
     <input type="text" class="search-box" id="search" placeholder="Buscar restaurante, cocina, zona...">
-    <select id="cuisine-filter"><option value="">Cocina</option></select>
-    <select id="district-filter"><option value="">Zona</option></select>
+
+    <div class="ms" id="ms-cuisine">
+      <button class="ms-trigger" type="button" data-label="Cocina">Cocina</button>
+      <div class="ms-drop">
+        <input class="ms-search" type="text" placeholder="Buscar cocina...">
+        <div class="ms-opts"></div>
+        <button class="ms-clear" type="button">Limpiar</button>
+      </div>
+    </div>
+
+    <div class="ms" id="ms-district">
+      <button class="ms-trigger" type="button" data-label="Zona">Zona</button>
+      <div class="ms-drop">
+        <input class="ms-search" type="text" placeholder="Buscar zona...">
+        <div class="ms-opts"></div>
+        <button class="ms-clear" type="button">Limpiar</button>
+      </div>
+    </div>
+
     <select id="price-filter">
       <option value="">Precio</option>
       <option value="0-30">Hasta 30 &euro;</option>
@@ -323,15 +573,33 @@
       <option value="0-80">Hasta 80 &euro;</option>
       <option value="80-999">Desde 80 &euro;</option>
     </select>
-    <div class="sort-group">
+
+    <button class="ctrl-btn" id="fav-filter" type="button" aria-label="Favoritos">&#9825;</button>
+
+    <span class="sep"></span>
+
+    <div class="btn-group">
       <button class="sort-btn active" data-sort="rating">Ranking</button>
       <button class="sort-btn" data-sort="name">A-Z</button>
       <button class="sort-btn" data-sort="price">Precio</button>
+    </div>
+
+    <span class="sep"></span>
+
+    <div class="btn-group">
+      <button class="view-btn active" data-view="grid">Lista</button>
+      <button class="view-btn" data-view="map">Mapa</button>
     </div>
   </div>
 </div>
 
 <div class="grid" id="grid"></div>
+
+<div id="map-container" hidden>
+  <div id="map-view"></div>
+</div>
+
+<button class="btt" id="btt" aria-label="Volver arriba">&uarr;</button>
 
 <footer>
   Datos de <a href="https://macarfi.com/es/mad/restaurantes" target="_blank" rel="noopener">Macarfi</a>
@@ -341,127 +609,424 @@
 <script src="data.js"></script>
 <script>
 (function() {
-  const grid = document.getElementById('grid');
-  const searchInput = document.getElementById('search');
-  const cuisineSelect = document.getElementById('cuisine-filter');
-  const districtSelect = document.getElementById('district-filter');
-  const priceSelect = document.getElementById('price-filter');
-  const statsEl = document.getElementById('stats');
+  'use strict';
 
-  // Populate filters
-  const cuisines = [...new Set(RESTAURANTS.map(r => r.c).filter(Boolean))].sort();
-  const districts = [...new Set(RESTAURANTS.map(r => r.d).filter(Boolean))].sort();
-  cuisines.forEach(c => {
-    const o = document.createElement('option');
-    o.value = c; o.textContent = c;
-    cuisineSelect.appendChild(o);
+  /* ── Constants ── */
+  var BATCH = 60;
+
+  /* ── DOM ── */
+  var grid     = document.getElementById('grid');
+  var searchEl = document.getElementById('search');
+  var priceEl  = document.getElementById('price-filter');
+  var statsEl  = document.getElementById('stats');
+  var bttEl    = document.getElementById('btt');
+  var favBtn   = document.getElementById('fav-filter');
+  var mapCont  = document.getElementById('map-container');
+
+  /* ── State ── */
+  var sort       = 'rating';
+  var view       = 'grid';
+  var favs       = new Set(JSON.parse(localStorage.getItem('mf-fav') || '[]'));
+  var favsOnly   = false;
+  var selCuisine = new Set();
+  var selDistrict= new Set();
+  var filtered   = [];
+  var rendered   = 0;
+  var map        = null;
+  var tileLayer  = null;
+  var markers    = [];
+  var leafletOk  = false;
+
+  /* ── Utilities ── */
+  function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  /* ── Theme ── */
+  function initTheme() {
+    var saved = localStorage.getItem('mf-theme');
+    if (saved) { document.documentElement.dataset.theme = saved; return; }
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.dataset.theme = 'dark';
+    }
+  }
+  function toggleTheme() {
+    var t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = t;
+    localStorage.setItem('mf-theme', t);
+    if (map && tileLayer) tileLayer.setUrl(getTileUrl());
+  }
+  function getTileUrl() {
+    return document.documentElement.dataset.theme === 'dark'
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+  }
+
+  /* ── Favorites ── */
+  function saveFavs() { localStorage.setItem('mf-fav', JSON.stringify([...favs])); }
+  function toggleFav(name) {
+    if (favs.has(name)) favs.delete(name); else favs.add(name);
+    saveFavs();
+    /* Update visible hearts */
+    grid.querySelectorAll('.fav-btn').forEach(function(b) {
+      var n = b.getAttribute('data-name');
+      var active = favs.has(n);
+      b.classList.toggle('active', active);
+      b.textContent = active ? '\u2665' : '\u2661';
+    });
+    updateFavBtn();
+    if (favsOnly) render();
+  }
+  function updateFavBtn() {
+    favBtn.textContent = (favsOnly ? '\u2665' : '\u2661') + (favs.size ? ' ' + favs.size : '');
+    favBtn.classList.toggle('active', favsOnly);
+  }
+
+  /* ── Multi-Select ── */
+  function setupMS(id, items, onChange) {
+    var el      = document.getElementById(id);
+    var trigger = el.querySelector('.ms-trigger');
+    var drop    = el.querySelector('.ms-drop');
+    var search  = el.querySelector('.ms-search');
+    var opts    = el.querySelector('.ms-opts');
+    var clear   = el.querySelector('.ms-clear');
+    var label   = trigger.getAttribute('data-label');
+
+    items.forEach(function(item) {
+      var lbl = document.createElement('label');
+      var cb  = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.value = item;
+      lbl.appendChild(cb);
+      lbl.appendChild(document.createTextNode(item));
+      opts.appendChild(lbl);
+      cb.addEventListener('change', function() { sync(); onChange(getSelected()); });
+    });
+
+    trigger.addEventListener('click', function(e) {
+      e.stopPropagation();
+      document.querySelectorAll('.ms.open').forEach(function(m) { if (m !== el) m.classList.remove('open'); });
+      el.classList.toggle('open');
+      if (el.classList.contains('open')) search.focus();
+    });
+
+    search.addEventListener('input', function() {
+      var q = search.value.toLowerCase();
+      opts.querySelectorAll('label').forEach(function(l) {
+        l.hidden = l.textContent.toLowerCase().indexOf(q) === -1;
+      });
+    });
+
+    clear.addEventListener('click', function() {
+      opts.querySelectorAll('input').forEach(function(cb) { cb.checked = false; });
+      sync();
+      onChange(getSelected());
+    });
+
+    function getSelected() {
+      return [].slice.call(opts.querySelectorAll('input:checked')).map(function(cb) { return cb.value; });
+    }
+    function sync() {
+      var sel = getSelected();
+      var hasSel = sel.length > 0;
+      el.classList.toggle('has-sel', hasSel);
+      trigger.textContent = hasSel ? label + ' (' + sel.length + ')' : label;
+    }
+    return {
+      setSelected: function(vals) {
+        var set = new Set(vals);
+        opts.querySelectorAll('input').forEach(function(cb) { cb.checked = set.has(cb.value); });
+        sync();
+      },
+      getSelected: getSelected
+    };
+  }
+
+  /* Build options */
+  var cuisineSet = new Set();
+  RESTAURANTS.forEach(function(r) {
+    if (r.c) r.c.split('\u2022').forEach(function(t) {
+      var trimmed = t.trim();
+      if (trimmed) cuisineSet.add(trimmed);
+    });
   });
-  districts.forEach(d => {
-    const o = document.createElement('option');
-    o.value = d; o.textContent = d;
-    districtSelect.appendChild(o);
+  var cuisineOpts  = [].slice.call(cuisineSet).sort(function(a,b){ return a.localeCompare(b,'es'); });
+  var districtOpts = [].slice.call(new Set(RESTAURANTS.map(function(r){return r.d;}).filter(Boolean))).sort(function(a,b){ return a.localeCompare(b,'es'); });
+
+  var cuisineMS  = setupMS('ms-cuisine', cuisineOpts, function(sel) { selCuisine = new Set(sel); render(); });
+  var districtMS = setupMS('ms-district', districtOpts, function(sel) { selDistrict = new Set(sel); render(); });
+
+  /* Close dropdowns on outside click */
+  document.addEventListener('click', function() {
+    document.querySelectorAll('.ms.open').forEach(function(m) { m.classList.remove('open'); });
   });
 
-  let currentSort = 'rating';
+  /* ── URL State ── */
+  function syncURL() {
+    var p = new URLSearchParams();
+    if (searchEl.value.trim()) p.set('q', searchEl.value.trim());
+    if (selCuisine.size)  p.set('c', [].slice.call(selCuisine).join(','));
+    if (selDistrict.size) p.set('d', [].slice.call(selDistrict).join(','));
+    if (priceEl.value)    p.set('p', priceEl.value);
+    if (sort !== 'rating') p.set('s', sort);
+    if (favsOnly) p.set('f', '1');
+    var qs = p.toString();
+    history.replaceState(null, '', qs ? '?' + qs : location.pathname);
+  }
+  function readURL() {
+    var p = new URLSearchParams(location.search);
+    if (p.has('q')) searchEl.value = p.get('q');
+    if (p.has('c')) { var v = p.get('c').split(','); selCuisine = new Set(v); cuisineMS.setSelected(v); }
+    if (p.has('d')) { var v2 = p.get('d').split(','); selDistrict = new Set(v2); districtMS.setSelected(v2); }
+    if (p.has('p')) priceEl.value = p.get('p');
+    if (p.has('s')) {
+      sort = p.get('s');
+      document.querySelectorAll('.sort-btn').forEach(function(b) {
+        b.classList.toggle('active', b.getAttribute('data-sort') === sort);
+      });
+    }
+    if (p.get('f') === '1') favsOnly = true;
+  }
 
-  function sortRestaurants(list, key) {
-    return [...list].sort((a, b) => {
-      if (key === 'rating') {
-        const ra = parseFloat(a.r) || 0;
-        const rb = parseFloat(b.r) || 0;
-        return rb - ra;
+  /* ── Filter & Sort ── */
+  function getFiltered() {
+    var q = searchEl.value.toLowerCase().trim();
+    var pv = priceEl.value;
+    var list = RESTAURANTS.filter(function(r) {
+      if (q) {
+        var h = (r.n + ' ' + (r.c||'') + ' ' + (r.d||'') + ' ' + (r.a||'')).toLowerCase();
+        if (h.indexOf(q) === -1) return false;
       }
-      if (key === 'name') return a.n.localeCompare(b.n, 'es');
-      if (key === 'price') {
-        const pa = parseInt(a.p) || 9999;
-        const pb = parseInt(b.p) || 9999;
-        return pa - pb;
+      if (selCuisine.size) {
+        var tags = r.c ? r.c.split('\u2022').map(function(t){return t.trim();}) : [];
+        if (!tags.some(function(t){ return selCuisine.has(t); })) return false;
       }
+      if (selDistrict.size && !selDistrict.has(r.d)) return false;
+      if (pv) {
+        var parts = pv.split('-').map(Number);
+        var price = parseInt(r.p) || 0;
+        if (!r.p || price < parts[0] || price > parts[1]) return false;
+      }
+      if (favsOnly && !favs.has(r.n)) return false;
+      return true;
+    });
+    return sortList(list, sort);
+  }
+
+  function sortList(list, key) {
+    return list.slice().sort(function(a, b) {
+      if (key === 'rating') return (parseFloat(b.r)||0) - (parseFloat(a.r)||0);
+      if (key === 'name')   return a.n.localeCompare(b.n, 'es');
+      if (key === 'price')  return (parseInt(a.p)||9999) - (parseInt(b.p)||9999);
       return 0;
     });
   }
 
-  function render() {
-    const query = searchInput.value.toLowerCase().trim();
-    const cuisine = cuisineSelect.value;
-    const district = districtSelect.value;
-    const priceRange = priceSelect.value;
+  /* ── Card Builder ── */
+  function buildCard(r) {
+    var isFav  = favs.has(r.n);
+    var heart  = isFav ? '\u2665' : '\u2661';
+    var favCls = isFav ? ' active' : '';
+    var rCls   = r.r && r.r !== '-' ? '' : ' no-r';
+    var rText  = r.r && r.r !== '-' ? r.r : '\u2014';
+    var tags   = r.c ? r.c.split('\u2022').map(function(t) {
+      return '<span class="tag">' + t.trim() + '</span>';
+    }).join('') : '';
+    var price  = r.p ? r.p + ' \u20ac' : '';
+    var gmaps  = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(r.n + ', ' + r.a);
+    var eName  = esc(r.n);
 
-    let filtered = RESTAURANTS.filter(r => {
-      if (query) {
-        const haystack = (r.n + ' ' + r.c + ' ' + r.d + ' ' + r.a).toLowerCase();
-        if (!haystack.includes(query)) return false;
-      }
-      if (cuisine && r.c !== cuisine) return false;
-      if (district && r.d !== district) return false;
-      if (priceRange) {
-        const [min, max] = priceRange.split('-').map(Number);
-        const p = parseInt(r.p) || 0;
-        if (!r.p || p < min || p > max) return false;
-      }
-      return true;
-    });
+    /* Expandable detail */
+    var rDetail = [
+      r.rf ? 'Comida <strong>' + r.rf + '</strong>' : '',
+      r.rd ? 'Decor <strong>' + r.rd + '</strong>' : '',
+      r.rs ? 'Servicio <strong>' + r.rs + '</strong>' : ''
+    ].filter(Boolean).join(' \u00b7 ');
+    var phone = r.ph ? '<div class="card-phone"><a href="tel:' + r.ph.replace(/\s/g,'') + '">' + r.ph + '</a></div>' : '';
+    var addr  = r.a  ? '<div class="card-address">' + r.a + '</div>' : '';
+    var hasDetail = rDetail || r.ph || r.a;
 
-    filtered = sortRestaurants(filtered, currentSort);
-    statsEl.textContent = filtered.length + ' de ' + RESTAURANTS.length + ' restaurantes';
-
-    if (!filtered.length) {
-      grid.innerHTML = '<div class="no-results">No se encontraron restaurantes con esos filtros.</div>';
-      return;
-    }
-
-    grid.innerHTML = filtered.map(r => {
-      const ratingClass = r.r && r.r !== '-' ? '' : ' no-rating';
-      const ratingText = r.r && r.r !== '-' ? r.r : '\u2014';
-      const cuisineTags = r.c ? r.c.split('\u2022').map(t =>
-        '<span class="tag">' + t.trim() + '</span>'
-      ).join('') : '';
-      const ratingsDetail = [
-        r.rf ? 'Comida <strong>' + r.rf + '</strong>' : '',
-        r.rd ? 'Decor <strong>' + r.rd + '</strong>' : '',
-        r.rs ? 'Servicio <strong>' + r.rs + '</strong>' : '',
-      ].filter(Boolean).join(' &middot; ');
-      const price = r.p ? r.p + ' &euro;' : '';
-      const phone = r.ph ? r.ph : '';
-      const gmapsUrl = 'https://www.google.com/maps/search/?api=1&query=' +
-        encodeURIComponent(r.n + ', ' + r.a);
-
-      return '<div class="card">' +
-        '<div class="card-top">' +
-          '<div class="card-name"><a href="' + r.u + '" target="_blank" rel="noopener">' + r.n + '</a></div>' +
-          '<div class="card-rating' + ratingClass + '">' + ratingText + '</div>' +
+    return '<div class="card">' +
+      '<div class="card-top">' +
+        '<div class="card-name"><a href="' + r.u + '" target="_blank" rel="noopener">' + r.n + '</a></div>' +
+        '<button class="fav-btn' + favCls + '" data-name="' + eName + '">' + heart + '</button>' +
+        '<div class="card-rating' + rCls + '">' + rText + '</div>' +
+      '</div>' +
+      '<div class="card-meta">' +
+        (r.d ? '<span>' + r.d + '</span>' : '') +
+        (price ? '<span>' + price + '</span>' : '') +
+      '</div>' +
+      (tags ? '<div class="card-tags">' + tags + '</div>' : '') +
+      (hasDetail ? '<div class="card-expand"><div>' +
+        '<div class="card-detail">' +
+          (rDetail ? '<div class="card-ratings">' + rDetail + '</div>' : '') +
+          addr + phone +
         '</div>' +
-        '<div class="card-meta">' +
-          (r.d ? '<span>' + r.d + '</span>' : '') +
-          (price ? '<span>' + price + '</span>' : '') +
-          (phone ? '<span>' + phone + '</span>' : '') +
-        '</div>' +
-        (cuisineTags ? '<div class="card-tags">' + cuisineTags + '</div>' : '') +
-        (ratingsDetail ? '<div class="card-ratings">' + ratingsDetail + '</div>' : '') +
-        '<div class="card-actions">' +
-          '<a href="' + gmapsUrl + '" target="_blank" rel="noopener">Google Maps</a>' +
-          (r.w ? '<a href="' + r.w + '" target="_blank" rel="noopener">Web</a>' : '') +
-          '<a href="' + r.u + '" target="_blank" rel="noopener">Macarfi</a>' +
-        '</div>' +
-      '</div>';
-    }).join('');
+      '</div></div>' : '') +
+      '<div class="card-actions">' +
+        '<a href="' + gmaps + '" target="_blank" rel="noopener">Maps</a>' +
+        (r.w ? '<a href="' + r.w + '" target="_blank" rel="noopener">Web</a>' : '') +
+        '<a href="' + r.u + '" target="_blank" rel="noopener">Macarfi</a>' +
+      '</div>' +
+    '</div>';
   }
 
-  // Event listeners
-  searchInput.addEventListener('input', render);
-  cuisineSelect.addEventListener('change', render);
-  districtSelect.addEventListener('change', render);
-  priceSelect.addEventListener('change', render);
+  /* ── Progressive Rendering ── */
+  var sentinel = document.createElement('div');
+  sentinel.className = 'sentinel';
+  var observer = new IntersectionObserver(function(entries) {
+    if (entries[0] && entries[0].isIntersecting && rendered < filtered.length) {
+      observer.unobserve(sentinel);
+      renderBatch();
+    }
+  }, { rootMargin: '300px' });
 
-  document.querySelectorAll('.sort-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  function renderBatch() {
+    var batch = filtered.slice(rendered, rendered + BATCH);
+    if (!batch.length) return;
+    if (sentinel.parentNode) sentinel.remove();
+    grid.insertAdjacentHTML('beforeend', batch.map(buildCard).join(''));
+    rendered += batch.length;
+    if (rendered < filtered.length) {
+      grid.appendChild(sentinel);
+      observer.observe(sentinel);
+    }
+  }
+
+  function render() {
+    observer.disconnect();
+    if (sentinel.parentNode) sentinel.remove();
+    filtered = getFiltered();
+    statsEl.textContent = filtered.length + ' de ' + RESTAURANTS.length + ' restaurantes';
+    grid.innerHTML = '';
+    rendered = 0;
+    if (!filtered.length) {
+      grid.innerHTML = '<div class="no-results">No se encontraron restaurantes con esos filtros.</div>';
+    } else {
+      renderBatch();
+    }
+    syncURL();
+    if (view === 'map' && leafletOk) updateMap();
+  }
+
+  /* ── Map ── */
+  function loadLeaflet() {
+    return new Promise(function(resolve) {
+      if (leafletOk) { resolve(); return; }
+      var css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(css);
+      var js = document.createElement('script');
+      js.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      js.onload = function() { leafletOk = true; resolve(); };
+      document.head.appendChild(js);
+    });
+  }
+  function initMap() {
+    mapCont.hidden = false;
+    grid.style.display = 'none';
+    if (map) { updateMap(); map.invalidateSize(); return; }
+    loadLeaflet().then(function() {
+      map = L.map('map-view').setView([40.42, -3.7], 13);
+      tileLayer = L.tileLayer(getTileUrl(), { attribution: '&copy; OpenStreetMap &copy; CartoDB' }).addTo(map);
+      updateMap();
+    });
+  }
+  function updateMap() {
+    if (!map) return;
+    markers.forEach(function(m) { m.remove(); });
+    markers = [];
+    var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+    filtered.forEach(function(r) {
+      if (!r.lat || !r.lng) return;
+      var m = L.circleMarker([parseFloat(r.lat), parseFloat(r.lng)], {
+        radius: 5, fillColor: accent, fillOpacity: 0.85, color: '#fff', weight: 1.5
+      }).bindPopup(
+        '<strong>' + r.n + '</strong>' +
+        (r.r && r.r !== '-' ? '<br>' + r.r + '/10' : '') +
+        (r.d ? '<br>' + r.d : '') +
+        '<br><a href="' + r.u + '" target="_blank">Ver en Macarfi</a>'
+      );
+      m.addTo(map);
+      markers.push(m);
+    });
+    /* Fit bounds if markers exist */
+    if (markers.length) {
+      var group = L.featureGroup(markers);
+      map.fitBounds(group.getBounds().pad(0.1));
+    }
+  }
+  function showGrid() {
+    mapCont.hidden = true;
+    grid.style.display = '';
+    view = 'grid';
+  }
+
+  /* ── Back to Top ── */
+  var scrollTick = false;
+  window.addEventListener('scroll', function() {
+    if (!scrollTick) {
+      requestAnimationFrame(function() {
+        bttEl.classList.toggle('visible', window.scrollY > 500);
+        scrollTick = false;
+      });
+      scrollTick = true;
+    }
+  });
+  bttEl.addEventListener('click', function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  /* ── Card interactions (delegated) ── */
+  grid.addEventListener('click', function(e) {
+    /* Favorite toggle */
+    var fb = e.target.closest('.fav-btn');
+    if (fb) { e.stopPropagation(); toggleFav(fb.getAttribute('data-name')); return; }
+    /* Links pass through */
+    if (e.target.closest('a')) return;
+    /* Expand/collapse */
+    var card = e.target.closest('.card');
+    if (card) card.classList.toggle('expanded');
+  });
+
+  /* ── Event Listeners ── */
+  var searchTimer;
+  searchEl.addEventListener('input', function() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(render, 150);
+  });
+  priceEl.addEventListener('change', render);
+
+  document.querySelectorAll('.sort-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.sort-btn').forEach(function(b) { b.classList.remove('active'); });
       btn.classList.add('active');
-      currentSort = btn.dataset.sort;
+      sort = btn.getAttribute('data-sort');
       render();
     });
   });
 
+  document.querySelectorAll('.view-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.view-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      var v = btn.getAttribute('data-view');
+      if (v === 'map') { view = 'map'; initMap(); }
+      else showGrid();
+    });
+  });
+
+  document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+
+  favBtn.addEventListener('click', function() {
+    favsOnly = !favsOnly;
+    updateFavBtn();
+    render();
+  });
+
+  /* ── Init ── */
+  initTheme();
+  readURL();
+  updateFavBtn();
   render();
 })();
 </script>
