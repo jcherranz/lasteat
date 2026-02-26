@@ -164,14 +164,18 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* ── Theme Transitions ── */
-  body.theme-transition,
-  body.theme-transition *,
-  body.theme-transition *::before,
-  body.theme-transition *::after {
-    transition: background-color 0.4s ease, border-color 0.4s ease,
-                color 0.3s ease, fill 0.3s ease, box-shadow 0.4s ease,
-                background 0.4s ease !important;
+  /* ── Theme Crossfade ── */
+  .theme-fade {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    animation: themeFade 0.45s ease both;
+  }
+  @keyframes themeFade {
+    0%   { opacity: 0; }
+    40%  { opacity: 1; }
+    100% { opacity: 0; }
   }
 
   /* ── Accessibility ── */
@@ -1425,15 +1429,24 @@
     }
   }
   function toggleTheme() {
-    document.body.classList.add('theme-transition');
-    var t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-    document.documentElement.dataset.theme = t;
-    safeSetStorage('mf-theme', t);
-    setTimeout(function() { document.body.classList.remove('theme-transition'); }, 500);
-    if (map && tileLayer) {
-      tileLayer.setUrl(getTileUrl());
-      if (view === 'map') updateMap();
-    }
+    var isDark = document.documentElement.dataset.theme === 'dark';
+    var t = isDark ? 'light' : 'dark';
+    /* Crossfade overlay: covers the instant switch */
+    var overlay = document.createElement('div');
+    overlay.className = 'theme-fade';
+    overlay.style.background = isDark ? '#F8F7F3' : '#0F1311';
+    document.body.appendChild(overlay);
+    /* Switch theme at peak opacity */
+    setTimeout(function() {
+      document.documentElement.dataset.theme = t;
+      safeSetStorage('mf-theme', t);
+      if (map && tileLayer) {
+        tileLayer.setUrl(getTileUrl());
+        if (view === 'map') updateMap();
+      }
+    }, 180);
+    /* Remove overlay after animation */
+    overlay.addEventListener('animationend', function() { overlay.remove(); });
   }
   function getTileUrl() {
     return document.documentElement.dataset.theme === 'dark'
