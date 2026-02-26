@@ -601,7 +601,7 @@
 
 <button class="btt" id="btt" aria-label="Volver arriba">&uarr;</button>
 
-<footer>
+<footer id="footer">
   Actualizado feb 2026
 </footer>
 
@@ -1022,10 +1022,21 @@
     render();
   });
 
+  /* ── Dynamic footer ── */
+  function updateFooter() {
+    if (typeof META === 'undefined') return;
+    var d = new Date(META.updated);
+    if (isNaN(d)) return;
+    var months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    document.getElementById('footer').textContent =
+      'Actualizado ' + months[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
   /* ── Init ── */
   initTheme();
   readURL();
   updateFavBtn();
+  updateFooter();
   render();
 })();
 </script>

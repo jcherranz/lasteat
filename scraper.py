@@ -19,6 +19,7 @@ import re
 import sys
 import time
 from pathlib import Path
+from typing import Any
 
 import httpx
 from bs4 import BeautifulSoup
@@ -302,6 +303,35 @@ def fetch_all_html_cards(client: httpx.Client, total_pages: int) -> str:
     return all_html
 
 
+# ── Validation ───────────────────────────────────────────────────────────────
+
+MIN_RESTAURANTS = 700
+MIN_CUISINE_PCT = 0.90
+
+
+def validate_data(restaurants: list[dict[str, Any]]) -> list[str]:
+    """Check scraped data meets quality thresholds. Returns list of errors."""
+    errors = []
+    total = len(restaurants)
+
+    if total < MIN_RESTAURANTS:
+        errors.append(f"Only {total} restaurants (minimum: {MIN_RESTAURANTS})")
+
+    if total > 0:
+        with_cuisine = sum(1 for r in restaurants if r.get("cuisine"))
+        cuisine_pct = with_cuisine / total
+        if cuisine_pct < MIN_CUISINE_PCT:
+            errors.append(
+                f"Only {cuisine_pct:.0%} have cuisine data (minimum: {MIN_CUISINE_PCT:.0%})"
+            )
+
+        with_coords = sum(1 for r in restaurants if r.get("latitude"))
+        if with_coords < total * 0.95:
+            errors.append(f"Only {with_coords}/{total} have coordinates")
+
+    return errors
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 
@@ -383,6 +413,16 @@ def main():
     print(f"  5. Select 'Name' as the title column")
     if not enrich:
         print(f"\nTip: Run with --enrich to also fetch phone/website (takes ~13 min)")
+
+    # Validate data quality
+    errors = validate_data(restaurants)
+    if errors:
+        print(f"\nVALIDATION FAILED:")
+        for e in errors:
+            print(f"  - {e}")
+        sys.exit(1)
+    else:
+        print(f"\nValidation passed.")
 
 
 if __name__ == "__main__":
