@@ -962,6 +962,17 @@
   }
   .map-tooltip::before { border-top-color: var(--border) !important; }
 
+  /* ── Map Attribution ── */
+  .leaflet-control-attribution {
+    background: transparent !important;
+    font-size: 0.55rem !important;
+    color: var(--muted) !important;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+  }
+  .leaflet-control-attribution:hover { opacity: 1; }
+  .leaflet-control-attribution a { color: var(--muted) !important; }
+
   /* ── Back to top ── */
   .btt {
     position: fixed;
@@ -1812,7 +1823,8 @@
     if (map) { updateMap(); map.invalidateSize(); return; }
     loadLeaflet().then(function() {
       map = L.map('map-view').setView([40.42, -3.7], 13);
-      tileLayer = L.tileLayer(getTileUrl(), { attribution: '&copy; OpenStreetMap &copy; CartoDB' }).addTo(map);
+      map.attributionControl.setPrefix('');
+      tileLayer = L.tileLayer(getTileUrl(), { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>' }).addTo(map);
       document.getElementById('map-view').classList.add('loaded');
       map.on('moveend', updateMapCounter);
       updateMap();
