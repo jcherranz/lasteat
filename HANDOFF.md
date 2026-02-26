@@ -2,68 +2,43 @@
 
 Date: 2026-02-26
 
-## Scope Completed This Session
-Frontend UX/UI polish pass — all changes in `docs/index.html` (CSS + JS), plus favicon and generate_pages.py template:
+## Current Status
 
-### List View
-- Replaced infinite scroll with load-more button: 9 cards initial, 9 per click
-- Removed IntersectionObserver/sentinel code entirely
-- Load-more button has down-arrow chevron, scrolls to first new card on click
-- Footer is always reachable after the initial 9 cards
+All engineering fundamentals are solid (security, testing, CI, accessibility, performance). A professional outside-in assessment identified **visual design expression** as the weakest dimension — the site reads as "competent developer project" rather than "editorial dining platform."
 
-### Map View
-- Uniform pin sizes (14x19px) — removed rating-based sizing
-- Styled Leaflet zoom controls to match editorial aesthetic
-- Thin custom scrollbar on map side panel
-- Prefetch Leaflet CSS/JS and MarkerCluster during idle time (`<link rel="prefetch">`)
+### Design Assessment Findings
+1. **Monotone color**: teal accent does everything (ratings, tags, actions, hover, map) — no visual hierarchy
+2. **Typography sprawl**: ~25 distinct font-sizes between 0.55–3.4rem, no systematic scale
+3. **Underpowered header**: thin 300-weight logo, near-invisible subtitle, no atmosphere
+4. **Cards are a wall of small text**: no visual tiers, no imagery-substitute personality
+5. **No content rhythm**: 770 identical cards in a flat grid with no editorial punctuation
+6. **Static page feel**: minimal hover personality, no scroll reveals, bland empty states
 
-### Controls Bar Redesign (CSS-only, no HTML changes)
-- Search takes full width (its own row) with magnifying glass SVG icon
-- Filter pills unified at 36px height, smaller chevrons (8x5)
-- Separators (`.sep`) hidden, spacing via flexbox gap + auto-margin
-- Sort/view segmented controls pushed right with accent-fill active state
-- Control buttons reduced to 36px circles
+## Next Work: Phase 12 (Design Elevation)
 
-### Theme System
-- Fixed garbled theme toggle icons → proper Unicode sun/moon
-- Replaced broken per-element theme transition with crossfade overlay
-  (fullscreen div fades in with target color, theme switches at peak, fades out)
+Phase 12 has been added to ROADMAP.md with three sub-phases:
 
-### Visual Polish
-- SVG favicon (teal LE monogram) + PNG fallback — added to index.html and generate_pages.py
-- Page entrance animation: header elements stagger in (0.6s, 100ms between)
-- Sticky controls bar gains subtle shadow when scrolled past 80px
-- Warmer card hover shadows (layered, more lift)
-- Tag pills: lowercase, refined letter-spacing
-- Reduced-motion: header animations properly disabled
+| Sub-phase | Focus | Key deliverables |
+|---|---|---|
+| **12A** | Design System Foundation | Warm accent palette, 6-step typography scale, hero section upgrade |
+| **12B** | Card Hierarchy + Micro-interactions | Card visual overhaul, hover/toggle animations, empty states, footer |
+| **12C** | Content Rhythm + Scroll Reveals | Editorial banners, district headers, scroll fade-ins, map polish |
 
-## Verification Performed
-- `python -m pytest tests/` — 37 passed (verified after each change)
-- All commits pushed to main
+### Recommended Execution Order
+**12A first, then 12B, then 12C.** Strictly sequential — each sub-phase builds on the previous:
+- 12B depends on the `--warm` variables and `--text-*` scale from 12A
+- 12C depends on the card hierarchy from 12B for visual coherence
 
-## Commits This Session
-```
-d544e61 Fix theme transition: crossfade overlay instead of per-element transitions
-dab142a Redesign controls bar and prefetch map resources
-f1878ce Add favicon, fix theme toggle, polish UI entrance and transitions
-dadd7f6 Show only 9 cards initially, load 60 more per click
-4f44104 Fix map UX: unlock zoom, uniform pins, styled panel scrollbar
-c391ec6 Polish list and map UX: hybrid load-more, styled controls, zoom cap, pin sizes
-```
+### Known Caveats
+1. **Detail page CSS sync** — `scripts/generate_pages.py` template CSS must mirror homepage variable changes from 12A. Regenerating 770 pages creates a large diff — use a separate commit.
+2. **Warm accent WCAG** — the planned ~#C4956A needs contrast verification against `--surface` and `--bg` at implementation time. Adjust if needed for AA compliance.
+3. **IntersectionObserver history** (12C) — IntersectionObserver was previously used for infinite scroll and was deliberately removed when switching to load-more pagination. The 12C usage is different: reveal animations only (not loading), so reintroduction is appropriate but the session should note this history.
+4. **Service worker cache** — 12A bumps to `lasteat-v6`, 12C bumps to `lasteat-v7`. Each sub-phase commit should include the cache version bump.
 
-## Current Roadmap Status
-- Phases 1-5, 7, 8B, 10A: complete
-- Phase 6B/6C, 8A, 10B: partially done (pending audit tool verification)
-- Phase 9 (search/analytics), 11 (multi-city): not started
-- See ROADMAP.md for detailed status tracking
+## Previous Session Summary
+The last session completed a UX/UI polish pass (load-more pagination, controls bar redesign, theme crossfade, favicon, map prefetch, entrance animations). All commits pushed to main. 37 tests passing.
 
-## Recommended Next Actions
-1. Run axe DevTools audit to close `6B` and Lighthouse to close `6C`
-2. Validate sample restaurant pages with schema.org validator to close `8A`
-3. Run Lighthouse Performance audit to close `10B`
-4. Then move to Phase 9 (Smart Search & Analytics) or Phase 11 (Multi-City)
-
-## Known Caveats
-- Detail pages (`docs/r/*.html`) have NOT been regenerated this session — they don't have the favicon link yet. Run `scripts/generate_pages.py` to update them.
-- The BATCH=9 constant means many clicks to load all 770 restaurants. User explicitly requested this.
-- Service worker cache version is `lasteat-v5` — may need a bump if users see stale assets.
+## Other Pending Work
+- **P0 audits:** 6B/6C (axe + Lighthouse a11y), 8A (schema.org validator), 10B (Lighthouse perf) — these are tool-verification tasks, not code changes
+- **P1 features:** 9A (smart search), 9B (analytics)
+- **P2 expansion:** 11A (multi-city)

@@ -216,9 +216,18 @@ def build_page(r: dict) -> str:
     --accent: #2E6058;
     --accent-soft: rgba(46, 96, 88, 0.06);
     --accent-muted: rgba(46, 96, 88, 0.14);
+    --warm: #C4956A;
+    --warm-soft: rgba(196, 149, 106, 0.08);
+    --warm-muted: rgba(196, 149, 106, 0.16);
     --border: #E5E2DC;
     --radius: 8px;
     --radius-pill: 100px;
+    --text-xs: 0.65rem;
+    --text-sm: 0.72rem;
+    --text-base: 0.85rem;
+    --text-lg: 0.95rem;
+    --text-xl: 1.6rem;
+    --text-2xl: 4.2rem;
   }}
   [data-theme="dark"] {{
     --bg: #0F1311;
@@ -229,6 +238,9 @@ def build_page(r: dict) -> str:
     --accent: #4CB0A1;
     --accent-soft: rgba(76, 176, 161, 0.08);
     --accent-muted: rgba(76, 176, 161, 0.15);
+    --warm: #D4A574;
+    --warm-soft: rgba(212, 165, 116, 0.10);
+    --warm-muted: rgba(212, 165, 116, 0.18);
     --border: #262A28;
   }}
   * {{ margin: 0; padding: 0; box-sizing: border-box; }}
@@ -250,7 +262,7 @@ def build_page(r: dict) -> str:
     transition: background-color 0.3s, border-color 0.3s, color 0.2s;
   }}
   .back {{
-    font-size: 0.72rem;
+    font-size: var(--text-sm);
     color: var(--muted);
     text-decoration: none;
     letter-spacing: 0.08em;
@@ -271,7 +283,7 @@ def build_page(r: dict) -> str:
     margin: 1.5rem 0 0.5rem;
   }}
   .meta {{
-    font-size: 0.74rem;
+    font-size: var(--text-sm);
     color: var(--muted);
     display: flex;
     flex-wrap: wrap;
@@ -287,12 +299,12 @@ def build_page(r: dict) -> str:
     font-family: 'Cormorant Garamond', Georgia, serif;
     font-size: 3.2rem;
     font-weight: 600;
-    color: var(--accent);
+    color: var(--warm);
     margin: 1.25rem 0 0.25rem;
     line-height: 1;
   }}
   .ratings {{
-    font-size: 0.74rem;
+    font-size: var(--text-sm);
     color: var(--muted);
     margin-bottom: 1rem;
     letter-spacing: 0.01em;
@@ -300,10 +312,10 @@ def build_page(r: dict) -> str:
   .ratings strong {{ color: var(--secondary); font-weight: 500; }}
   .tags {{ display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0.75rem 0; }}
   .tag {{
-    font-size: 0.68rem;
+    font-size: var(--text-xs);
     padding: 0.15rem 0.5rem;
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: var(--warm-soft);
+    color: var(--warm);
     border-radius: var(--radius-pill);
     font-weight: 500;
     letter-spacing: 0.02em;
@@ -316,7 +328,7 @@ def build_page(r: dict) -> str:
     margin: 1.25rem 0;
   }}
   .card-label {{
-    font-size: 0.64rem;
+    font-size: var(--text-xs);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--muted);
@@ -324,7 +336,7 @@ def build_page(r: dict) -> str:
     font-weight: 500;
   }}
   .card-value {{
-    font-size: 0.88rem;
+    font-size: var(--text-base);
     color: var(--text);
     line-height: 1.5;
   }}
@@ -334,7 +346,7 @@ def build_page(r: dict) -> str:
   }}
   .card-value a:hover {{ text-decoration: underline; }}
   .contact {{
-    font-size: 0.82rem;
+    font-size: var(--text-base);
     color: var(--muted);
     margin: 1rem 0;
   }}
@@ -350,7 +362,7 @@ def build_page(r: dict) -> str:
     background: var(--accent);
     color: #fff;
     border-radius: var(--radius-pill);
-    font-size: 0.78rem;
+    font-size: var(--text-sm);
     font-family: inherit;
     font-weight: 500;
     letter-spacing: 0.04em;
@@ -361,7 +373,7 @@ def build_page(r: dict) -> str:
   footer {{
     text-align: center;
     padding: 2.5rem 1.5rem;
-    font-size: 0.68rem;
+    font-size: var(--text-xs);
     color: var(--muted);
     letter-spacing: 0.08em;
     text-transform: uppercase;

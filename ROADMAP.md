@@ -86,8 +86,9 @@ _Goal: match professional delivery sequencing for a live MVP._
 
 ### Remaining work
 1. **P0 Close open audits:** 6B/6C (axe + Lighthouse a11y), 8A (schema.org validator), 10B (Lighthouse perf)
-2. **P1 Product discovery features:** 9A (smart search), 9B (analytics) — 9B before 9A
-3. **P2 Expansion:** 11A only after single-city KPI thresholds are met
+2. **P1 Visual design elevation:** 12A (design system), 12B (card hierarchy), 12C (rhythm + polish)
+3. **P1 Product discovery features:** 9A (smart search), 9B (analytics) — 9B before 9A
+4. **P2 Expansion:** 11A only after single-city KPI thresholds are met
 
 ### KPI gate before multi-city (11A)
 - 4 consecutive weekly scraper runs without incident
@@ -492,13 +493,92 @@ _Goal: Serve Barcelona, Valencia, and other cities with minimal new code._
 
 ---
 
+## Phase 12: Design Elevation
+_Goal: Evolve from "competent developer project" to "editorial dining platform" through systematic visual refinement._
+
+### 12A. Design System Foundation `[ ]`
+**Why:** Teal accent does everything (ratings, tags, actions, hover, map) — monotone palette lacks hierarchy. ~25 distinct font-sizes between 0.55–3.4rem with no system. Thin 300-weight logo lacks presence.
+**Scope:**
+- Add `--warm` accent CSS variables (gold/amber ~#C4956A) for ratings/price/data display
+- Define typography scale variables (`--text-xs` through `--text-xl`, 6 steps)
+- Migrate all ~25 hardcoded font-sizes to nearest scale variable
+- Scale logo to 4.2rem/600 weight (from 3.4rem/300), mobile 3rem
+- Add header atmosphere (subtle warm radial gradient, decorative divider)
+- Mirror CSS variable changes in `scripts/generate_pages.py` template
+
+**Files to modify:**
+- `docs/index.html` — CSS variables, typography migration, header styling
+- `scripts/generate_pages.py` — mirror new CSS variables in detail page template
+- `docs/sw.js` — cache bump to `lasteat-v6`
+
+**Acceptance criteria:**
+- [ ] `--warm`, `--warm-soft`, `--warm-muted` defined for both light and dark themes
+- [ ] Typography scale variables in `:root`, no more than 8 hardcoded font-sizes remain
+- [ ] Logo 4.2rem/600 desktop, 3rem mobile
+- [ ] Header has warm radial gradient
+- [ ] Dark mode correct with new warm tones
+- [ ] Detail pages receive new variables after regeneration
+
+---
+
+### 12B. Card Hierarchy + Micro-interactions + Footer `[ ]`
+**Why:** Cards are a wall of small text with no visual tiers. No hover personality. Bland empty states. Footer is minimal.
+**Scope:**
+- Card name to `--text-lg` (0.95rem)/600 weight
+- Rating pill: warm-tinted background badge
+- Tags: increase to `--text-sm` (0.72rem), use warm accent (not teal)
+- Left border accent on 9.0+ rated cards (`data-top-rated` attribute)
+- Enhanced hover: warmer layered shadow, more lift
+- Heart bounce animation on toggle (keyframe + `just-toggled` class)
+- Load-more arrow rotation on hover
+- CSS-only fork-knife illustration for empty state
+- Footer: larger Cormorant brand, italic "Hecho en Madrid"
+- All animations respect `prefers-reduced-motion`
+
+**Files to modify:**
+- `docs/index.html` — CSS (card styles, animations, footer) + JS (buildCard, toggleFav)
+
+**Acceptance criteria:**
+- [ ] Card name 0.95rem/600, rating has warm pill, tags use warm accent
+- [ ] 9.0+ cards have left border accent
+- [ ] Heart bounces on toggle, arrow rotates on hover
+- [ ] Empty state has CSS illustration
+- [ ] Footer brand larger, "Hecho en Madrid" italic serif
+- [ ] Dark mode correct, reduced-motion respected
+
+---
+
+### 12C. Content Rhythm + Scroll Reveals + Map Polish `[ ]`
+**Why:** 770 identical cards in a flat grid with no editorial punctuation. Static page feel with no scroll reveals. Map view lacks branding.
+**Scope:**
+- Decorative banner row between first and second card batch
+- District headers when sorted by name
+- IntersectionObserver for card fade-in (second batch onward)
+- Stats count-up animation (0→N over 800ms) on initial load
+- Map view: "Explora Madrid" header, refined zoom controls (36x36px, warm hover)
+- Service worker cache bump to `lasteat-v7`
+
+**Files to modify:**
+- `docs/index.html` — CSS (banner, district headers, fade-in, map) + JS (renderBatch, IntersectionObserver, map header, count-up)
+
+**Acceptance criteria:**
+- [ ] Banner appears between first and second batch
+- [ ] District headers when sorted by name
+- [ ] Cards beyond initial batch fade in on scroll
+- [ ] Stats count-up on initial load
+- [ ] Map has "Explora Madrid" header, 36x36px zoom controls
+- [ ] All animations disabled under `prefers-reduced-motion`
+- [ ] No performance regression
+
+---
+
 ## Scoring Targets
 
 After completing all phases, the project should achieve:
 
 | Dimension | Current | Target | Key phases |
 |---|---|---|---|
-| Design & UX | 9/10 | 10/10 | 9A |
+| Design & UX | 9/10 | 10/10 | 12A, 12B, 12C |
 | Functionality | 8/10 | 10/10 | 9A, 9B, 11A |
 | Code quality | 9/10 | 10/10 | — |
 | Testing | 9/10 | 10/10 | — |
