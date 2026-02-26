@@ -742,6 +742,22 @@
   }
   .no-results .clear-filters:hover { border-color: var(--accent); color: var(--accent); }
 
+  /* ── Load More ── */
+  .load-more { grid-column: 1 / -1; text-align: center; padding: 2rem 0 0.5rem; }
+  .load-more-btn {
+    display: inline-block;
+    padding: 0.55rem 1.6rem;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--secondary);
+    font-size: 0.78rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.25s, color 0.25s;
+  }
+  .load-more-btn:hover { border-color: var(--accent); color: var(--accent); }
+
   /* ── Map ── */
   /* ── Map Layout ── */
   #map-container {
@@ -976,6 +992,29 @@
   }
   .leaflet-control-attribution:hover { opacity: 1; }
   .leaflet-control-attribution a { color: var(--muted) !important; }
+
+  /* ── Leaflet Zoom Controls ── */
+  .leaflet-control-zoom {
+    border: 1.5px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+    overflow: hidden;
+  }
+  .leaflet-control-zoom a {
+    background: var(--surface) !important;
+    color: var(--muted) !important;
+    width: 32px !important;
+    height: 32px !important;
+    line-height: 32px !important;
+    font-size: 1rem !important;
+    border-color: var(--border) !important;
+    transition: color 0.2s, background 0.2s;
+  }
+  .leaflet-control-zoom a:hover {
+    background: var(--accent-soft) !important;
+    color: var(--accent) !important;
+  }
+  .leaflet-control-zoom-in { border-bottom: 1px solid var(--border) !important; }
 
   /* ── Back to top ── */
   .btt {
@@ -1233,6 +1272,7 @@
 
   /* ── Constants ── */
   var BATCH = 60;
+  var AUTO_BATCHES = 2;
   var LEAFLET_CSS_INTEGRITY = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
   var LEAFLET_JS_INTEGRITY = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
   var MC_JS_INTEGRITY = 'sha256-Hk4dIpcqOSb0hZjgyvFOP+cEmDXUKKNE/tT542ZbNQg=';
@@ -1271,6 +1311,7 @@
   var selDistrict= new Set();
   var filtered   = [];
   var rendered   = 0;
+  var batchCount = 0;
   var map          = null;
   var tileLayer    = null;
   var clusterGroup = null;
@@ -1746,7 +1787,7 @@
     '</div>';
   }
 
-  /* ── Progressive Rendering ── */
+  /* ── Progressive Rendering (hybrid: auto + load-more) ── */
   var sentinel = document.createElement('div');
   sentinel.className = 'sentinel';
   var observer = new IntersectionObserver(function(entries) {
@@ -1756,25 +1797,52 @@
     }
   }, { rootMargin: '300px' });
 
+  var loadMoreWrap = document.createElement('div');
+  loadMoreWrap.className = 'load-more';
+  var loadMoreBtn = document.createElement('button');
+  loadMoreBtn.className = 'load-more-btn';
+  loadMoreBtn.type = 'button';
+  loadMoreWrap.appendChild(loadMoreBtn);
+  loadMoreBtn.addEventListener('click', function() {
+    if (loadMoreWrap.parentNode) loadMoreWrap.remove();
+    renderBatch();
+  });
+
+  function showLoadMore() {
+    var remaining = filtered.length - rendered;
+    if (remaining <= 0) return;
+    loadMoreBtn.textContent = 'Mostrar más (' + remaining + ' restantes)';
+    if (loadMoreWrap.parentNode) loadMoreWrap.remove();
+    grid.appendChild(loadMoreWrap);
+  }
+
   function renderBatch() {
     var batch = filtered.slice(rendered, rendered + BATCH);
     if (!batch.length) return;
     if (sentinel.parentNode) sentinel.remove();
+    if (loadMoreWrap.parentNode) loadMoreWrap.remove();
     grid.insertAdjacentHTML('beforeend', batch.map(function(r, i) { return buildCard(r, i); }).join(''));
     rendered += batch.length;
+    batchCount++;
     if (rendered < filtered.length) {
-      grid.appendChild(sentinel);
-      observer.observe(sentinel);
+      if (batchCount < AUTO_BATCHES) {
+        grid.appendChild(sentinel);
+        observer.observe(sentinel);
+      } else {
+        showLoadMore();
+      }
     }
   }
 
   function render() {
     observer.disconnect();
     if (sentinel.parentNode) sentinel.remove();
+    if (loadMoreWrap.parentNode) loadMoreWrap.remove();
     filtered = getFiltered();
     statsEl.textContent = filtered.length + ' de ' + RESTAURANTS.length + ' restaurantes';
     grid.innerHTML = '';
     rendered = 0;
+    batchCount = 0;
     if (!filtered.length) {
       if (favsOnly && !favs.size) {
         grid.innerHTML = '<div class="no-results"><p>Marca restaurantes con el coraz\u00f3n para verlos aqu\u00ed.</p></div>';
@@ -1833,10 +1901,10 @@
   function markerIcon(rating) {
     var r = parseFloat(rating) || 0;
     var w, h, opacity;
-    if (r >= 9)      { w = 22; h = 30; opacity = 1;    }
-    else if (r >= 8) { w = 18; h = 24; opacity = 0.92; }
+    if (r >= 9)      { w = 18; h = 24; opacity = 1;    }
+    else if (r >= 8) { w = 16; h = 21; opacity = 0.92; }
     else if (r >= 7) { w = 14; h = 19; opacity = 0.82; }
-    else             { w = 11; h = 15; opacity = 0.7;   }
+    else             { w = 12; h = 16; opacity = 0.7;   }
     /* Teardrop pin: top circle + bottom point */
     var cx = w / 2;
     var cr = w / 2 - 1;
@@ -1921,7 +1989,7 @@
     grid.style.display = 'none';
     if (map) { updateMap(); map.invalidateSize(); return; }
     loadLeaflet().then(function() {
-      map = L.map('map-view').setView([40.42, -3.7], 13);
+      map = L.map('map-view', { maxZoom: 16 }).setView([40.42, -3.7], 13);
       map.attributionControl.setPrefix('');
       tileLayer = L.tileLayer(getTileUrl(), { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>' }).addTo(map);
       document.getElementById('map-view').classList.add('loaded');
@@ -1949,7 +2017,7 @@
       spiderfyOnMaxZoom: true,
       showCoverageOnHover: false,
       zoomToBoundsOnClick: true,
-      disableClusteringAtZoom: 17,
+      disableClusteringAtZoom: 16,
       animateAddingMarkers: true
     });
 
