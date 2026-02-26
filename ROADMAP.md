@@ -74,19 +74,19 @@ A  @  185.199.111.153
 ## Re-prioritized Execution Order (2026-02-26)
 _Goal: match professional delivery sequencing for a live MVP._
 
-### Current sprint (in progress) `[~]`
-1. Security + correctness baseline (Phase 4A + critical UI fixes)
-2. Scraper reliability cleanup (targeted Phase 4B items)
-3. Establish CI safety gates before shipping new features
+### Completed sprints `[x]`
+1. Security + correctness baseline (Phase 4A + 4B)
+2. Testing foundation (Phase 5A + 5B)
+3. Accessibility keyboard/ARIA (Phase 6A)
+4. CI/DevOps hardening (Phase 7A + 7B)
+5. SEO metadata + branded OG image (Phase 8A partial + 8B)
+6. Font self-hosting + data optimization (Phase 10A + 10B partial)
+7. Frontend design polish (dark mode contrast, empty states, mobile UX, theme transitions)
 
-### Professional order from this point
-1. **P0 Hardening first:** 4A, then highest-risk parts of 4B
-2. **P1 Release safety:** 5A + 7B (tests + CI gates + PR-based data updates)
-3. **P2 Compliance baseline:** privacy/legal pages + analytics consent posture
-4. **P3 Accessibility:** 6A-6C (WCAG 2.1 AA baseline)
-5. **P4 SEO/performance polish:** 8A, 10A, 10B
-6. **P5 Product discovery features:** 9B (analytics) before 9A
-7. **P6 Expansion:** 11A only after single-city KPI thresholds are met
+### Remaining work
+1. **P0 Close open audits:** 6B/6C (axe + Lighthouse a11y), 8A (schema.org validator), 10B (Lighthouse perf)
+2. **P1 Product discovery features:** 9A (smart search), 9B (analytics) — 9B before 9A
+3. **P2 Expansion:** 11A only after single-city KPI thresholds are met
 
 ### KPI gate before multi-city (11A)
 - 4 consecutive weekly scraper runs without incident
@@ -282,8 +282,8 @@ _Goal: WCAG 2.1 AA compliance. Usable by keyboard and screen reader users._
 - `docs/index.html` — CSS variable adjustment, padding increases
 
 **Acceptance criteria:**
-- [ ] All text/background combinations pass WCAG AA (≥4.5:1 normal, ≥3:1 large text)
-- [ ] All interactive elements have ≥44x44px touch area
+- [x] All text/background combinations pass WCAG AA (≥4.5:1 normal, ≥3:1 large text)
+- [x] All interactive elements have ≥44x44px touch area
 - [ ] Lighthouse Accessibility score ≥95
 
 ---
@@ -422,7 +422,7 @@ _Goal: Better ways to find restaurants. Expand content._
 ## Phase 10: Performance
 _Goal: Lighthouse 95+ across all categories. Fast on 3G._
 
-### 10A. Font & Asset Optimization `[ ]`
+### 10A. Font & Asset Optimization `[x]`
 **Why:** Google Fonts is a render-blocking external dependency. CDN failures break fonts.
 **Scope:**
 - Self-host Cormorant Garamond and DM Sans (download woff2 files)
@@ -437,9 +437,9 @@ _Goal: Lighthouse 95+ across all categories. Fast on 3G._
 - `docs/index.html` — replace Google Fonts link with inline @font-face + preload
 
 **Acceptance criteria:**
-- [ ] No external font requests (Google Fonts removed)
-- [ ] Fonts load via self-hosted woff2 with font-display: swap
-- [ ] First Contentful Paint unchanged or improved
+- [x] No external font requests (Google Fonts removed)
+- [x] Fonts load via self-hosted woff2 with font-display: swap
+- [x] First Contentful Paint unchanged or improved
 
 ---
 
@@ -497,15 +497,15 @@ After completing all phases, the project should achieve:
 
 | Dimension | Current | Target | Key phases |
 |---|---|---|---|
-| Design & UX | 8/10 | 10/10 | 8B, 9A |
+| Design & UX | 9/10 | 10/10 | 9A |
 | Functionality | 8/10 | 10/10 | 9A, 9B, 11A |
-| Code quality | 5/10 | 10/10 | 4B, 5B |
-| Testing | 1/10 | 10/10 | 5A, 5B |
-| Security | 4/10 | 10/10 | 4A |
-| Accessibility | 3/10 | 10/10 | 6A, 6B, 6C |
-| DevOps/CI | 7/10 | 10/10 | 7A, 7B |
-| SEO | 7/10 | 10/10 | 8A |
-| Performance | 7/10 | 10/10 | 10A, 10B |
+| Code quality | 9/10 | 10/10 | — |
+| Testing | 9/10 | 10/10 | — |
+| Security | 9/10 | 10/10 | — |
+| Accessibility | 8/10 | 10/10 | 6B, 6C (audits) |
+| DevOps/CI | 9/10 | 10/10 | — |
+| SEO | 9/10 | 10/10 | 8A (validator) |
+| Performance | 8/10 | 10/10 | 10B (Lighthouse) |
 
 ---
 
