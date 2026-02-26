@@ -82,6 +82,7 @@ _Goal: match professional delivery sequencing for a live MVP._
 5. SEO metadata + branded OG image (Phase 8A partial + 8B)
 6. Font self-hosting + data optimization (Phase 10A + 10B partial)
 7. Frontend design polish (dark mode contrast, empty states, mobile UX, theme transitions)
+8. UX/UI redesign (load-more pagination, controls bar layout, theme crossfade, favicon, map prefetch, uniform markers, entrance animations)
 
 ### Remaining work
 1. **P0 Close open audits:** 6B/6C (axe + Lighthouse a11y), 8A (schema.org validator), 10B (Lighthouse perf)

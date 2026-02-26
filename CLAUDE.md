@@ -7,7 +7,9 @@ Madrid restaurant discovery platform. Python scraper harvests ~770 restaurants f
 ```
 scraper.py          → Python. Fetches Macarfi API + HTML cards, merges, exports JSON/CSV
 docs/index.html     → Single-file frontend (HTML + CSS + JS). No build step.
+docs/app.js         → Extracted pure logic (esc, haversine, getFiltered, sortList)
 docs/data.js        → Generated. RESTAURANTS array consumed by index.html
+docs/favicon.svg    → SVG favicon (teal LE monogram)
 docs/CNAME          → Custom domain config (lasteat.es)
 output/             → Gitignored. Scraper cache + exports
 ```

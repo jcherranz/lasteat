@@ -3,41 +3,67 @@
 Date: 2026-02-26
 
 ## Scope Completed This Session
-- Frontend Design Improvements (Phase 2 polish pass):
-  - Regenerated all 770 detail pages with updated design system (self-hosted fonts, corrected palette, theme transitions, 44px touch targets on back link)
-  - Fixed PWA `manifest.json` colors to match CSS (`#2E6058`, `#F8F7F3`)
-  - Fixed dark mode contrast: `--muted` bumped from `#6B706D` to `#8A8F8C` (~4.6:1 WCAG AA)
-  - Added dark mode SVG chevron overrides for `select` and `.ms-trigger`
-  - Added empty state improvements: "Limpiar filtros" button on no-results, distinct favorites empty message
-  - Added CSS-only map loading skeleton (pulse animation, removed on Leaflet init)
-  - Added theme switch transitions on major surfaces (`body`, `.card`, `.controls-wrap`, etc.)
-  - Restored 44px min-height on sort/view buttons in mobile breakpoint
-  - Added `:active` touch feedback states on cards, buttons
-  - Added search clear (`×`) button with show/hide logic
-  - Added card expand hint chevron on first card
-  - Improved accessibility: fav button `aria-label` includes restaurant name, `#grid` gets `tabindex="-1"`, cards get `aria-label`
-  - Removed unused Cormorant Garamond 500 weight (2 files, ~67KB saved)
-  - Bumped card animation stagger cap from 11 to 15
-  - Increased divider opacity from 0.35 to 0.5
-  - Bumped service worker cache to `lasteat-v4`
+Frontend UX/UI polish pass — all changes in `docs/index.html` (CSS + JS), plus favicon and generate_pages.py template:
+
+### List View
+- Replaced infinite scroll with load-more button: 9 cards initial, 9 per click
+- Removed IntersectionObserver/sentinel code entirely
+- Load-more button has down-arrow chevron, scrolls to first new card on click
+- Footer is always reachable after the initial 9 cards
+
+### Map View
+- Uniform pin sizes (14x19px) — removed rating-based sizing
+- Styled Leaflet zoom controls to match editorial aesthetic
+- Thin custom scrollbar on map side panel
+- Prefetch Leaflet CSS/JS and MarkerCluster during idle time (`<link rel="prefetch">`)
+
+### Controls Bar Redesign (CSS-only, no HTML changes)
+- Search takes full width (its own row) with magnifying glass SVG icon
+- Filter pills unified at 36px height, smaller chevrons (8x5)
+- Separators (`.sep`) hidden, spacing via flexbox gap + auto-margin
+- Sort/view segmented controls pushed right with accent-fill active state
+- Control buttons reduced to 36px circles
+
+### Theme System
+- Fixed garbled theme toggle icons → proper Unicode sun/moon
+- Replaced broken per-element theme transition with crossfade overlay
+  (fullscreen div fades in with target color, theme switches at peak, fades out)
+
+### Visual Polish
+- SVG favicon (teal LE monogram) + PNG fallback — added to index.html and generate_pages.py
+- Page entrance animation: header elements stagger in (0.6s, 100ms between)
+- Sticky controls bar gains subtle shadow when scrolled past 80px
+- Warmer card hover shadows (layered, more lift)
+- Tag pills: lowercase, refined letter-spacing
+- Reduced-motion: header animations properly disabled
 
 ## Verification Performed
-- `python -m pytest tests/` — 37 passed
-- Generated pages verified: new `--muted` color, font-weight 600, no 500 font references
-- `git diff --stat` confirmed 776 files changed (770 detail pages + core files)
+- `python -m pytest tests/` — 37 passed (verified after each change)
+- All commits pushed to main
+
+## Commits This Session
+```
+d544e61 Fix theme transition: crossfade overlay instead of per-element transitions
+dab142a Redesign controls bar and prefetch map resources
+f1878ce Add favicon, fix theme toggle, polish UI entrance and transitions
+dadd7f6 Show only 9 cards initially, load 60 more per click
+4f44104 Fix map UX: unlock zoom, uniform pins, styled panel scrollbar
+c391ec6 Polish list and map UX: hybrid load-more, styled controls, zoom cap, pin sizes
+```
 
 ## Current Roadmap Status
-- Phases 1-5, 7, 8B: complete
-- Phase 4A, 4B: complete
-- Phase 6A: complete
-- Phase 6B: mostly done, pending axe DevTools audit (`[ ]` criterion)
-- Phase 6C: mostly done — dark mode contrast fixed, touch targets at 44px. Pending Lighthouse a11y score ≥95
-- Phase 8A: mostly done, pending schema.org validator check
-- Phase 10A: complete (self-hosted fonts shipped in redesign commit `2c8c428`)
-- Phase 10B: partially done — data.js size reduction and preload shipped, pending Lighthouse perf score
+- Phases 1-5, 7, 8B, 10A: complete
+- Phase 6B/6C, 8A, 10B: partially done (pending audit tool verification)
+- Phase 9 (search/analytics), 11 (multi-city): not started
+- See ROADMAP.md for detailed status tracking
 
 ## Recommended Next Actions
 1. Run axe DevTools audit to close `6B` and Lighthouse to close `6C`
 2. Validate sample restaurant pages with schema.org validator to close `8A`
 3. Run Lighthouse Performance audit to close `10B`
 4. Then move to Phase 9 (Smart Search & Analytics) or Phase 11 (Multi-City)
+
+## Known Caveats
+- Detail pages (`docs/r/*.html`) have NOT been regenerated this session — they don't have the favicon link yet. Run `scripts/generate_pages.py` to update them.
+- The BATCH=9 constant means many clicks to load all 770 restaurants. User explicitly requested this.
+- Service worker cache version is `lasteat-v5` — may need a bump if users see stale assets.
