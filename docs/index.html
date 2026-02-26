@@ -1002,20 +1002,82 @@
 
   /* ── Footer ── */
   footer {
-    text-align: center;
-    padding: 2.5rem 1.5rem;
-    font-size: 0.68rem;
-    color: var(--muted);
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 2rem;
+    border-top: 1px solid var(--border);
+  }
+  .footer-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .footer-brand-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 1.15rem;
+    color: var(--text);
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
-  footer a {
-    color: var(--secondary);
-    text-decoration: none;
-    border-bottom: 1px solid var(--border);
-    transition: border-color 0.2s, color 0.2s;
+  .footer-brand-tagline {
+    font-size: 0.66rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+    letter-spacing: 0.03em;
   }
-  footer a:hover { border-bottom-color: var(--accent); color: var(--accent); }
+  .footer-links {
+    display: flex;
+    gap: 2.5rem;
+  }
+  .footer-col-title {
+    font-size: 0.6rem;
+    font-weight: 500;
+    color: var(--secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+  .footer-col ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .footer-col li { margin-bottom: 0.3rem; }
+  .footer-col a {
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-col a:hover { color: var(--accent); }
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.58rem;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .footer-bottom a {
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-bottom a:hover { color: var(--accent); }
+  @media (max-width: 640px) {
+    footer { padding: 2rem 1.25rem 1.5rem; }
+    .footer-inner { flex-direction: column; gap: 1.5rem; }
+    .footer-links { gap: 1.5rem; }
+    .footer-bottom { flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+  }
 
 
 
@@ -1136,7 +1198,31 @@
 <button class="btt" id="btt" aria-label="Volver arriba">&uarr;</button>
 
 <footer id="footer">
-  Actualizado feb 2026
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-brand-name">Last Eat</div>
+      <div class="footer-brand-tagline">Descubre d&oacute;nde comer en Madrid</div>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <div class="footer-col-title">Proyecto</div>
+        <ul>
+          <li><a href="https://github.com/jcherranz/lasteat" target="_blank" rel="noopener">GitHub</a></li>
+          <li><a href="https://macarfi.com/es/madrid" target="_blank" rel="noopener">Fuente: Macarfi</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Legal</div>
+        <ul>
+          <li><a href="https://github.com/jcherranz/lasteat/blob/main/LICENSE" target="_blank" rel="noopener">Licencia MIT</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span id="footer-updated">Actualizado feb 2026</span>
+    <span>Hecho en Madrid</span>
+  </div>
 </footer>
 
 <script src="app.js"></script>
@@ -2028,8 +2114,8 @@
     var d = new Date(META.updated);
     if (isNaN(d)) return;
     var months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-    document.getElementById('footer').textContent =
-      'Actualizado ' + months[d.getMonth()] + ' ' + d.getFullYear();
+    var el = document.getElementById('footer-updated');
+    if (el) el.textContent = 'Actualizado ' + months[d.getMonth()] + ' ' + d.getFullYear();
   }
 
   /* ── Init ── */
