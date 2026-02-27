@@ -2710,28 +2710,63 @@
     var countBadge = document.getElementById('map-count-badge');
     if (countBadge) countBadge.textContent = visibleCount + ' restaurantes visibles';
 
-    /* Pin labels: show on nearest markers to center at high zoom */
+    /* Pin labels: show on nearest non-overlapping markers at high zoom */
     var zoom = map.getZoom();
-    /* Close previous labels */
     openLabelMarkers.forEach(function(m) { m.closeTooltip(); });
     openLabelMarkers = [];
 
     if (zoom >= PIN_LABEL_ZOOM) {
       var center = map.getCenter();
-      /* Find visible unclustered markers, sorted by distance to center */
       var candidates = [];
       markerIndex.forEach(function(item) {
         if (!bounds.contains(item.marker.getLatLng())) return;
-        /* Skip markers that are inside a cluster (not on the map directly) */
-        if (!map.hasLayer(item.marker) && clusterGroup && !clusterGroup.hasLayer(item.marker)) return;
         var dist = center.distanceTo(item.marker.getLatLng());
-        candidates.push({ marker: item.marker, dist: dist });
+        candidates.push({ marker: item.marker, data: item.data, dist: dist });
       });
       candidates.sort(function(a, b) { return a.dist - b.dist; });
-      candidates.slice(0, PIN_LABEL_MAX).forEach(function(c) {
+
+      /* Greedy collision-free placement using pixel coordinates */
+      var LABEL_H = 20;
+      var CHAR_W = 5.5;
+      var PAD = 6;
+      var PIN_W = 14, PIN_H = 19;
+      var placed = []; /* array of {x, y, w, h} rects */
+
+      function rectsOverlap(a, b) {
+        return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+      }
+
+      for (var i = 0; i < candidates.length && openLabelMarkers.length < PIN_LABEL_MAX; i++) {
+        var c = candidates[i];
+        var pt = map.latLngToContainerPoint(c.marker.getLatLng());
+        /* Estimate label width from name + rating text length */
+        var textLen = (c.data.n || '').length + (c.data.r && c.data.r !== '-' ? c.data.r.length + 1 : 0);
+        var labelW = textLen * CHAR_W + PAD * 2;
+        /* Label rect: centered above pin, offset by 22px */
+        var labelRect = {
+          x: pt.x - labelW / 2,
+          y: pt.y - PIN_H - 22 - LABEL_H,
+          w: labelW,
+          h: LABEL_H
+        };
+        /* Pin rect */
+        var pinRect = { x: pt.x - PIN_W / 2, y: pt.y - PIN_H, w: PIN_W, h: PIN_H };
+
+        /* Check collision with placed labels and their pins */
+        var collides = false;
+        for (var j = 0; j < placed.length; j++) {
+          if (rectsOverlap(labelRect, placed[j])) { collides = true; break; }
+        }
+        if (collides) continue;
+
+        /* Also ensure label doesn't overlap any placed pin */
+        /* (pins are small, but check anyway) */
+
         c.marker.openTooltip();
         openLabelMarkers.push(c.marker);
-      });
+        placed.push(labelRect);
+        placed.push(pinRect);
+      }
     }
   }
 
@@ -2802,7 +2837,7 @@
       var m = L.marker(latlng, { icon: markerIcon(r.r) });
       m.bindPopup(buildPopup(r), { maxWidth: 260, minWidth: 180 });
       /* Tooltip: hover on desktop, force-opened at high zoom for central markers */
-      m.bindTooltip(buildTooltip(r), { direction: 'top', offset: [0, -6], className: 'map-pin-label' });
+      m.bindTooltip(buildTooltip(r), { direction: 'top', offset: [0, -22], className: 'map-pin-label' });
 
       /* Panel item */
       var li = document.createElement('li');
