@@ -1267,7 +1267,7 @@
   }
   .map-tooltip::before { border-top-color: var(--border) !important; }
 
-  /* Pin labels: permanent tooltips, visible only at high zoom */
+  /* Pin labels: shown on nearby markers at high zoom */
   .map-pin-label {
     font-family: 'DM Sans', sans-serif !important;
     font-size: var(--text-xs) !important;
@@ -1277,17 +1277,12 @@
     color: var(--text) !important;
     border: 1px solid var(--border) !important;
     white-space: nowrap;
-    opacity: 0;
     pointer-events: none;
-    transition: opacity 0.2s;
   }
   .map-pin-label::before { border-top-color: var(--border) !important; }
   .map-pin-label .map-tt-rating {
     color: var(--warm);
     font-weight: 500;
-  }
-  #map-view.zoom-labels .map-pin-label {
-    opacity: 1;
   }
   .district-label {
     background: none !important;
@@ -2699,7 +2694,9 @@
   }
 
   /* Sync panel to visible map bounds */
-  var PIN_LABEL_ZOOM = 17;
+  var PIN_LABEL_ZOOM = 18;
+  var PIN_LABEL_MAX = 6;
+  var openLabelMarkers = [];
   function updateMapPanel() {
     if (!map) return;
     var bounds = map.getBounds();
@@ -2712,8 +2709,30 @@
     if (mapVisibleCountEl) mapVisibleCountEl.textContent = visibleCount + ' visibles';
     var countBadge = document.getElementById('map-count-badge');
     if (countBadge) countBadge.textContent = visibleCount + ' restaurantes visibles';
-    /* Toggle pin labels at high zoom */
-    document.getElementById('map-view').classList.toggle('zoom-labels', map.getZoom() >= PIN_LABEL_ZOOM);
+
+    /* Pin labels: show on nearest markers to center at high zoom */
+    var zoom = map.getZoom();
+    /* Close previous labels */
+    openLabelMarkers.forEach(function(m) { m.closeTooltip(); });
+    openLabelMarkers = [];
+
+    if (zoom >= PIN_LABEL_ZOOM) {
+      var center = map.getCenter();
+      /* Find visible unclustered markers, sorted by distance to center */
+      var candidates = [];
+      markerIndex.forEach(function(item) {
+        if (!bounds.contains(item.marker.getLatLng())) return;
+        /* Skip markers that are inside a cluster (not on the map directly) */
+        if (!map.hasLayer(item.marker) && clusterGroup && !clusterGroup.hasLayer(item.marker)) return;
+        var dist = center.distanceTo(item.marker.getLatLng());
+        candidates.push({ marker: item.marker, dist: dist });
+      });
+      candidates.sort(function(a, b) { return a.dist - b.dist; });
+      candidates.slice(0, PIN_LABEL_MAX).forEach(function(c) {
+        c.marker.openTooltip();
+        openLabelMarkers.push(c.marker);
+      });
+    }
   }
 
   /* Highlight panel item + scroll into view */
@@ -2782,8 +2801,8 @@
       var latlng = L.latLng(parseFloat(r.lat), parseFloat(r.lng));
       var m = L.marker(latlng, { icon: markerIcon(r.r) });
       m.bindPopup(buildPopup(r), { maxWidth: 260, minWidth: 180 });
-      /* Permanent pin label (revealed at high zoom via CSS) */
-      m.bindTooltip(buildTooltip(r), { permanent: true, direction: 'top', offset: [0, -6], className: 'map-pin-label' });
+      /* Tooltip: hover on desktop, force-opened at high zoom for central markers */
+      m.bindTooltip(buildTooltip(r), { direction: 'top', offset: [0, -6], className: 'map-pin-label' });
 
       /* Panel item */
       var li = document.createElement('li');
