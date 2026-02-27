@@ -337,6 +337,7 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 0.5rem;
+    position: relative;
   }
 
   /* ── View Toggle & Fav ── */
@@ -437,8 +438,9 @@
 
   /* ── Sort Dropdown ── */
   .sort-wrap {
-    position: relative;
-    margin-left: auto;
+    position: absolute;
+    top: 0;
+    right: 0;
   }
   .sort-trigger {
     background: none;
@@ -1382,10 +1384,9 @@
       margin-right: 0.15rem;
     }
 
-    /* Sort pill: own line on mobile */
+    /* Sort pill: flow normally on mobile */
     .sort-wrap {
-      margin-left: 0;
-      flex-basis: 100%;
+      position: static;
     }
 
     /* Smaller pills on mobile */
@@ -1448,14 +1449,14 @@
         <button class="filter-pill" data-price="31-50" type="button">31&ndash;50 &euro;</button>
         <button class="filter-pill" data-price="51-80" type="button">51&ndash;80 &euro;</button>
         <button class="filter-pill" data-price="80-999" type="button">80 &euro;+</button>
-        <div class="sort-wrap" id="sort-wrap">
-          <button class="sort-trigger" id="sort-trigger" type="button" aria-expanded="false" aria-haspopup="listbox" aria-controls="sort-drop">Ordenar: <span id="sort-label">Ranking</span> &#9662;</button>
-          <div class="sort-drop" id="sort-drop" role="listbox" aria-label="Ordenar por">
-            <button class="sort-option active" data-sort="rating" role="option" aria-selected="true" type="button">Ranking</button>
-            <button class="sort-option" data-sort="name" role="option" aria-selected="false" type="button">A-Z</button>
-            <button class="sort-option" data-sort="price" role="option" aria-selected="false" type="button">Precio</button>
-            <button class="sort-option" data-sort="distance" role="option" aria-selected="false" type="button" id="sort-dist" hidden>Distancia</button>
-          </div>
+      </div>
+      <div class="sort-wrap" id="sort-wrap">
+        <button class="sort-trigger" id="sort-trigger" type="button" aria-expanded="false" aria-haspopup="listbox" aria-controls="sort-drop">Ordenar: <span id="sort-label">Ranking</span> &#9662;</button>
+        <div class="sort-drop" id="sort-drop" role="listbox" aria-label="Ordenar por">
+          <button class="sort-option active" data-sort="rating" role="option" aria-selected="true" type="button">Ranking</button>
+          <button class="sort-option" data-sort="name" role="option" aria-selected="false" type="button">A-Z</button>
+          <button class="sort-option" data-sort="price" role="option" aria-selected="false" type="button">Precio</button>
+          <button class="sort-option" data-sort="distance" role="option" aria-selected="false" type="button" id="sort-dist" hidden>Distancia</button>
         </div>
       </div>
 
