@@ -1358,10 +1358,46 @@
     header { padding: 1.25rem 1.25rem 0; }
     .logo { font-size: 2.2rem; letter-spacing: 0.15em; }
     .theme-toggle { top: 1rem; right: 1rem; }
-    .controls { padding: 0.6rem 1.25rem; gap: 0.35rem; }
-    .controls-row-1 { gap: 0.5rem; }
-    .controls-row-2 { gap: 0.35rem; }
-    .active-filters { padding: 0 1.25rem 0.4rem; }
+    .controls { padding: 0.6rem 1rem; gap: 0.35rem; }
+
+    /* Row 1: search on top, pills below */
+    .controls-row-1 {
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+    .controls-row-1 .search-wrap {
+      flex-basis: 100%;
+      min-width: 0;
+    }
+
+    /* Row 2: tighter layout */
+    .controls-row-2 { gap: 0.3rem; }
+
+    /* Filter groups: drop the fixed-width label, stack vertically */
+    .filter-group {
+      gap: 0.25rem;
+    }
+    .filter-group-label {
+      width: auto;
+      margin-right: 0.15rem;
+    }
+
+    /* Sort pill: own line on mobile */
+    .sort-wrap {
+      margin-left: 0;
+      flex-basis: 100%;
+    }
+
+    /* Smaller pills on mobile */
+    .filter-pill,
+    .view-link,
+    .filter-group .ms-trigger,
+    .sort-trigger {
+      padding: 0.25rem 0.5rem;
+      min-height: 28px;
+    }
+
+    .active-filters { padding: 0 1rem 0.4rem; }
     .grid {
       grid-template-columns: 1fr;
       padding: 0 1rem 2rem;
@@ -1372,6 +1408,11 @@
     #map-container { padding: 0 1rem 2rem; }
     #map-view { height: 55vh; border-radius: var(--radius); }
     .surprise-prompt { padding: 2rem 1.25rem; font-size: var(--text-title); }
+
+    /* Map mode filter overlay: tighter padding */
+    body.map-mode .controls-row-2.filters-open {
+      padding: 0.6rem 1rem;
+    }
   }
 </style>
 </head>
