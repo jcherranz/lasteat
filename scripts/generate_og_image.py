@@ -1,155 +1,132 @@
 """
-Generate branded OG image (1200x630) without external dependencies.
+Generate branded OG image (1200x630).
+
+Uses the project's Cormorant Garamond and DM Sans fonts for proper
+editorial typography. Requires: Pillow, fonttools, brotli.
 
 Usage:
     python scripts/generate_og_image.py
 """
 
-import struct
-import zlib
+import os
+import tempfile
 from pathlib import Path
+
+from fontTools.ttLib import TTFont
+from PIL import Image, ImageDraw, ImageFont
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 OUTPUT_PATH = PROJECT_ROOT / "docs" / "og.png"
+FONTS_DIR = PROJECT_ROOT / "docs" / "fonts"
 WIDTH = 1200
 HEIGHT = 630
 
-# 5x7 bitmap font for required uppercase chars.
-GLYPHS = {
-    " ": ["00000", "00000", "00000", "00000", "00000", "00000", "00000"],
-    "+": ["00000", "00100", "00100", "11111", "00100", "00100", "00000"],
-    "0": ["01110", "10001", "10011", "10101", "11001", "10001", "01110"],
-    "7": ["11111", "00001", "00010", "00100", "01000", "01000", "01000"],
-    "A": ["01110", "10001", "10001", "11111", "10001", "10001", "10001"],
-    "C": ["01110", "10001", "10000", "10000", "10000", "10001", "01110"],
-    "D": ["11110", "10001", "10001", "10001", "10001", "10001", "11110"],
-    "E": ["11111", "10000", "10000", "11110", "10000", "10000", "11111"],
-    "G": ["01110", "10001", "10000", "10111", "10001", "10001", "01110"],
-    "I": ["11111", "00100", "00100", "00100", "00100", "00100", "11111"],
-    "L": ["10000", "10000", "10000", "10000", "10000", "10000", "11111"],
-    "M": ["10001", "11011", "10101", "10101", "10001", "10001", "10001"],
-    "N": ["10001", "11001", "10101", "10011", "10001", "10001", "10001"],
-    "O": ["01110", "10001", "10001", "10001", "10001", "10001", "01110"],
-    "R": ["11110", "10001", "10001", "11110", "10100", "10010", "10001"],
-    "S": ["01111", "10000", "10000", "01110", "00001", "00001", "11110"],
-    "T": ["11111", "00100", "00100", "00100", "00100", "00100", "00100"],
-    "U": ["10001", "10001", "10001", "10001", "10001", "10001", "01110"],
-}
+# Project palette
+TEAL = (46, 96, 88)  # #2E6058
+WHITE = (255, 255, 255)
 
 
-def blend_rect(img: dict, x: int, y: int, w: int, h: int, color, alpha: float) -> None:
-    x0 = max(0, x)
-    y0 = max(0, y)
-    x1 = min(img["width"], x + w)
-    y1 = min(img["height"], y + h)
-    if x0 >= x1 or y0 >= y1:
-        return
-    pixels = img["pixels"]
-    width = img["width"]
-    inv_alpha = 1.0 - alpha
-    sr, sg, sb = color
-
-    for yy in range(y0, y1):
-        base = (yy * width + x0) * 3
-        for _xx in range(x0, x1):
-            dr = pixels[base]
-            dg = pixels[base + 1]
-            db = pixels[base + 2]
-            pixels[base] = int((dr * inv_alpha) + (sr * alpha) + 0.5)
-            pixels[base + 1] = int((dg * inv_alpha) + (sg * alpha) + 0.5)
-            pixels[base + 2] = int((db * inv_alpha) + (sb * alpha) + 0.5)
-            base += 3
+def _blend(alpha: float) -> tuple[int, int, int]:
+    """Pre-blend white over teal at given opacity."""
+    return tuple(int(TEAL[i] + (WHITE[i] - TEAL[i]) * alpha) for i in range(3))
 
 
-def draw_text(img: dict, text: str, y: int, scale: int, color, alpha: float = 1.0) -> None:
-    text = text.upper()
-    glyph_w = 5
-    spacing = 1
-    total = 0
-    for ch in text:
-        total += (glyph_w + spacing) * scale
-    if total > 0:
-        total -= spacing * scale
+def _load_font(woff2_name: str, size: int) -> tuple[ImageFont.FreeTypeFont, str]:
+    """Decompress woff2 to temp TTF and load with Pillow.
 
-    x = (img["width"] - total) // 2
-    for ch in text:
-        glyph = GLYPHS.get(ch, GLYPHS[" "])
-        for row, bits in enumerate(glyph):
-            for col, bit in enumerate(bits):
-                if bit == "1":
-                    blend_rect(
-                        img,
-                        x + col * scale,
-                        y + row * scale,
-                        scale,
-                        scale,
-                        color=color,
-                        alpha=alpha,
-                    )
-        x += (glyph_w + spacing) * scale
+    Returns (font, tmp_path) so caller can clean up.
+    """
+    woff2_path = FONTS_DIR / woff2_name
+    font_tt = TTFont(str(woff2_path))
+    fd, tmp_path = tempfile.mkstemp(suffix=".ttf")
+    os.close(fd)
+    font_tt.save(tmp_path)
+    font_tt.close()
+    return ImageFont.truetype(tmp_path, size), tmp_path
 
 
-def build_image(width: int = WIDTH, height: int = HEIGHT) -> dict:
-    top = (62, 137, 127)
-    bottom = (27, 83, 76)
-    pixels = bytearray(width * height * 3)
-    img = {"width": width, "height": height, "pixels": pixels}
+def _draw_tracked(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    center_x: float,
+    y: int,
+    font: ImageFont.FreeTypeFont,
+    fill: tuple,
+    tracking: float = 0,
+) -> None:
+    """Draw text centered horizontally with letter-spacing."""
+    total = sum(font.getlength(ch) for ch in text)
+    total += tracking * max(0, len(text) - 1)
 
-    for y in range(height):
-        t = y / (height - 1)
-        r = int((top[0] * (1.0 - t)) + (bottom[0] * t))
-        g = int((top[1] * (1.0 - t)) + (bottom[1] * t))
-        b = int((top[2] * (1.0 - t)) + (bottom[2] * t))
-        row = bytes((r, g, b)) * width
-        start = y * width * 3
-        pixels[start : start + width * 3] = row
-
-    blend_rect(img, -100, -60, 720, 320, color=(255, 255, 255), alpha=0.09)
-    blend_rect(img, 620, 260, 720, 420, color=(14, 52, 47), alpha=0.35)
-    blend_rect(img, 120, 510, 960, 2, color=(255, 255, 255), alpha=0.3)
-
-    draw_text(img, "LAST EAT", y=150, scale=18, color=(255, 255, 255), alpha=1.0)
-    draw_text(img, "RESTAURANTES EN MADRID", y=320, scale=7, color=(255, 255, 255), alpha=0.95)
-    draw_text(img, "GUIA CURADA DE 770+ RESTAURANTES", y=400, scale=5, color=(255, 255, 255), alpha=0.82)
-
-    return img
+    x = center_x - total / 2
+    for i, ch in enumerate(text):
+        draw.text((x, y), ch, font=font, fill=fill)
+        x += font.getlength(ch)
+        if i < len(text) - 1:
+            x += tracking
 
 
-def png_chunk(tag: bytes, data: bytes) -> bytes:
-    return (
-        struct.pack(">I", len(data))
-        + tag
-        + data
-        + struct.pack(">I", zlib.crc32(tag + data) & 0xFFFFFFFF)
-    )
+def build_image(width: int = WIDTH, height: int = HEIGHT) -> Image.Image:
+    """Build the OG image and return a PIL Image."""
+    tmp_files = []
+    try:
+        # Scale fonts and positions when rendering at non-standard sizes
+        scale = min(width / WIDTH, height / HEIGHT)
+        heading_size = max(1, int(96 * scale))
+        body_size = max(1, int(24 * scale))
+        small_size = max(1, int(17 * scale))
 
+        heading, t1 = _load_font("cormorant-garamond-300-latin.woff2", heading_size)
+        tmp_files.append(t1)
+        body, t2 = _load_font("dm-sans-400-latin.woff2", body_size)
+        tmp_files.append(t2)
+        small, t3 = _load_font("dm-sans-300-latin.woff2", small_size)
+        tmp_files.append(t3)
 
-def write_png(path: Path, img: dict) -> None:
-    width = img["width"]
-    height = img["height"]
-    pixels = img["pixels"]
-    header = struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0)
-    raw = bytearray()
-    row_len = width * 3
-    for y in range(height):
-        start = y * row_len
-        raw.append(0)  # filter type 0 (None)
-        raw.extend(pixels[start : start + row_len])
-    compressed = zlib.compress(raw, level=9)
+        img = Image.new("RGB", (width, height), TEAL)
+        draw = ImageDraw.Draw(img)
+        cx = width / 2
 
-    png = (
-        b"\x89PNG\r\n\x1a\n"
-        + png_chunk(b"IHDR", header)
-        + png_chunk(b"IDAT", compressed)
-        + png_chunk(b"IEND", b"")
-    )
-    path.write_bytes(png)
+        # "Last Eat" — Cormorant Garamond 300, generous tracking (~0.22em)
+        _draw_tracked(
+            draw, "Last Eat", cx, int(195 * scale),
+            heading, WHITE, tracking=22 * scale,
+        )
+
+        # Thin horizontal rule
+        rule_y = int(310 * scale)
+        rule_half = int(40 * scale)
+        draw.line(
+            [(cx - rule_half, rule_y), (cx + rule_half, rule_y)],
+            fill=_blend(0.25),
+            width=1,
+        )
+
+        # "Restaurantes en Madrid" — DM Sans 400
+        _draw_tracked(
+            draw, "Restaurantes en Madrid", cx, int(340 * scale),
+            body, _blend(0.78), tracking=1 * scale,
+        )
+
+        # "lasteat.es" — DM Sans 300, subtle
+        _draw_tracked(
+            draw, "lasteat.es", cx, int(555 * scale),
+            small, _blend(0.35), tracking=2 * scale,
+        )
+
+        return img
+    finally:
+        for f in tmp_files:
+            try:
+                os.unlink(f)
+            except OSError:
+                pass
 
 
 def generate_image(output_path: Path = OUTPUT_PATH) -> None:
-    image = build_image()
-    write_png(output_path, image)
+    img = build_image()
+    img.save(str(output_path), optimize=True)
     size_kb = output_path.stat().st_size / 1024
     print(f"Generated {output_path} ({size_kb:.1f} KB)")
 
