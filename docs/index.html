@@ -1208,11 +1208,30 @@
   .leaflet-popup-content-wrapper {
     border-radius: var(--radius) !important;
     font-family: 'DM Sans', sans-serif !important;
-    box-shadow: none !important;
-    background: var(--surface) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    background: rgba(255, 255, 255, 0.92) !important;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
     color: var(--text) !important;
+    border: none !important;
+    animation: labelGrow 0.25s ease-out;
+    transform-origin: bottom center;
   }
-  .leaflet-popup-tip { background: var(--surface) !important; }
+  [data-theme="dark"] .leaflet-popup-content-wrapper {
+    background: rgba(15, 19, 17, 0.9) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  }
+  @keyframes labelGrow {
+    from { transform: scale(0.4); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .leaflet-popup-tip {
+    background: rgba(255, 255, 255, 0.92) !important;
+    box-shadow: none !important;
+  }
+  [data-theme="dark"] .leaflet-popup-tip {
+    background: rgba(15, 19, 17, 0.9) !important;
+  }
   .leaflet-popup-content { margin: 0 !important; padding: 0 !important; width: auto !important; }
   .map-popup { padding: 0.75rem 0.85rem; min-width: 180px; max-width: 240px; }
   .map-popup-name {
@@ -2872,8 +2891,17 @@
       });
       mapPanel.appendChild(li);
 
-      /* Click marker → highlight panel */
-      m.on('popupopen', function() { highlightPanel(r.s); });
+      /* Click marker → highlight panel, hide label, restore on close */
+      m.on('popupopen', function() {
+        highlightPanel(r.s);
+        m.closeTooltip();
+      });
+      m.on('popupclose', function() {
+        /* Re-show label if still at high zoom and near center */
+        if (map.getZoom() >= PIN_LABEL_ZOOM) {
+          updateMapPanel();
+        }
+      });
 
       markerIndex.push({ marker: m, data: r, panelEl: li });
       clusterGroup.addLayer(m);
