@@ -1208,33 +1208,22 @@
   .leaflet-popup-content-wrapper {
     border-radius: var(--radius) !important;
     font-family: 'DM Sans', sans-serif !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
     background: rgba(255, 255, 255, 0.92) !important;
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     color: var(--text) !important;
     border: none !important;
-    animation: popupReveal 0.3s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+    box-shadow: none !important;
   }
   [data-theme="dark"] .leaflet-popup-content-wrapper {
     background: rgba(15, 19, 17, 0.9) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
-  }
-  @keyframes popupReveal {
-    0% { clip-path: inset(0 25% 80% 25% round var(--radius)); opacity: 0.4; }
-    100% { clip-path: inset(0 0 0 0 round var(--radius)); opacity: 1; }
   }
   .leaflet-popup-tip {
     background: rgba(255, 255, 255, 0.92) !important;
     box-shadow: none !important;
-    animation: tipFade 0.15s 0.15s ease-out backwards;
   }
   [data-theme="dark"] .leaflet-popup-tip {
     background: rgba(15, 19, 17, 0.9) !important;
-  }
-  @keyframes tipFade {
-    from { opacity: 0; }
-    to { opacity: 1; }
   }
   .leaflet-popup-content { margin: 0 !important; padding: 0 !important; width: auto !important; }
   .map-popup { padding: 0.75rem 0.85rem; min-width: 180px; max-width: 240px; }
@@ -1312,11 +1301,6 @@
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
   }
   .map-pin-label::before { display: none !important; }
-  .map-pin-label.label-exit {
-    opacity: 0 !important;
-    transform: scale(0.85) !important;
-    transition: opacity 0.15s ease-in, transform 0.15s ease-in !important;
-  }
   .map-pin-label .map-tt-rating {
     font-family: 'DM Sans', sans-serif;
     font-size: var(--text-xs);
@@ -2900,21 +2884,15 @@
       });
       mapPanel.appendChild(li);
 
-      /* Click marker → animate label out, then show popup detail */
+      /* Click marker → hide label while popup is open, restore on close */
       m.on('popupopen', function() {
         highlightPanel(r.s);
-        var tt = m.getTooltip();
-        if (tt && tt._container) {
-          tt._container.classList.add('label-exit');
-          setTimeout(function() { m.closeTooltip(); }, 150);
-        } else {
-          m.closeTooltip();
-        }
+        m.closeTooltip();
+        /* Remove this marker from open labels so it's eligible again on close */
+        openLabelMarkers = openLabelMarkers.filter(function(om) { return om !== m; });
       });
       m.on('popupclose', function() {
-        if (map.getZoom() >= PIN_LABEL_ZOOM) {
-          updateMapPanel();
-        }
+        updateMapPanel();
       });
 
       markerIndex.push({ marker: m, data: r, panelEl: li });
