@@ -5,13 +5,15 @@ Madrid restaurant discovery platform. Python scraper harvests ~770 restaurants f
 
 ## Architecture
 ```
-scraper.py          → Python. Fetches Macarfi API + HTML cards, merges, exports JSON/CSV
-docs/index.html     → Single-file frontend (HTML + CSS + JS). No build step.
-docs/app.js         → Extracted pure logic (esc, haversine, getFiltered, sortList)
-docs/data.js        → Generated. RESTAURANTS array consumed by index.html
-docs/favicon.svg    → SVG favicon (teal LE monogram)
-docs/CNAME          → Custom domain config (lasteat.es)
-output/             → Gitignored. Scraper cache + exports
+scraper.py                          → Python. Fetches Macarfi API + HTML cards, merges, exports JSON/CSV
+docs/index.html                     → Single-file frontend (HTML + CSS + JS). No build step.
+docs/app.js                         → Extracted pure logic (esc, haversine, getFiltered, sortList)
+docs/data.js                        → Generated. RESTAURANTS array consumed by index.html
+docs/districts.geojson              → 21 Madrid district polygons for map choropleth (static, 17KB)
+docs/favicon.svg                    → SVG favicon (teal LE monogram)
+docs/CNAME                          → Custom domain config (lasteat.es)
+scripts/fetch_district_geojson.py   → One-time: fetch + simplify district boundaries from Overpass API
+output/                             → Gitignored. Scraper cache + exports
 ```
 
 ## Tech Stack
@@ -50,7 +52,7 @@ Frontend uses abbreviated keys for payload size: `n`, `s`, `a`, `lat`, `lng`, `c
 
 ## Roadmap
 See `ROADMAP.md` for the phased improvement plan with status tracking.
-Phases 1-5, 7, 8B are complete. Phases 6B/6C, 8A, 10B have partial work done. Phases 9-11 remain.
+Phases 1-5, 7, 8B, 10A, 12A, 12B are complete. 9A, 12C mostly complete (pending perf verification). Phases 6B/6C, 8A, 10B have partial work done. Phase 9B, 11 not started.
 Each phase is self-contained — a new Claude session can pick up any incomplete phase by reading ROADMAP.md + the relevant files listed there.
 
 ## Known Debt (to fix in upcoming phases)

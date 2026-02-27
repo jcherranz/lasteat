@@ -84,6 +84,8 @@ _Goal: match professional delivery sequencing for a live MVP._
 7. Frontend design polish (dark mode contrast, mobile UX, theme transitions)
 8. UX/UI redesign (load-more pagination, controls bar layout, theme crossfade, favicon, map prefetch, uniform markers, entrance animations)
 9. Editorial restraint refactor (warm accent limited to 5 locations, decorative animations removed)
+10. Controls redesign (three-tier hierarchy, ghost filter triggers, multi-select Cocina/Zona dropdowns)
+11. District choropleth (21 MECE Madrid district polygons on main map, click-to-filter, topology-preserving GeoJSON)
 
 ### Remaining work
 1. **P0 Close open audits:** 6B/6C (axe + Lighthouse a11y), 8A (schema.org validator), 10B (Lighthouse perf)
@@ -557,10 +559,16 @@ _Note: Rating pill background, warm tags, fork-knife empty illustration, warm ca
 - IntersectionObserver for card fade-in (second batch onward, 0.3s transition)
 - Stats count-up animation (0→N over 400ms) on initial load
 - Map view: "Explora Madrid" header, refined zoom controls (36x36px, teal accent hover)
-- Service worker cache bump to `lasteat-v8`
+- District choropleth: GeoJSON polygons on main map, click-to-filter zones
+- Service worker cache bump to `lasteat-v14`
+
+**Files created:**
+- `scripts/fetch_district_geojson.py` — fetch + simplify district boundaries from Overpass API (topology-preserving)
+- `docs/districts.geojson` — 21 Madrid city district polygons (17KB static asset)
 
 **Files to modify:**
-- `docs/index.html` — CSS (district headers, fade-in, map) + JS (renderBatch, IntersectionObserver, map header, count-up)
+- `docs/index.html` — CSS (district headers, fade-in, map) + JS (renderBatch, IntersectionObserver, map header, count-up, district choropleth layer)
+- `docs/sw.js` — add districts.geojson to STATIC_ASSETS, bump cache version
 
 **Acceptance criteria:**
 - [x] District headers when sorted by name
@@ -568,9 +576,17 @@ _Note: Rating pill background, warm tags, fork-knife empty illustration, warm ca
 - [x] Stats count-up on initial load
 - [x] Map has "Explora Madrid" header, 36x36px zoom controls
 - [x] All animations disabled under `prefers-reduced-motion`
+- [x] District polygons rendered on main map as background choropleth layer
+- [x] Click polygon toggles Zona filter (bidirectional sync with dropdown)
+- [x] Hover tooltip shows district name + restaurant count
+- [x] Choropleth opacity scales by restaurant density (5 steps)
+- [x] Theme-aware polygon styles (fill/stroke update on dark mode toggle)
+- [x] MECE boundaries — topology-preserving simplification, no gaps or overlaps
+- [x] Lazy-loaded GeoJSON on first map init (not on page load)
+- [x] districts.geojson cached by service worker
 - [ ] No performance regression
 
-_Note: Rhythm banner between card batches was removed in the editorial restraint refactor. Stats count-up tightened from 800ms to 400ms. Zoom hover changed from warm to teal accent._
+_Note: Rhythm banner between card batches was removed in the editorial restraint refactor. Stats count-up tightened from 800ms to 400ms. Zoom hover changed from warm to teal accent. District choropleth uses topology-preserving simplification at the OSM way level to guarantee MECE boundaries._
 
 ---
 
