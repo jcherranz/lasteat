@@ -1030,6 +1030,79 @@
     #map-view { border-radius: var(--radius); }
   }
 
+  /* ── Full-Screen Map Mode ── */
+  #filter-toggle { display: none; }
+  body.map-mode { overflow: hidden; }
+  body.map-mode #map-container {
+    max-width: none;
+    padding: 0;
+    margin: 0;
+    height: calc(100vh - var(--controls-h, 80px));
+    overflow: hidden;
+    position: relative;
+  }
+  body.map-mode #map-container:not([hidden]) { display: block; }
+  body.map-mode #map-view {
+    height: 100%;
+    width: 100%;
+    border-radius: 0;
+    border: none;
+  }
+  body.map-mode .map-head,
+  body.map-mode #map-panel { display: none; }
+  body.map-mode .surprise-prompt,
+  body.map-mode .btt,
+  body.map-mode footer { display: none; }
+  body.map-mode .active-filters { display: none; }
+
+  /* Filtros toggle: visible only in map mode */
+  body.map-mode #filter-toggle { display: inline-flex; }
+
+  /* Filter rows hidden in map mode, overlay when open */
+  body.map-mode .controls-row-2 { display: none; }
+  body.map-mode .controls-row-2.filters-open {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg);
+    padding: 0.75rem 2rem;
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    z-index: 200;
+  }
+  [data-theme="dark"] body.map-mode .controls-row-2.filters-open {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+
+  /* Filtros button accent fill when filters active */
+  #filter-toggle.has-filters {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  [data-theme="dark"] #filter-toggle.has-filters { color: #0F1311; }
+
+  /* Map count badge */
+  .map-count-badge {
+    display: none;
+    position: absolute;
+    bottom: 1.5rem;
+    left: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.25rem 0.6rem;
+    font-size: var(--text-xs);
+    color: var(--secondary);
+    z-index: 500;
+    pointer-events: none;
+  }
+  body.map-mode .map-count-badge { display: block; }
+
   /* ── Map Loading State ── */
   #map-view:not(.loaded)::before {
     content: '';
@@ -1323,6 +1396,7 @@
         <button class="view-link active" data-view="grid" type="button">Lista</button>
         <button class="view-link" data-view="map" type="button">Mapa</button>
       </div>
+      <button class="view-link" id="filter-toggle" type="button">Filtros &#9662;</button>
       <button class="view-link" id="fav-filter" type="button" aria-pressed="false">&#9825; Favoritos</button>
     </div>
 
@@ -1385,6 +1459,7 @@
     <ul id="map-panel-list"></ul>
   </nav>
   <div id="map-view"></div>
+  <div class="map-count-badge" id="map-count-badge"></div>
 </div>
 
 <div class="surprise-prompt" id="surprise-prompt">
@@ -2437,6 +2512,7 @@
     updateActiveFilters();
     syncPills();
     updateDynamicCounts();
+    updateFilterToggle();
     if (view === 'map' && leafletOk && clusterOk) updateMap();
   }
 
@@ -2547,6 +2623,8 @@
       if (visible) visibleCount += 1;
     });
     if (mapVisibleCountEl) mapVisibleCountEl.textContent = visibleCount + ' visibles';
+    var countBadge = document.getElementById('map-count-badge');
+    if (countBadge) countBadge.textContent = visibleCount + ' restaurantes visibles';
   }
 
   /* Highlight panel item + scroll into view */
@@ -2566,7 +2644,11 @@
   function initMap() {
     mapCont.hidden = false;
     grid.style.display = 'none';
-    if (map) { updateMap(); map.invalidateSize(); return; }
+    document.body.classList.add('map-mode');
+    var ch = document.querySelector('.controls-wrap').offsetHeight;
+    document.body.style.setProperty('--controls-h', ch + 'px');
+    updateFilterToggle();
+    if (map) { updateMap(); setTimeout(function() { map.invalidateSize(); }, 50); return; }
     loadLeaflet().then(function() {
       map = L.map('map-view').setView([40.42, -3.7], 13);
       map.attributionControl.setPrefix('');
@@ -2576,6 +2658,7 @@
       /* Load district polygons as background choropleth */
       loadDistrictGeo().then(function() { addDistrictLayer(); });
       updateMap();
+      setTimeout(function() { map.invalidateSize(); }, 50);
     });
   }
 
@@ -2672,6 +2755,8 @@
     mapCont.hidden = true;
     grid.style.display = '';
     view = 'grid';
+    document.body.classList.remove('map-mode');
+    document.querySelector('.controls-row-2').classList.remove('filters-open');
   }
 
   /* ── Back to Top + Sticky Shadow ── */
@@ -2688,6 +2773,30 @@
     }
   });
   bttEl.addEventListener('click', function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  /* ── Filtros toggle (map mode) ── */
+  var filterToggle = document.getElementById('filter-toggle');
+  var controlsRow2 = document.querySelector('.controls-row-2');
+
+  function updateFilterToggle() {
+    var count = selCuisine.size + selDistrict.size + selPrice.size;
+    filterToggle.textContent = count > 0
+      ? 'Filtros (' + count + ') \u25BE'
+      : 'Filtros \u25BE';
+    filterToggle.classList.toggle('has-filters', count > 0);
+  }
+
+  filterToggle.addEventListener('click', function(e) {
+    e.stopPropagation();
+    controlsRow2.classList.toggle('filters-open');
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!document.body.classList.contains('map-mode')) return;
+    if (!controlsRow2.classList.contains('filters-open')) return;
+    if (controlsRow2.contains(e.target) || filterToggle.contains(e.target)) return;
+    controlsRow2.classList.remove('filters-open');
+  });
 
   /* ── Card interactions (delegated) ── */
   grid.addEventListener('click', function(e) {
