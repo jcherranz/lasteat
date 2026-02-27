@@ -1214,23 +1214,27 @@
     backdrop-filter: blur(10px);
     color: var(--text) !important;
     border: none !important;
-    animation: labelGrow 0.25s ease-out;
-    transform-origin: bottom center;
+    animation: popupReveal 0.3s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
   }
   [data-theme="dark"] .leaflet-popup-content-wrapper {
     background: rgba(15, 19, 17, 0.9) !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
   }
-  @keyframes labelGrow {
-    from { transform: scale(0.4); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+  @keyframes popupReveal {
+    0% { clip-path: inset(0 25% 80% 25% round var(--radius)); opacity: 0.4; }
+    100% { clip-path: inset(0 0 0 0 round var(--radius)); opacity: 1; }
   }
   .leaflet-popup-tip {
     background: rgba(255, 255, 255, 0.92) !important;
     box-shadow: none !important;
+    animation: tipFade 0.15s 0.15s ease-out backwards;
   }
   [data-theme="dark"] .leaflet-popup-tip {
     background: rgba(15, 19, 17, 0.9) !important;
+  }
+  @keyframes tipFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
   .leaflet-popup-content { margin: 0 !important; padding: 0 !important; width: auto !important; }
   .map-popup { padding: 0.75rem 0.85rem; min-width: 180px; max-width: 240px; }
@@ -1308,6 +1312,11 @@
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
   }
   .map-pin-label::before { display: none !important; }
+  .map-pin-label.label-exit {
+    opacity: 0 !important;
+    transform: scale(0.85) !important;
+    transition: opacity 0.15s ease-in, transform 0.15s ease-in !important;
+  }
   .map-pin-label .map-tt-rating {
     font-family: 'DM Sans', sans-serif;
     font-size: var(--text-xs);
@@ -2891,13 +2900,18 @@
       });
       mapPanel.appendChild(li);
 
-      /* Click marker → highlight panel, hide label, restore on close */
+      /* Click marker → animate label out, then show popup detail */
       m.on('popupopen', function() {
         highlightPanel(r.s);
-        m.closeTooltip();
+        var tt = m.getTooltip();
+        if (tt && tt._container) {
+          tt._container.classList.add('label-exit');
+          setTimeout(function() { m.closeTooltip(); }, 150);
+        } else {
+          m.closeTooltip();
+        }
       });
       m.on('popupclose', function() {
-        /* Re-show label if still at high zoom and near center */
         if (map.getZoom() >= PIN_LABEL_ZOOM) {
           updateMapPanel();
         }
