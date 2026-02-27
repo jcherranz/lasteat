@@ -105,7 +105,7 @@
   function splitCuisine(raw) {
     if (!raw) return [];
     return String(raw)
-      .split(/[\u2022,]/)
+      .split(/\u2022/)
       .map(function(t) { return t.trim(); })
       .filter(Boolean);
   }
@@ -127,6 +127,14 @@
     var getFavKey = opts.getFavKey || defaultFavKey;
     var useFuzzy = opts.fuzzy !== false;
 
+    // Normalize priceValue: accept string (legacy) or array (multi-select)
+    var priceRanges = [];
+    if (Array.isArray(priceValue)) {
+      priceRanges = priceValue;
+    } else if (priceValue) {
+      priceRanges = [priceValue];
+    }
+
     var list = restaurants.filter(function(r) {
       if (q) {
         var haystack = (r.n + ' ' + (r.c || '') + ' ' + (r.d || '') + ' ' + (r.a || ''));
@@ -143,12 +151,15 @@
 
       if (selDistrict.size && !selDistrict.has(r.d)) return false;
 
-      if (priceValue) {
-        var parts = priceValue.split('-').map(Number);
-        var min = parts[0];
-        var max = parts[1];
+      if (priceRanges.length) {
         var price = parseInt(r.p, 10) || 0;
-        if (!r.p || price < min || price > max) return false;
+        if (!r.p) return false;
+        var matched = false;
+        for (var pi = 0; pi < priceRanges.length; pi++) {
+          var parts = priceRanges[pi].split('-').map(Number);
+          if (price >= parts[0] && price <= parts[1]) { matched = true; break; }
+        }
+        if (!matched) return false;
       }
 
       if (favsOnly && !favs.has(getFavKey(r))) return false;

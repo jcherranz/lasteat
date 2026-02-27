@@ -38,7 +38,7 @@ def test_abbreviate_maps_expected_keys():
         "a": "Calle Mayor 1, Madrid",
         "lat": "40.4167",
         "lng": "-3.70325",
-        "c": "Mediterránea, de mercado",
+        "c": "Mediterránea\u2022De mercado",
         "d": "Centro",
         "r": "8.7",
         "rf": "8.8",

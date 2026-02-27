@@ -1,0 +1,36 @@
+[
+  {
+    "name": "La Tasca",
+    "slug": "la-tasca",
+    "address": "Calle Mayor 1, Madrid",
+    "latitude": "40.4167",
+    "longitude": "-3.70325",
+    "cuisine": "Mediterránea\u2022De mercado",
+    "district": "Centro",
+    "rating": "8.7",
+    "rating_food": "8.8",
+    "rating_decor": "8.4",
+    "rating_service": "8.6",
+    "price_eur": "55",
+    "phone": "+34 910 000 000",
+    "website": "https://latasca.example.com",
+    "macarfi_url": "https://macarfi.com/es/mad/ficha-restaurante/la-tasca"
+  },
+  {
+    "name": "Casa Norte",
+    "slug": "casa-norte",
+    "address": "Calle Norte 2, Madrid",
+    "latitude": "40.427",
+    "longitude": "-3.691",
+    "cuisine": "Asador",
+    "district": "Salamanca",
+    "rating": "7.9",
+    "rating_food": "8.0",
+    "rating_decor": "7.7",
+    "rating_service": "7.8",
+    "price_eur": "42",
+    "phone": "+34 911 111 111",
+    "website": "https://casanorte.example.com",
+    "macarfi_url": "https://macarfi.com/es/mad/ficha-restaurante/casa-norte"
+  }
+]

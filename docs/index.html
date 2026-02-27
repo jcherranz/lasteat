@@ -132,21 +132,16 @@
     --secondary: #5A5F5C;
     --muted: #878C89;
     --accent: #2E6058;
-    --accent-hover: #245048;
     --accent-soft: rgba(46, 96, 88, 0.06);
     --accent-muted: rgba(46, 96, 88, 0.14);
     --warm: #C4956A;
-    --warm-soft: rgba(196, 149, 106, 0.08);
-    --warm-muted: rgba(196, 149, 106, 0.16);
     --border: #E5E2DC;
-    --radius: 8px;
-    --radius-pill: 100px;
+    --radius: 2px;
     --text-xs: 0.65rem;
     --text-sm: 0.72rem;
     --text-base: 0.85rem;
     --text-lg: 0.95rem;
     --text-xl: 1.6rem;
-    --text-2xl: 4.2rem;
   }
   [data-theme="dark"] {
     --bg: #0F1311;
@@ -155,12 +150,9 @@
     --secondary: #9EA3A0;
     --muted: #8A8F8C;
     --accent: #4CB0A1;
-    --accent-hover: #5DC4B3;
     --accent-soft: rgba(76, 176, 161, 0.08);
     --accent-muted: rgba(76, 176, 161, 0.15);
     --warm: #D4A574;
-    --warm-soft: rgba(212, 165, 116, 0.10);
-    --warm-muted: rgba(212, 165, 116, 0.18);
     --border: #262A28;
   }
 
@@ -174,20 +166,6 @@
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-  }
-
-  /* ── Theme Crossfade ── */
-  .theme-fade {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    pointer-events: none;
-    animation: themeFade 0.3s ease both;
-  }
-  @keyframes themeFade {
-    0%   { opacity: 0; }
-    40%  { opacity: 1; }
-    100% { opacity: 0; }
   }
 
   /* ── Accessibility ── */
@@ -420,7 +398,7 @@
     border: none;
     border-bottom: 1.5px solid transparent;
     font: 400 var(--text-sm) / 1 inherit;
-    color: var(--muted);
+    color: var(--secondary);
     cursor: pointer;
     padding: 0.4rem 0;
     min-height: 44px;
@@ -435,6 +413,32 @@
     color: var(--accent);
     font-weight: 500;
     border-bottom-color: var(--accent);
+  }
+
+  /* ── Price Tier Toggles ── */
+  .quick-link[data-price] {
+    border: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.3rem 0.65rem;
+    font-size: var(--text-xs);
+    letter-spacing: 0.03em;
+    margin-right: -0.25rem;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+  }
+  .quick-link[data-price]:hover {
+    border-color: var(--secondary);
+    color: var(--text);
+  }
+  .quick-link[data-price].active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 400;
+    border-bottom-color: var(--accent);
+  }
+  [data-theme="dark"] .quick-link[data-price].active {
+    color: #0F1311;
   }
 
   /* ── Sort Dropdown ── */
@@ -470,7 +474,6 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
     min-width: 160px;
     z-index: 200;
     overflow: hidden;
@@ -499,9 +502,45 @@
     font-weight: 500;
     background: var(--accent-soft);
   }
-  [data-theme="dark"] .sort-drop {
-    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+
+  /* ── Active Filters ── */
+  .active-filters {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 2rem 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
   }
+  .active-filters:empty { display: none; }
+  .active-filter-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: var(--text-xs);
+    color: var(--secondary);
+    background: var(--surface);
+    line-height: 1.4;
+  }
+  .tag-dismiss {
+    background: none;
+    border: none;
+    font-size: 0.75rem;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0;
+    min-width: 22px;
+    min-height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+  .tag-dismiss:hover { color: var(--accent); }
 
   /* ── Surprise Prompt ── */
   .surprise-prompt {
@@ -570,7 +609,6 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
     z-index: 200;
     overflow: hidden;
   }
@@ -596,7 +634,7 @@
   }
   .ms-search::placeholder { color: var(--muted); }
   .ms-opts {
-    max-height: 220px;
+    max-height: min(280px, 50vh);
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
@@ -606,7 +644,7 @@
   .ms-opts label {
     display: flex;
     align-items: center;
-    padding: 0.4rem 0.8rem;
+    padding: 0.3rem 0.8rem;
     font-size: var(--text-sm);
     color: var(--secondary);
     cursor: pointer;
@@ -615,6 +653,8 @@
   }
   .ms-opts label:hover { background: var(--accent-soft); }
   .ms-opts label.active { background: var(--accent-soft); }
+  .ms-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ms-count { flex-shrink: 0; color: var(--muted); font-size: var(--text-xs); padding-left: 0.5rem; }
   .ms-opts input[type="checkbox"] {
     -webkit-appearance: none;
     appearance: none;
@@ -658,10 +698,17 @@
   }
   .ms.has-sel .ms-clear { display: block; }
   .ms-clear:hover { color: var(--accent); }
-  /* Single-select variant (price) — uses sort-option buttons */
-  .ms-drop--single { min-width: 160px; }
-  .ms-drop--single .ms-opts { max-height: none; }
-
+  .ms-group-header {
+    padding: 0.4rem 0.8rem 0.2rem;
+    font-size: var(--text-xs);
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-top: 1px solid var(--border);
+  }
+  .ms-group-header:first-child { border-top: none; }
+  .ms-opts label.zero-count { opacity: 0.4; }
   .card-dist {
     font-size: var(--text-sm);
     color: var(--secondary);
@@ -681,8 +728,8 @@
 
   /* ── Card ── */
   @keyframes cardIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
   .card {
     background: var(--surface);
@@ -695,7 +742,6 @@
     cursor: pointer;
     transition: border-color 0.25s ease;
     animation: cardIn 0.35s ease both;
-    animation-delay: calc(min(var(--i, 0), 15) * 30ms);
   }
   .card.top-rated {
     border-left: 3px solid var(--warm);
@@ -704,18 +750,17 @@
   .card:hover {
     border-color: var(--muted);
   }
-  .card.expanded {
-    background: var(--accent-soft);
+  .card.expanded:not(.top-rated) {
+    border-left: 2px solid var(--accent);
+    padding-left: calc(1.5rem - 1px);
   }
   .card.reveal {
     opacity: 0;
-    transform: translateY(14px);
     animation: none;
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity 0.3s ease;
   }
   .card.reveal.in {
     opacity: 1;
-    transform: translateY(0);
   }
   .card-top {
     display: flex;
@@ -753,13 +798,6 @@
   }
   .fav-btn:hover { color: var(--accent); }
   .fav-btn.active { color: var(--accent); }
-  .fav-btn.just-toggled { animation: heartBounce 0.35s ease; }
-  @keyframes heartBounce {
-    0% { transform: scale(1); }
-    35% { transform: scale(1.28); }
-    60% { transform: scale(0.9); }
-    100% { transform: scale(1); }
-  }
   .card-rating {
     flex-shrink: 0;
     font-family: 'Cormorant Garamond', Georgia, serif;
@@ -908,6 +946,7 @@
     gap: 0;
     position: relative;
     flex-wrap: wrap;
+    isolation: isolate;
   }
   #map-container:not([hidden]) {
     display: flex;
@@ -959,7 +998,7 @@
     line-height: 1.45;
   }
   .map-panel-item:hover { background: var(--accent-soft); }
-  .map-panel-item.active { background: var(--accent-muted); }
+  .map-panel-item.active { border-left: 2px solid var(--accent); padding-left: calc(0.85rem - 2px); }
   .map-panel-name {
     font-family: 'Cormorant Garamond', serif;
     font-weight: 600;
@@ -1078,7 +1117,7 @@
   .leaflet-popup-content-wrapper {
     border-radius: var(--radius) !important;
     font-family: 'DM Sans', sans-serif !important;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
+    box-shadow: none !important;
     background: var(--surface) !important;
     color: var(--text) !important;
   }
@@ -1130,7 +1169,6 @@
     background: var(--surface) !important;
     color: var(--text) !important;
     border: 1px solid var(--border) !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
   }
   .map-tooltip .map-tt-rating {
     color: var(--warm);
@@ -1153,7 +1191,7 @@
   .leaflet-control-zoom {
     border: 1.5px solid var(--border) !important;
     border-radius: var(--radius) !important;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+    box-shadow: none !important;
     overflow: hidden;
   }
   .leaflet-control-zoom a {
@@ -1219,16 +1257,11 @@
 
 
 
-  /* ── Touch Feedback ── */
-  .btt:active { transform: scale(0.92); }
-  .fav-btn:active { transform: scale(0.9); }
-
   /* ── Reduced Motion ── */
   @media (prefers-reduced-motion: reduce) {
     .card { animation: none; }
-    .card.reveal { opacity: 1; transform: none; transition: none; }
+    .card.reveal { opacity: 1; transition: none; }
     .ms.open .ms-drop, .sort-wrap.open .sort-drop { animation: none; }
-    .fav-btn.just-toggled { animation: none; }
     *, *::before, *::after { transition-duration: 0.01ms !important; }
   }
 
@@ -1242,6 +1275,7 @@
     .controls-row-1 { gap: 0.5rem; }
     .controls-row-2 { gap: 0.35rem; }
     .sort-wrap { margin-left: 0; }
+    .active-filters { padding: 0 1.25rem 0.4rem; }
     .grid {
       grid-template-columns: 1fr;
       padding: 0 1rem 2rem;
@@ -1279,6 +1313,8 @@
         <span class="view-sep" aria-hidden="true">&middot;</span>
         <button class="view-link" data-view="map" type="button">Mapa</button>
       </div>
+      <span class="view-sep" aria-hidden="true">&middot;</span>
+      <button class="view-link" id="fav-filter" type="button" aria-pressed="false">&#9825; Favoritos</button>
     </div>
 
     <div class="controls-row-2">
@@ -1300,19 +1336,15 @@
         </div>
       </div>
 
-      <div class="ms" id="ms-price">
-        <button class="ms-trigger" type="button" data-label="Precio" aria-expanded="false" aria-haspopup="listbox">Precio</button>
-        <div class="ms-drop ms-drop--single">
-          <div class="ms-opts" role="listbox" aria-multiselectable="false"></div>
-          <button class="ms-clear" type="button">Limpiar</button>
-        </div>
-      </div>
+      <span class="filter-sep" aria-hidden="true"></span>
+
+      <button class="quick-link" data-price="0-30" type="button">&le;30 &euro;</button>
+      <button class="quick-link" data-price="31-50" type="button">31&ndash;50 &euro;</button>
+      <button class="quick-link" data-price="51-80" type="button">51&ndash;80 &euro;</button>
+      <button class="quick-link" data-price="80-999" type="button">80 &euro;+</button>
 
       <span class="filter-sep" aria-hidden="true"></span>
 
-      <button class="quick-link" id="fav-filter" type="button" aria-pressed="false">Favoritos</button>
-      <button class="quick-link" data-quick="top50" type="button">Top 50</button>
-      <button class="quick-link" data-quick="cheap" type="button">Econ&oacute;mico</button>
       <button class="quick-link" data-quick="service" type="button">Servicio</button>
 
       <div class="sort-wrap" id="sort-wrap">
@@ -1326,6 +1358,7 @@
       </div>
     </div>
   </div>
+  <div class="active-filters" id="active-filters" role="region" aria-label="Filtros activos"></div>
 </div>
 
 <div class="grid" id="grid" tabindex="-1"></div>
@@ -1393,6 +1426,7 @@
   var sortDrop = document.getElementById('sort-drop');
   var sortLabel = document.getElementById('sort-label');
   var quickFilterBtns = [].slice.call(document.querySelectorAll('.quick-link[data-quick]'));
+  var activeFiltersEl = document.getElementById('active-filters');
 
   /* ── Data Maps ── */
   var slugSet = new Set();
@@ -1409,7 +1443,7 @@
   var favsOnly   = false;
   var selCuisine = new Set();
   var selDistrict= new Set();
-  var priceValue = '';
+  var selPrice   = new Set();
   var filtered   = [];
   var rendered   = 0;
   var map          = null;
@@ -1478,18 +1512,9 @@
     });
   }
   function applyQuickFilter(list, key) {
-    if (key === 'top50') {
-      return app.sortList(list, 'rating').slice(0, 50);
-    }
-    if (key === 'cheap') {
-      return list.filter(function(r) {
-        var p = parseInt(r.p, 10);
-        return p > 0 && p <= 30;
-      });
-    }
     if (key === 'service') {
       return sortByService(list).filter(function(r) {
-        return (parseFloat(r.rs) || 0) >= 8.5;
+        return (parseFloat(r.rs) || 0) >= 8.0;
       });
     }
     return list;
@@ -1498,6 +1523,20 @@
     quickFilterBtns.forEach(function(btn) {
       btn.classList.toggle('active', btn.getAttribute('data-quick') === quickFilter);
     });
+  }
+  function buildFilterTag(type, value, label) {
+    return '<span class="active-filter-tag" data-filter-type="' + esc(type) + '" data-filter-value="' + esc(value) + '">' +
+      esc(label) + '<button class="tag-dismiss" type="button" aria-label="Quitar filtro ' + esc(label) + '">&times;</button></span>';
+  }
+  var priceLabels = { '0-30': '\u226430 \u20ac', '31-50': '31\u201350 \u20ac', '51-80': '51\u201380 \u20ac', '80-999': '80 \u20ac+' };
+  function updateActiveFilters() {
+    var tags = [];
+    var q = searchEl.value.trim();
+    if (q) tags.push(buildFilterTag('search', q, '\u201c' + q + '\u201d'));
+    selCuisine.forEach(function(c) { tags.push(buildFilterTag('cuisine', c, c)); });
+    selDistrict.forEach(function(d) { tags.push(buildFilterTag('district', d, d)); });
+    selPrice.forEach(function(p) { tags.push(buildFilterTag('price', p, priceLabels[p] || p)); });
+    activeFiltersEl.innerHTML = tags.join('');
   }
   function ensureRevealObserver() {
     if (prefersReducedMotion || revealObserver || !('IntersectionObserver' in window)) return;
@@ -1527,22 +1566,12 @@
   function toggleTheme() {
     var isDark = document.documentElement.dataset.theme === 'dark';
     var t = isDark ? 'light' : 'dark';
-    /* Crossfade overlay: covers the instant switch */
-    var overlay = document.createElement('div');
-    overlay.className = 'theme-fade';
-    overlay.style.background = isDark ? '#F8F7F3' : '#0F1311';
-    document.body.appendChild(overlay);
-    /* Switch theme at peak opacity */
-    setTimeout(function() {
-      document.documentElement.dataset.theme = t;
-      safeSetStorage('mf-theme', t);
-      if (map && tileLayer) {
-        tileLayer.setUrl(getTileUrl());
-        if (view === 'map') updateMap();
-      }
-    }, 120);
-    /* Remove overlay after animation */
-    overlay.addEventListener('animationend', function() { overlay.remove(); });
+    document.documentElement.dataset.theme = t;
+    safeSetStorage('mf-theme', t);
+    if (map && tileLayer) {
+      tileLayer.setUrl(getTileUrl());
+      if (view === 'map') updateMap();
+    }
   }
   function getTileUrl() {
     return document.documentElement.dataset.theme === 'dark'
@@ -1563,17 +1592,13 @@
       b.classList.toggle('active', active);
       b.textContent = active ? '\u2665' : '\u2661';
       b.setAttribute('aria-pressed', active ? 'true' : 'false');
-      if (key === favKey && !prefersReducedMotion) {
-        b.classList.remove('just-toggled');
-        b.offsetWidth;
-        b.classList.add('just-toggled');
-      }
     });
     updateFavBtn();
     if (favsOnly) render();
   }
   function updateFavBtn() {
-    favBtn.textContent = 'Favoritos' + (favs.size ? ' (' + favs.size + ')' : '');
+    var heart = favsOnly ? '\u2665' : '\u2661';
+    favBtn.textContent = heart + ' Favoritos' + (favs.size ? ' (' + favs.size + ')' : '');
     favBtn.classList.toggle('active', favsOnly);
     favBtn.setAttribute('aria-pressed', favsOnly ? 'true' : 'false');
   }
@@ -1621,7 +1646,7 @@
   }
 
   /* ── Multi-Select ── */
-  function setupMS(id, items, onChange) {
+  function setupMS(id, items, onChange, counts, config) {
     var el      = document.getElementById(id);
     var trigger = el.querySelector('.ms-trigger');
     var search  = el.querySelector('.ms-search');
@@ -1630,6 +1655,7 @@
     var label   = trigger.getAttribute('data-label');
     var activeLabel = null;
     var listboxId = id + '-listbox';
+    var groups  = config && config.groups;
     opts.id = listboxId;
     trigger.setAttribute('aria-controls', listboxId);
 
@@ -1682,22 +1708,69 @@
       }
     }
 
-    items.forEach(function(item) {
+    function appendOption(item) {
       var lbl = document.createElement('label');
       var cb  = document.createElement('input');
       cb.type = 'checkbox';
       cb.value = item;
       lbl.setAttribute('role', 'option');
       lbl.setAttribute('aria-selected', 'false');
+      lbl.setAttribute('data-name', item.toLowerCase());
       lbl.appendChild(cb);
-      lbl.appendChild(document.createTextNode(item));
+      var nameSpan = document.createElement('span');
+      nameSpan.className = 'ms-label';
+      nameSpan.textContent = item;
+      lbl.appendChild(nameSpan);
+      var cnt = document.createElement('span');
+      cnt.className = 'ms-count';
+      cnt.textContent = (counts && counts[item] != null) ? counts[item] : '';
+      lbl.appendChild(cnt);
       opts.appendChild(lbl);
       cb.addEventListener('change', function() {
         lbl.setAttribute('aria-selected', cb.checked ? 'true' : 'false');
         sync();
         onChange(getSelected());
       });
-    });
+    }
+
+    /* Render options — grouped or flat */
+    if (groups) {
+      groups.forEach(function(group) {
+        if (group.label) {
+          var header = document.createElement('div');
+          header.className = 'ms-group-header';
+          header.textContent = group.label;
+          header.setAttribute('role', 'presentation');
+          opts.appendChild(header);
+        }
+        var groupItems = group.items.slice().sort(function(a, b) {
+          return a.localeCompare(b, 'es');
+        });
+        groupItems.forEach(appendOption);
+      });
+    } else {
+      /* Sort by count descending, then alphabetical tie-break */
+      var sorted = items;
+      if (counts) {
+        sorted = items.slice().sort(function(a, b) {
+          var diff = (counts[b] || 0) - (counts[a] || 0);
+          return diff !== 0 ? diff : a.localeCompare(b, 'es');
+        });
+      }
+      sorted.forEach(appendOption);
+    }
+
+    function hideGroupHeaders(q) {
+      opts.querySelectorAll('.ms-group-header').forEach(function(header) {
+        var next = header.nextElementSibling;
+        var anyVisible = false;
+        while (next && !next.classList.contains('ms-group-header')) {
+          if (next.tagName === 'LABEL' && !next.hidden) anyVisible = true;
+          next = next.nextElementSibling;
+        }
+        header.hidden = q ? !anyVisible : false;
+      });
+    }
 
     el.addEventListener('click', function(e) {
       e.stopPropagation();
@@ -1724,8 +1797,9 @@
     search.addEventListener('input', function() {
       var q = search.value.toLowerCase();
       opts.querySelectorAll('label').forEach(function(l) {
-        l.hidden = l.textContent.toLowerCase().indexOf(q) === -1;
+        l.hidden = (l.getAttribute('data-name') || l.textContent.toLowerCase()).indexOf(q) === -1;
       });
+      hideGroupHeaders(q);
       setActiveLabel(null);
     });
 
@@ -1794,120 +1868,118 @@
         sync();
       },
       getSelected: getSelected,
-      close: function() { closeDropdown(false); }
+      close: function() { closeDropdown(false); },
+      updateCounts: function(newCounts) {
+        opts.querySelectorAll('label').forEach(function(lbl) {
+          var cb = lbl.querySelector('input');
+          if (!cb) return;
+          var count = (newCounts && newCounts[cb.value]) || 0;
+          var countEl = lbl.querySelector('.ms-count');
+          if (countEl) countEl.textContent = count;
+          lbl.classList.toggle('zero-count', count === 0 && !cb.checked);
+        });
+      }
     };
   }
 
-  /* Build options */
-  var cuisineSet = new Set();
+  /* ── Build options with counts ── */
+  var cuisineCounts = Object.create(null);
+  var districtCounts = Object.create(null);
   RESTAURANTS.forEach(function(r) {
-    if (r.c) r.c.split(/[\u2022,]/).forEach(function(t) {
+    if (r.c) r.c.split(/\u2022/).forEach(function(t) {
       var trimmed = t.trim();
-      if (trimmed) cuisineSet.add(trimmed);
+      if (trimmed) cuisineCounts[trimmed] = (cuisineCounts[trimmed] || 0) + 1;
     });
+    if (r.d) districtCounts[r.d] = (districtCounts[r.d] || 0) + 1;
   });
-  var cuisineOpts  = [].slice.call(cuisineSet).sort(function(a,b){ return a.localeCompare(b,'es'); });
-  var districtOpts = [].slice.call(new Set(RESTAURANTS.map(function(r){return r.d;}).filter(Boolean))).sort(function(a,b){ return a.localeCompare(b,'es'); });
 
-  var cuisineMS  = setupMS('ms-cuisine', cuisineOpts, function(sel) { selCuisine = new Set(sel); render(); });
-  var districtMS = setupMS('ms-district', districtOpts, function(sel) { selDistrict = new Set(sel); render(); });
+  /* Cuisine: flat list, sorted by count descending */
+  var cuisineOpts = Object.keys(cuisineCounts).sort(function(a,b){ return a.localeCompare(b,'es'); });
+  var cuisineMS   = setupMS('ms-cuisine', cuisineOpts, function(sel) { selCuisine = new Set(sel); render(); }, cuisineCounts);
 
-  /* ── Price Dropdown (single-select via ms pattern) ── */
-  var priceOptions = [
-    { value: '0-30',  label: 'Hasta 30 \u20ac' },
-    { value: '0-50',  label: 'Hasta 50 \u20ac' },
-    { value: '0-80',  label: 'Hasta 80 \u20ac' },
-    { value: '80-999', label: 'Desde 80 \u20ac' }
+  /* District: grouped — Madrid city vs surrounding municipalities */
+  var MADRID_DISTRICTS = [
+    'Arganzuela','Barajas','Carabanchel','Centro','Chamartín','Chamberí',
+    'Ciudad Lineal','Fuencarral-El Pardo','Hortaleza','Latina','Madrid',
+    'Madrid - Ciudad','Moncloa-Aravaca','Moratalaz','Puente de Vallecas',
+    'Retiro','Salamanca','San Blas-Canillejas','Tetuán','Usera',
+    'Vicálvaro','Villa de Vallecas','Villaverde'
   ];
-  (function setupPriceMS() {
-    var el = document.getElementById('ms-price');
-    var trigger = el.querySelector('.ms-trigger');
-    var opts = el.querySelector('.ms-opts');
-    var clear = el.querySelector('.ms-clear');
-    var label = 'Precio';
+  var madridSet = new Set(MADRID_DISTRICTS);
+  var districtMadrid = [];
+  var districtComunidad = [];
+  Object.keys(districtCounts).forEach(function(d) {
+    if (madridSet.has(d)) districtMadrid.push(d);
+    else districtComunidad.push(d);
+  });
+  var districtMS = setupMS('ms-district', [], function(sel) { selDistrict = new Set(sel); render(); }, districtCounts, {
+    groups: [
+      { label: 'Madrid', items: districtMadrid },
+      { label: 'Comunidad de Madrid', items: districtComunidad }
+    ]
+  });
 
-    priceOptions.forEach(function(opt) {
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'sort-option';
-      btn.setAttribute('role', 'option');
-      btn.setAttribute('data-value', opt.value);
-      btn.textContent = opt.label;
-      opts.appendChild(btn);
-      btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        priceValue = opt.value;
-        trigger.textContent = opt.label;
-        el.classList.add('has-sel');
-        el.classList.remove('open');
-        trigger.setAttribute('aria-expanded', 'false');
-        opts.querySelectorAll('.sort-option').forEach(function(b) { b.classList.remove('active'); });
-        btn.classList.add('active');
-        render();
+  /* ── Dynamic Counts ── */
+  function splitCuisineTags(raw) {
+    if (!raw) return [];
+    return String(raw).split(/\u2022/).map(function(t) { return t.trim(); }).filter(Boolean);
+  }
+
+  function updateDynamicCounts() {
+    var q = searchEl.value;
+    var priceArr = [].slice.call(selPrice);
+
+    /* Cuisine counts: apply all filters except cuisine */
+    var forCuisine = app.getFiltered(RESTAURANTS, {
+      query: q, priceValue: priceArr,
+      selDistrict: selDistrict, selCuisine: new Set(),
+      favsOnly: favsOnly, favs: favs,
+      sort: 'rating', getFavKey: getFavKey, fuzzy: true
+    });
+
+    /* District counts: apply all filters except district */
+    var forDistrict = app.getFiltered(RESTAURANTS, {
+      query: q, priceValue: priceArr,
+      selCuisine: selCuisine, selDistrict: new Set(),
+      favsOnly: favsOnly, favs: favs,
+      sort: 'rating', getFavKey: getFavKey, fuzzy: true
+    });
+
+    var cCounts = Object.create(null);
+    forCuisine.forEach(function(r) {
+      splitCuisineTags(r.c).forEach(function(t) {
+        cCounts[t] = (cCounts[t] || 0) + 1;
       });
     });
 
-    trigger.addEventListener('click', function(e) {
-      e.stopPropagation();
-      /* Close other dropdowns first */
-      closeSortDrop();
-      document.querySelectorAll('.ms.open').forEach(function(m) {
-        if (m !== el) {
-          m.classList.remove('open');
-          var otherTrigger = m.querySelector('.ms-trigger');
-          if (otherTrigger) otherTrigger.setAttribute('aria-expanded', 'false');
-        }
-      });
-      var isOpen = el.classList.contains('open');
-      if (isOpen) {
-        el.classList.remove('open');
-        trigger.setAttribute('aria-expanded', 'false');
+    var dCounts = Object.create(null);
+    forDistrict.forEach(function(r) {
+      if (r.d) dCounts[r.d] = (dCounts[r.d] || 0) + 1;
+    });
+
+    cuisineMS.updateCounts(cCounts);
+    districtMS.updateCounts(dCounts);
+  }
+
+  /* ── Price Tier Buttons (multi-select) ── */
+  var priceBtns = [].slice.call(document.querySelectorAll('.quick-link[data-price]'));
+  priceBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var val = btn.getAttribute('data-price');
+      if (selPrice.has(val)) {
+        selPrice.delete(val);
       } else {
-        el.classList.add('open');
-        trigger.setAttribute('aria-expanded', 'true');
+        selPrice.add(val);
       }
-    });
-
-    el.addEventListener('click', function(e) { e.stopPropagation(); });
-
-    clear.addEventListener('click', function(e) {
-      e.stopPropagation();
-      priceValue = '';
-      trigger.textContent = label;
-      el.classList.remove('has-sel');
-      el.classList.remove('open');
-      trigger.setAttribute('aria-expanded', 'false');
-      opts.querySelectorAll('.sort-option').forEach(function(b) { b.classList.remove('active'); });
+      updatePriceUI();
       render();
     });
-
-    el.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        el.classList.remove('open');
-        trigger.setAttribute('aria-expanded', 'false');
-        trigger.focus();
-      }
+  });
+  function updatePriceUI() {
+    priceBtns.forEach(function(btn) {
+      btn.classList.toggle('active', selPrice.has(btn.getAttribute('data-price')));
     });
-
-    window._priceMS = {
-      setValue: function(val) {
-        if (!val) return;
-        priceValue = val;
-        var match = priceOptions.filter(function(o) { return o.value === val; })[0];
-        if (match) {
-          trigger.textContent = match.label;
-          el.classList.add('has-sel');
-        }
-        opts.querySelectorAll('.sort-option').forEach(function(b) {
-          b.classList.toggle('active', b.getAttribute('data-value') === val);
-        });
-      },
-      close: function() {
-        el.classList.remove('open');
-        trigger.setAttribute('aria-expanded', 'false');
-      }
-    };
-  })();
+  }
 
   /* ── Sort Dropdown ── */
   var sortLabels = { rating: 'Ranking', name: 'A-Z', price: 'Precio', distance: 'Distancia' };
@@ -1931,7 +2003,7 @@
     /* Close other dropdowns */
     cuisineMS.close();
     districtMS.close();
-    window._priceMS.close();
+
     var isOpen = sortWrap.classList.contains('open');
     if (isOpen) {
       closeSortDrop();
@@ -1971,14 +2043,14 @@
   document.addEventListener('click', function() {
     cuisineMS.close();
     districtMS.close();
-    window._priceMS.close();
+
     closeSortDrop();
   });
   document.addEventListener('keydown', function(e) {
     if (e.key !== 'Escape') return;
     cuisineMS.close();
     districtMS.close();
-    window._priceMS.close();
+
     closeSortDrop();
   });
 
@@ -1988,7 +2060,7 @@
     if (searchEl.value.trim()) p.set('q', searchEl.value.trim());
     if (selCuisine.size) [].slice.call(selCuisine).forEach(function(c) { p.append('c', c); });
     if (selDistrict.size) [].slice.call(selDistrict).forEach(function(d) { p.append('d', d); });
-    if (priceValue)       p.set('p', priceValue);
+    if (selPrice.size) [].slice.call(selPrice).forEach(function(v) { p.append('p', v); });
     if (sort !== 'rating') p.set('s', sort);
     if (favsOnly) p.set('f', '1');
     if (quickFilter) p.set('qf', quickFilter);
@@ -2004,10 +2076,8 @@
     var v2 = p.getAll('d');
     if (v2.length === 1 && v2[0].indexOf(',') !== -1) v2 = v2[0].split(',');
     if (v2.length) { selDistrict = new Set(v2); districtMS.setSelected(v2); }
-    if (p.has('p')) {
-      priceValue = p.get('p');
-      window._priceMS.setValue(priceValue);
-    }
+    var pv = p.getAll('p');
+    if (pv.length) { selPrice = new Set(pv); updatePriceUI(); }
     if (p.has('s')) {
       sort = p.get('s');
       updateSortUI();
@@ -2015,7 +2085,7 @@
     if (p.get('f') === '1') favsOnly = true;
     if (p.has('qf')) {
       var qf = p.get('qf');
-      if (qf === 'top50' || qf === 'cheap' || qf === 'service') quickFilter = qf;
+      if (qf === 'service') quickFilter = qf;
     }
   }
 
@@ -2023,7 +2093,7 @@
   function getFilteredLocal(baseOnly) {
     var list = app.getFiltered(RESTAURANTS, {
       query: searchEl.value,
-      priceValue: priceValue,
+      priceValue: [].slice.call(selPrice),
       selCuisine: selCuisine,
       selDistrict: selDistrict,
       favsOnly: favsOnly,
@@ -2047,7 +2117,7 @@
     var topRatedCls = (!isNaN(ratingValue) && ratingValue >= 9) ? ' top-rated' : '';
     var revealCls = absoluteIdx >= BATCH ? ' reveal' : '';
     var rText  = r.r && r.r !== '-' ? r.r : '\u2014';
-    var tags   = r.c ? r.c.split(/[\u2022,]/).map(function(t) {
+    var tags   = r.c ? r.c.split(/\u2022/).map(function(t) {
       return t.trim();
     }).filter(Boolean).join(', ') : '';
     var price  = r.p ? r.p + ' \u20ac' : '';
@@ -2070,7 +2140,7 @@
     var addr  = r.a ? '<div class="card-address">' + esc(r.a) + '</div>' : '';
     var hasDetail = rDetail || r.ph || r.a;
 
-    return '<div class="card' + topRatedCls + revealCls + '" tabindex="0" role="article" aria-label="' + eName + '" style="--i:' + Math.min(batchIdx || 0, 15) + '">' +
+    return '<div class="card' + topRatedCls + revealCls + '" tabindex="0" role="article" aria-label="' + eName + '">' +
       '<div class="card-top">' +
         '<div class="card-name"><a href="' + pageUrl + '">' + eName + '</a></div>' +
         '<button class="fav-btn' + favCls + '" data-fav-key="' + eFavKey + '" aria-label="Favorito: ' + eName + '" aria-pressed="' + (isFav ? 'true' : 'false') + '">' + heart + '</button>' +
@@ -2091,7 +2161,7 @@
       '<div class="card-actions">' +
         '<a href="' + gmaps + '" target="_blank" rel="noopener noreferrer">Ver en Maps</a>' +
         (websiteUrl ? '<a href="' + websiteUrl + '" target="_blank" rel="noopener noreferrer">Web</a>' : '') +
-        (sourceUrl ? '<a href="' + sourceUrl + '" target="_blank" rel="noopener noreferrer">Fuente</a>' : '') +
+        (sourceUrl ? '<a href="' + sourceUrl + '" target="_blank" rel="noopener noreferrer">Macarfi</a>' : '') +
       '</div>' +
     '</div>';
   }
@@ -2164,6 +2234,8 @@
       renderBatch();
     }
     syncURL();
+    updateActiveFilters();
+    updateDynamicCounts();
     if (view === 'map' && leafletOk && clusterOk) updateMap();
   }
 
@@ -2238,7 +2310,7 @@
 
   /* Build rich popup HTML */
   function buildPopup(r) {
-    var tags = (r.c || '').split(/[\u2022,]/).map(function(t) { return t.trim(); }).filter(Boolean);
+    var tags = (r.c || '').split(/\u2022/).map(function(t) { return t.trim(); }).filter(Boolean);
     var html = '<div class="map-popup">';
     html += '<div class="map-popup-name">' + esc(r.n) + '</div>';
     if (r.r && r.r !== '-') html += '<span class="map-popup-rating">' + esc(r.r) + '</span> ';
@@ -2373,8 +2445,9 @@
     /* User position marker */
     if (userMarker) { userMarker.remove(); userMarker = null; }
     if (userLat !== null) {
+      var accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
       userMarker = L.circleMarker([userLat, userLng], {
-        radius: 8, fillColor: '#3B82F6', fillOpacity: 1, color: '#fff', weight: 2.5
+        radius: 8, fillColor: accentColor, fillOpacity: 1, color: '#fff', weight: 2.5
       }).bindPopup('Tu ubicaci\u00f3n').addTo(map);
     }
 
@@ -2414,11 +2487,7 @@
     /* Clear filters button */
     if (e.target.closest('.clear-filters')) {
       searchEl.value = '';
-      priceValue = '';
-      var priceEl = document.getElementById('ms-price');
-      priceEl.classList.remove('has-sel');
-      priceEl.querySelector('.ms-trigger').textContent = 'Precio';
-      priceEl.querySelectorAll('.sort-option').forEach(function(b) { b.classList.remove('active'); });
+      selPrice = new Set(); updatePriceUI();
       selCuisine = new Set(); cuisineMS.setSelected([]);
       selDistrict = new Set(); districtMS.setSelected([]);
       quickFilter = '';
@@ -2451,7 +2520,7 @@
   }
 
   function setViewButton(viewName) {
-    document.querySelectorAll('.view-link').forEach(function(b) {
+    document.querySelectorAll('.view-link[data-view]').forEach(function(b) {
       b.classList.toggle('active', b.getAttribute('data-view') === viewName);
     });
   }
@@ -2501,9 +2570,22 @@
     });
   });
 
-  document.querySelectorAll('.view-link').forEach(function(btn) {
+  activeFiltersEl.addEventListener('click', function(e) {
+    var btn = e.target.closest('.tag-dismiss');
+    if (!btn) return;
+    var tag = btn.parentElement;
+    var type = tag.getAttribute('data-filter-type');
+    var value = tag.getAttribute('data-filter-value');
+    if (type === 'search') { searchEl.value = ''; updateSearchClear(); }
+    else if (type === 'cuisine') { selCuisine.delete(value); cuisineMS.setSelected([].slice.call(selCuisine)); }
+    else if (type === 'district') { selDistrict.delete(value); districtMS.setSelected([].slice.call(selDistrict)); }
+    else if (type === 'price') { selPrice.delete(value); updatePriceUI(); }
+    render();
+  });
+
+  document.querySelectorAll('.view-link[data-view]').forEach(function(btn) {
     btn.addEventListener('click', function() {
-      document.querySelectorAll('.view-link').forEach(function(b) { b.classList.remove('active'); });
+      document.querySelectorAll('.view-link[data-view]').forEach(function(b) { b.classList.remove('active'); });
       btn.classList.add('active');
       var v = btn.getAttribute('data-view');
       if (v === 'map') { view = 'map'; initMap(); }

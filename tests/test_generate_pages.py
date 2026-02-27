@@ -24,7 +24,7 @@ def test_build_meta_description_includes_main_fields():
     desc = generate_pages.build_meta_description(_sample_restaurants()[0])
 
     assert "La Tasca" in desc
-    assert "Mediterránea, de mercado" in desc
+    assert "Mediterránea, De mercado" in desc
     assert "Centro" in desc
     assert "8.7/10" in desc
     assert "~55 €" in desc
@@ -36,7 +36,7 @@ def test_build_jsonld_outputs_valid_restaurant_schema():
     assert ld["@context"] == "https://schema.org"
     assert ld["@type"] == "Restaurant"
     assert ld["name"] == "La Tasca"
-    assert ld["servesCuisine"] == ["Mediterránea", "de mercado"]
+    assert ld["servesCuisine"] == ["Mediterránea", "De mercado"]
     assert ld["aggregateRating"]["ratingValue"] == 8.7
     assert ld["aggregateRating"]["bestRating"] == 10
     assert ld["aggregateRating"]["worstRating"] == 0

@@ -52,7 +52,7 @@ def build_meta_description(r: dict) -> str:
     """Build a concise meta description from restaurant data."""
     parts = [r.get("name", "")]
     if r.get("cuisine"):
-        parts.append(r["cuisine"].replace("\u2022", ","))
+        parts.append(r["cuisine"].replace("\u2022", ", "))
     if r.get("district"):
         parts.append(r["district"])
     if r.get("rating") and r["rating"] != "-":
@@ -78,7 +78,7 @@ def build_jsonld(r: dict) -> str:
             "addressCountry": "ES",
         }
     if r.get("cuisine"):
-        ld["servesCuisine"] = [c.strip() for c in r["cuisine"].split(",") if c.strip()]
+        ld["servesCuisine"] = [c.strip() for c in r["cuisine"].split("\u2022") if c.strip()]
 
     rating_value = parse_float(r.get("rating"))
     if rating_value is not None:
@@ -132,7 +132,7 @@ def build_page(r: dict) -> str:
     # Cuisine tags
     cuisine_tags = ""
     if cuisine:
-        tags = [c.strip() for c in cuisine.replace("\u2022", ",").split(",") if c.strip()]
+        tags = [c.strip() for c in cuisine.split("\u2022") if c.strip()]
         cuisine_tags = ", ".join(escape(t) for t in tags)
 
     # Ratings breakdown
@@ -154,7 +154,7 @@ def build_page(r: dict) -> str:
     if website:
         contact_parts.append(f'<a href="{escape(website)}" target="_blank" rel="noopener noreferrer">Web</a>')
     if macarfi_url:
-        contact_parts.append(f'<a href="{escape(macarfi_url)}" target="_blank" rel="noopener noreferrer">Fuente</a>')
+        contact_parts.append(f'<a href="{escape(macarfi_url)}" target="_blank" rel="noopener noreferrer">Macarfi</a>')
     contact_html = ""
     if contact_parts:
         contact_html = f'<div class="contact">{" &middot; ".join(contact_parts)}</div>'
@@ -217,17 +217,13 @@ def build_page(r: dict) -> str:
     --accent-soft: rgba(46, 96, 88, 0.06);
     --accent-muted: rgba(46, 96, 88, 0.14);
     --warm: #C4956A;
-    --warm-soft: rgba(196, 149, 106, 0.08);
-    --warm-muted: rgba(196, 149, 106, 0.16);
     --border: #E5E2DC;
-    --radius: 8px;
-    --radius-pill: 100px;
+    --radius: 2px;
     --text-xs: 0.65rem;
     --text-sm: 0.72rem;
     --text-base: 0.85rem;
     --text-lg: 0.95rem;
     --text-xl: 1.6rem;
-    --text-2xl: 4.2rem;
   }}
   [data-theme="dark"] {{
     --bg: #0F1311;
@@ -239,8 +235,6 @@ def build_page(r: dict) -> str:
     --accent-soft: rgba(76, 176, 161, 0.08);
     --accent-muted: rgba(76, 176, 161, 0.15);
     --warm: #D4A574;
-    --warm-soft: rgba(212, 165, 116, 0.10);
-    --warm-muted: rgba(212, 165, 116, 0.18);
     --border: #262A28;
   }}
   * {{ margin: 0; padding: 0; box-sizing: border-box; }}
@@ -347,74 +341,93 @@ def build_page(r: dict) -> str:
     margin: 1rem 0;
   }}
   .contact a {{
-    color: var(--accent);
+    color: var(--secondary);
     text-decoration: none;
   }}
-  .contact a:hover {{ text-decoration: underline; }}
+  .contact a:hover {{ text-decoration: underline; color: var(--accent); }}
+  .contact a[href^="tel:"] {{ color: var(--accent); }}
   .maps-btn {{
     display: inline-block;
     margin: 1rem 0;
-    padding: 0.6rem 1.4rem;
-    background: var(--accent);
-    color: #fff;
-    border-radius: var(--radius-pill);
+    padding: 0.25rem 0;
+    background: none;
+    color: var(--secondary);
+    border: none;
+    border-bottom: 1px solid var(--muted);
     font-size: var(--text-sm);
     font-family: inherit;
-    font-weight: 500;
+    font-weight: 400;
     letter-spacing: 0.04em;
     text-decoration: none;
-    transition: background 0.25s;
+    transition: color 0.2s, border-color 0.2s;
   }}
-  .maps-btn:hover {{ background: var(--accent-hover, #245048); }}
+  .maps-btn:hover {{ color: var(--accent); border-bottom-color: var(--accent); }}
   footer {{
-    text-align: center;
-    padding: 2.5rem 1.5rem;
-    font-size: var(--text-xs);
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1.5rem 2rem;
+    border-top: 1px solid var(--border);
+    font-size: var(--text-sm);
     color: var(--muted);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    text-align: center;
+    letter-spacing: 0.02em;
   }}
   footer a {{
-    color: var(--secondary);
+    color: var(--muted);
     text-decoration: none;
-    border-bottom: 1px solid var(--border);
-    transition: border-color 0.2s, color 0.2s;
+    transition: color 0.2s;
   }}
-  footer a:hover {{ border-bottom-color: var(--accent); color: var(--accent); }}
+  footer a:hover {{ color: var(--accent); }}
   .theme-toggle {{
     position: fixed;
     top: 1.5rem;
     right: 1.5rem;
     background: none;
-    border: 1.5px solid var(--border);
+    border: none;
     border-radius: 50%;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: var(--text-base);
     color: var(--muted);
     width: 44px;
     height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: border-color 0.25s, color 0.25s;
+    transition: color 0.25s;
     line-height: 1;
   }}
-  .theme-toggle::before {{ content: '\\263D'; }}
-  [data-theme="dark"] .theme-toggle::before {{ content: '\\2600'; }}
-  .theme-toggle:hover {{ border-color: var(--accent); color: var(--accent); }}
+  .theme-toggle::before {{ content: '\\2600'; }}
+  [data-theme="dark"] .theme-toggle::before {{ content: '\\263D'; }}
+  .theme-toggle:hover {{ color: var(--accent); }}
   @media (prefers-reduced-motion: reduce) {{
     *, *::before, *::after {{ transition-duration: 0.01ms !important; }}
   }}
+  .skip-link {{
+    position: absolute;
+    left: 1rem;
+    top: -40px;
+    padding: 0.5rem 0.8rem;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: var(--text-sm);
+    text-decoration: none;
+    z-index: 400;
+  }}
+  .skip-link:focus {{ top: 1rem; }}
   @media (max-width: 640px) {{
     .container {{ padding: 2.5rem 1.25rem; }}
     h1 {{ font-size: 1.8rem; }}
     .score {{ font-size: 2.6rem; }}
+    footer {{ padding: 1.25rem; font-size: var(--text-xs); }}
   }}
 </style>
 </head>
 <body>
+<a href="#main" class="skip-link">Saltar al contenido</a>
 <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema"></button>
-<div class="container">
+<div class="container" id="main">
   <a href="/" class="back">&larr; Last Eat</a>
   <h1>{name}</h1>
   <div class="meta">
@@ -437,7 +450,7 @@ def build_page(r: dict) -> str:
 </div>
 
 <footer>
-  <a href="/">Last Eat</a> &mdash; Restaurantes en Madrid
+  <a href="/">Last Eat</a> &middot; Restaurantes en Madrid
 </footer>
 
 <script>
