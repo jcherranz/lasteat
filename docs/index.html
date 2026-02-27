@@ -217,21 +217,6 @@
     line-height: 1;
     color: var(--text);
   }
-  .subtitle {
-    font-size: var(--text-sm);
-    color: var(--muted);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    margin-top: 0.5rem;
-    font-weight: 400;
-  }
-  .stats {
-    font-size: var(--text-sm);
-    color: var(--secondary);
-    margin-top: 0.8rem;
-    letter-spacing: 0.04em;
-    font-weight: 400;
-  }
   .theme-toggle {
     position: absolute;
     top: 1.5rem;
@@ -1298,7 +1283,6 @@
   @media (max-width: 640px) {
     header { padding: 1.25rem 1.25rem 0; }
     .logo { font-size: 2.2rem; letter-spacing: 0.15em; }
-    .subtitle { font-size: var(--text-xs); letter-spacing: 0.1em; }
     .theme-toggle { top: 1rem; right: 1rem; }
     .controls { padding: 0.6rem 1.25rem; gap: 0.35rem; }
     .controls-row-1 { gap: 0.5rem; }
@@ -1323,8 +1307,6 @@
 
 <header>
   <div class="logo">Last Eat</div>
-  <div class="subtitle">Restaurantes en Madrid</div>
-  <div class="stats" id="stats" aria-live="polite">Cargando...</div>
   <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema"></button>
 </header>
 
@@ -1445,7 +1427,6 @@
   /* ── DOM ── */
   var grid     = document.getElementById('grid');
   var searchEl = document.getElementById('search');
-  var statsEl  = document.getElementById('stats');
   var bttEl    = document.getElementById('btt');
   var favBtn   = document.getElementById('fav-filter');
   var surpriseBtn = document.getElementById('surprise-btn');
@@ -1530,12 +1511,6 @@
       var key = normalizeFavValue(item);
       if (key) favs.add(key);
     });
-  }
-  function setStatsText(count, total) {
-    statsEl.textContent = count + ' de ' + total + ' restaurantes';
-  }
-  function updateStats(count, total) {
-    setStatsText(count, total);
   }
   function buildFilterTag(type, value, label) {
     return '<span class="active-filter-tag" data-filter-type="' + esc(type) + '" data-filter-value="' + esc(value) + '">' +
@@ -2451,7 +2426,6 @@
   function render() {
     if (loadMoreWrap.parentNode) loadMoreWrap.remove();
     filtered = getFilteredLocal();
-    updateStats(filtered.length, RESTAURANTS.length);
     grid.innerHTML = '';
     rendered = 0;
     lastRenderedDistrict = '';
