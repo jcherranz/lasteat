@@ -1209,6 +1209,7 @@
     color: var(--accent) !important;
   }
   .leaflet-control-zoom-in { border-bottom: 1px solid var(--border) !important; }
+  .leaflet-interactive:focus { outline: none; }
 
   /* ── Back to top ── */
   .btt {
@@ -1447,6 +1448,7 @@
   var filtered   = [];
   var rendered   = 0;
   var map          = null;
+  var mapFitDone   = false;
   var tileLayer    = null;
   var clusterGroup = null;
   var markerIndex  = [];  /* {marker, data, panelEl} per restaurant */
@@ -1925,27 +1927,16 @@
   var districtLayers = Object.create(null);
   var districtGeoData = null;
 
-  function districtPolygonStyle(name, selected) {
-    var count = districtCounts[name] || 0;
-    var maxCount = 1;
-    Object.keys(districtCounts).forEach(function(k) {
-      if (madridSet.has(k) && districtCounts[k] > maxCount) maxCount = districtCounts[k];
-    });
-    var ratio = count / maxCount;
-    var fillOpacity;
-    if (ratio > 0.6) fillOpacity = 0.45;
-    else if (ratio > 0.35) fillOpacity = 0.3;
-    else if (ratio > 0.15) fillOpacity = 0.18;
-    else if (count > 0) fillOpacity = 0.08;
-    else fillOpacity = 0.03;
+  var DISTRICT_HIDE_ZOOM = 14; /* hide polygons at this zoom and above */
 
+  function districtPolygonStyle(name, selected) {
     var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
     var border = getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
 
     if (selected) {
-      return { fillColor: accent, fillOpacity: Math.min(fillOpacity + 0.2, 0.65), color: accent, weight: 2.5, opacity: 1 };
+      return { fillColor: accent, fillOpacity: 0.25, color: accent, weight: 2.5, opacity: 1 };
     }
-    return { fillColor: accent, fillOpacity: fillOpacity, color: border, weight: 1, opacity: 0.6 };
+    return { fillColor: accent, fillOpacity: 0.06, color: border, weight: 1, opacity: 0.6 };
   }
 
   function syncDistrictPolygons() {
@@ -2006,6 +1997,17 @@
 
     /* Keep polygons behind markers */
     districtGeoLayer.bringToBack();
+
+    /* Hide/show polygons based on zoom level */
+    function onZoomEnd() {
+      if (!districtGeoLayer) return;
+      if (map.getZoom() >= DISTRICT_HIDE_ZOOM) {
+        if (map.hasLayer(districtGeoLayer)) map.removeLayer(districtGeoLayer);
+      } else {
+        if (!map.hasLayer(districtGeoLayer)) { map.addLayer(districtGeoLayer); districtGeoLayer.bringToBack(); }
+      }
+    }
+    map.on('zoomend', onZoomEnd);
   }
 
   function updateDistrictTooltips() {
@@ -2031,7 +2033,7 @@
 
   function updateDynamicCounts() {
     var q = searchEl.value;
-    var priceArr = [].slice.call(selPrice);
+    var priceArr = Array.from(selPrice);
 
     /* Cuisine counts: apply all filters except cuisine */
     var forCuisine = app.getFiltered(RESTAURANTS, {
@@ -2164,9 +2166,9 @@
   function syncURL() {
     var p = new URLSearchParams();
     if (searchEl.value.trim()) p.set('q', searchEl.value.trim());
-    if (selCuisine.size) [].slice.call(selCuisine).forEach(function(c) { p.append('c', c); });
-    if (selDistrict.size) [].slice.call(selDistrict).forEach(function(d) { p.append('d', d); });
-    if (selPrice.size) [].slice.call(selPrice).forEach(function(v) { p.append('p', v); });
+    if (selCuisine.size) Array.from(selCuisine).forEach(function(c) { p.append('c', c); });
+    if (selDistrict.size) Array.from(selDistrict).forEach(function(d) { p.append('d', d); });
+    if (selPrice.size) Array.from(selPrice).forEach(function(v) { p.append('p', v); });
     if (sort !== 'rating') p.set('s', sort);
     if (favsOnly) p.set('f', '1');
     if (quickFilter) p.set('qf', quickFilter);
@@ -2199,7 +2201,7 @@
   function getFilteredLocal(baseOnly) {
     var list = app.getFiltered(RESTAURANTS, {
       query: searchEl.value,
-      priceValue: [].slice.call(selPrice),
+      priceValue: Array.from(selPrice),
       selCuisine: selCuisine,
       selDistrict: selDistrict,
       favsOnly: favsOnly,
@@ -2560,12 +2562,15 @@
       }).bindPopup('Tu ubicaci\u00f3n').addTo(map);
     }
 
-    /* Fit bounds */
-    var allMarkers = markerIndex.map(function(item) { return item.marker; });
-    if (userMarker) allMarkers.push(userMarker);
-    if (allMarkers.length) {
-      var group = L.featureGroup(allMarkers);
-      map.fitBounds(group.getBounds().pad(0.1));
+    /* Fit bounds only on first load */
+    if (!mapFitDone) {
+      var allMarkers = markerIndex.map(function(item) { return item.marker; });
+      if (userMarker) allMarkers.push(userMarker);
+      if (allMarkers.length) {
+        var group = L.featureGroup(allMarkers);
+        map.fitBounds(group.getBounds().pad(0.1));
+      }
+      mapFitDone = true;
     }
     updateMapPanel();
   }
@@ -2686,8 +2691,8 @@
     var type = tag.getAttribute('data-filter-type');
     var value = tag.getAttribute('data-filter-value');
     if (type === 'search') { searchEl.value = ''; updateSearchClear(); }
-    else if (type === 'cuisine') { selCuisine.delete(value); cuisineMS.setSelected([].slice.call(selCuisine)); }
-    else if (type === 'district') { selDistrict.delete(value); districtMS.setSelected([].slice.call(selDistrict)); syncDistrictPolygons(); }
+    else if (type === 'cuisine') { selCuisine.delete(value); cuisineMS.setSelected(Array.from(selCuisine)); }
+    else if (type === 'district') { selDistrict.delete(value); districtMS.setSelected(Array.from(selDistrict)); syncDistrictPolygons(); }
     else if (type === 'price') { selPrice.delete(value); updatePriceUI(); }
     render();
   });
