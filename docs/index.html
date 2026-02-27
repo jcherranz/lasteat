@@ -1839,6 +1839,13 @@
           if (otherTrigger) otherTrigger.setAttribute('aria-expanded', 'false');
         }
       });
+      /* Move selected options to the top of the list */
+      var firstChild = opts.firstChild;
+      var labels = [].slice.call(opts.querySelectorAll('label'));
+      labels.forEach(function(lbl) {
+        var cb = lbl.querySelector('input');
+        if (cb && cb.checked) opts.insertBefore(lbl, firstChild);
+      });
       el.classList.add('open');
       trigger.setAttribute('aria-expanded', 'true');
       search.focus();
