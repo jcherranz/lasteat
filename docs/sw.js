@@ -1,8 +1,9 @@
-var CACHE_NAME = 'lasteat-v13';
+var CACHE_NAME = 'lasteat-v14';
 var STATIC_ASSETS = [
   '/',
   '/app.js',
   '/data.js',
+  '/districts.geojson',
   '/manifest.json',
   '/og.png',
   '/icons/icon-192.png',

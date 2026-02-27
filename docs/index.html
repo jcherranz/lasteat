@@ -1570,6 +1570,7 @@
     safeSetStorage('mf-theme', t);
     if (map && tileLayer) {
       tileLayer.setUrl(getTileUrl());
+      syncDistrictPolygons();
       if (view === 'map') updateMap();
     }
   }
@@ -1912,12 +1913,115 @@
     if (madridSet.has(d)) districtMadrid.push(d);
     else districtComunidad.push(d);
   });
-  var districtMS = setupMS('ms-district', [], function(sel) { selDistrict = new Set(sel); render(); }, districtCounts, {
+  var districtMS = setupMS('ms-district', [], function(sel) { selDistrict = new Set(sel); syncDistrictPolygons(); render(); }, districtCounts, {
     groups: [
       { label: 'Madrid', items: districtMadrid },
       { label: 'Comunidad de Madrid', items: districtComunidad }
     ]
   });
+
+  /* ── District Choropleth (main map) ── */
+  var districtGeoLayer = null;
+  var districtLayers = Object.create(null);
+  var districtGeoData = null;
+
+  function districtPolygonStyle(name, selected) {
+    var count = districtCounts[name] || 0;
+    var maxCount = 1;
+    Object.keys(districtCounts).forEach(function(k) {
+      if (madridSet.has(k) && districtCounts[k] > maxCount) maxCount = districtCounts[k];
+    });
+    var ratio = count / maxCount;
+    var fillOpacity;
+    if (ratio > 0.6) fillOpacity = 0.45;
+    else if (ratio > 0.35) fillOpacity = 0.3;
+    else if (ratio > 0.15) fillOpacity = 0.18;
+    else if (count > 0) fillOpacity = 0.08;
+    else fillOpacity = 0.03;
+
+    var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+    var border = getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
+
+    if (selected) {
+      return { fillColor: accent, fillOpacity: Math.min(fillOpacity + 0.2, 0.65), color: accent, weight: 2.5, opacity: 1 };
+    }
+    return { fillColor: accent, fillOpacity: fillOpacity, color: border, weight: 1, opacity: 0.6 };
+  }
+
+  function syncDistrictPolygons() {
+    Object.keys(districtLayers).forEach(function(name) {
+      districtLayers[name].setStyle(districtPolygonStyle(name, selDistrict.has(name)));
+    });
+  }
+
+  function addDistrictLayer() {
+    if (!map || !districtGeoData) return;
+    if (districtGeoLayer) { map.removeLayer(districtGeoLayer); districtLayers = Object.create(null); }
+
+    districtGeoLayer = L.geoJSON(districtGeoData, {
+      style: function(feature) {
+        return districtPolygonStyle(feature.properties.name, selDistrict.has(feature.properties.name));
+      },
+      onEachFeature: function(feature, layer) {
+        var name = feature.properties.name;
+        districtLayers[name] = layer;
+        var count = districtCounts[name] || 0;
+
+        layer.bindTooltip(name + ' (' + count + ')', {
+          sticky: true, direction: 'top', className: 'map-tooltip'
+        });
+
+        layer.on('mouseover', function() {
+          if (!selDistrict.has(name)) {
+            layer.setStyle({ fillOpacity: layer.options.fillOpacity + 0.12, weight: 1.5 });
+          }
+        });
+        layer.on('mouseout', function() {
+          layer.setStyle(districtPolygonStyle(name, selDistrict.has(name)));
+        });
+
+        layer.on('click', function(e) {
+          L.DomEvent.stopPropagation(e);
+          /* Toggle district in checkbox list */
+          var msOpts = document.querySelector('#ms-district .ms-opts');
+          var inputs = msOpts.querySelectorAll('input[type="checkbox"]');
+          for (var i = 0; i < inputs.length; i++) {
+            if (inputs[i].value === name) {
+              inputs[i].checked = !inputs[i].checked;
+              var row = inputs[i].closest('label');
+              if (row) row.setAttribute('aria-selected', inputs[i].checked ? 'true' : 'false');
+              break;
+            }
+          }
+          selDistrict = new Set(districtMS.getSelected());
+          var hasSel = selDistrict.size > 0;
+          var msEl = document.getElementById('ms-district');
+          msEl.classList.toggle('has-sel', hasSel);
+          msEl.querySelector('.ms-trigger').textContent = hasSel ? 'Zona (' + selDistrict.size + ')' : 'Zona';
+          syncDistrictPolygons();
+          render();
+        });
+      }
+    }).addTo(map);
+
+    /* Keep polygons behind markers */
+    districtGeoLayer.bringToBack();
+  }
+
+  function updateDistrictTooltips() {
+    Object.keys(districtLayers).forEach(function(name) {
+      var count = districtCounts[name] || 0;
+      districtLayers[name].setTooltipContent(name + ' (' + count + ')');
+    });
+  }
+
+  /* Fetch GeoJSON once, add to map when ready */
+  function loadDistrictGeo() {
+    if (districtGeoData) return Promise.resolve();
+    return fetch('districts.geojson')
+      .then(function(resp) { return resp.json(); })
+      .then(function(data) { districtGeoData = data; });
+  }
 
   /* ── Dynamic Counts ── */
   function splitCuisineTags(raw) {
@@ -1959,6 +2063,8 @@
 
     cuisineMS.updateCounts(cCounts);
     districtMS.updateCounts(dCounts);
+    syncDistrictPolygons();
+    updateDistrictTooltips();
   }
 
   /* ── Price Tier Buttons (multi-select) ── */
@@ -2372,6 +2478,8 @@
       tileLayer = L.tileLayer(getTileUrl(), { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>' }).addTo(map);
       document.getElementById('map-view').classList.add('loaded');
       map.on('moveend', updateMapPanel);
+      /* Load district polygons as background choropleth */
+      loadDistrictGeo().then(function() { addDistrictLayer(); });
       updateMap();
     });
   }
@@ -2441,6 +2549,7 @@
     });
 
     map.addLayer(clusterGroup);
+    if (districtGeoLayer) districtGeoLayer.bringToBack();
 
     /* User position marker */
     if (userMarker) { userMarker.remove(); userMarker = null; }
@@ -2489,7 +2598,7 @@
       searchEl.value = '';
       selPrice = new Set(); updatePriceUI();
       selCuisine = new Set(); cuisineMS.setSelected([]);
-      selDistrict = new Set(); districtMS.setSelected([]);
+      selDistrict = new Set(); districtMS.setSelected([]); syncDistrictPolygons();
       quickFilter = '';
       if (favsOnly) { favsOnly = false; updateFavBtn(); }
       render();
@@ -2578,7 +2687,7 @@
     var value = tag.getAttribute('data-filter-value');
     if (type === 'search') { searchEl.value = ''; updateSearchClear(); }
     else if (type === 'cuisine') { selCuisine.delete(value); cuisineMS.setSelected([].slice.call(selCuisine)); }
-    else if (type === 'district') { selDistrict.delete(value); districtMS.setSelected([].slice.call(selDistrict)); }
+    else if (type === 'district') { selDistrict.delete(value); districtMS.setSelected([].slice.call(selDistrict)); syncDistrictPolygons(); }
     else if (type === 'price') { selPrice.delete(value); updatePriceUI(); }
     render();
   });
