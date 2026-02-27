@@ -1266,6 +1266,29 @@
     font-weight: 500;
   }
   .map-tooltip::before { border-top-color: var(--border) !important; }
+
+  /* Pin labels: permanent tooltips, visible only at high zoom */
+  .map-pin-label {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: var(--text-xs) !important;
+    padding: 0.15rem 0.4rem !important;
+    border-radius: var(--radius) !important;
+    background: var(--surface) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .map-pin-label::before { border-top-color: var(--border) !important; }
+  .map-pin-label .map-tt-rating {
+    color: var(--warm);
+    font-weight: 500;
+  }
+  #map-view.zoom-labels .map-pin-label {
+    opacity: 1;
+  }
   .district-label {
     background: none !important;
     border: none !important;
@@ -2669,6 +2692,7 @@
   }
 
   /* Sync panel to visible map bounds */
+  var PIN_LABEL_ZOOM = 17;
   function updateMapPanel() {
     if (!map) return;
     var bounds = map.getBounds();
@@ -2681,6 +2705,8 @@
     if (mapVisibleCountEl) mapVisibleCountEl.textContent = visibleCount + ' visibles';
     var countBadge = document.getElementById('map-count-badge');
     if (countBadge) countBadge.textContent = visibleCount + ' restaurantes visibles';
+    /* Toggle pin labels at high zoom */
+    document.getElementById('map-view').classList.toggle('zoom-labels', map.getZoom() >= PIN_LABEL_ZOOM);
   }
 
   /* Highlight panel item + scroll into view */
@@ -2749,10 +2775,8 @@
       var latlng = L.latLng(parseFloat(r.lat), parseFloat(r.lng));
       var m = L.marker(latlng, { icon: markerIcon(r.r) });
       m.bindPopup(buildPopup(r), { maxWidth: 260, minWidth: 180 });
-      /* Tooltip only on non-touch devices */
-      if (!isTouchDevice) {
-        m.bindTooltip(buildTooltip(r), { className: 'map-tooltip', direction: 'top', offset: [0, -6] });
-      }
+      /* Permanent pin label (revealed at high zoom via CSS) */
+      m.bindTooltip(buildTooltip(r), { permanent: true, direction: 'top', offset: [0, -6], className: 'map-pin-label' });
 
       /* Panel item */
       var li = document.createElement('li');
