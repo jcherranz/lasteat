@@ -1943,6 +1943,14 @@
     Object.keys(districtLayers).forEach(function(name) {
       districtLayers[name].setStyle(districtPolygonStyle(name, selDistrict.has(name)));
     });
+    /* Show/hide layer based on zoom + selection state */
+    if (map && districtGeoLayer) {
+      if (map.getZoom() >= DISTRICT_HIDE_ZOOM && selDistrict.size === 0) {
+        if (map.hasLayer(districtGeoLayer)) map.removeLayer(districtGeoLayer);
+      } else {
+        if (!map.hasLayer(districtGeoLayer)) map.addLayer(districtGeoLayer);
+      }
+    }
   }
 
   function addDistrictLayer() {
@@ -1995,16 +2003,13 @@
       }
     }).addTo(map);
 
-    /* Keep polygons behind markers */
-    districtGeoLayer.bringToBack();
-
-    /* Hide/show polygons based on zoom level */
+    /* Hide/show polygons based on zoom level (keep selected visible) */
     function onZoomEnd() {
       if (!districtGeoLayer) return;
-      if (map.getZoom() >= DISTRICT_HIDE_ZOOM) {
+      if (map.getZoom() >= DISTRICT_HIDE_ZOOM && selDistrict.size === 0) {
         if (map.hasLayer(districtGeoLayer)) map.removeLayer(districtGeoLayer);
       } else {
-        if (!map.hasLayer(districtGeoLayer)) { map.addLayer(districtGeoLayer); districtGeoLayer.bringToBack(); }
+        if (!map.hasLayer(districtGeoLayer)) map.addLayer(districtGeoLayer);
       }
     }
     map.on('zoomend', onZoomEnd);
@@ -2551,7 +2556,7 @@
     });
 
     map.addLayer(clusterGroup);
-    if (districtGeoLayer) districtGeoLayer.bringToBack();
+    /* District polygons are in overlayPane (z-400), above tiles (z-200) but below markers (z-600) */
 
     /* User position marker */
     if (userMarker) { userMarker.remove(); userMarker = null; }
