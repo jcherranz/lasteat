@@ -2197,7 +2197,14 @@
       districtLabels = Object.create(null);
     }
 
+    /* Dedicated pane below markers (z-index 250, between tiles at 200 and overlays at 400) */
+    if (!map.getPane('districts')) {
+      map.createPane('districts');
+      map.getPane('districts').style.zIndex = 250;
+    }
+
     districtGeoLayer = L.geoJSON(districtGeoData, {
+      pane: 'districts',
       style: function(feature) {
         return districtPolygonStyle(feature.properties.name, selDistrict.has(feature.properties.name));
       },
@@ -2807,7 +2814,7 @@
     });
 
     map.addLayer(clusterGroup);
-    /* District polygons are in overlayPane (z-400), above tiles (z-200) but below markers (z-600) */
+    /* District polygons in 'districts' pane (z-250), above tiles (z-200) but below markers (z-600) */
 
     /* User position marker */
     if (userMarker) { userMarker.remove(); userMarker = null; }
