@@ -63,37 +63,264 @@
 <link rel="icon" href="/icons/icon-192.png" type="image/png">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#2E6058">
-<link rel="stylesheet" href="/restaurant-app.css">
+<style>
+  @font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 300; font-display: swap; src: url('/fonts/cormorant-garamond-300-latin.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  @font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 300; font-display: swap; src: url('/fonts/cormorant-garamond-300-latin-ext.woff2') format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+  @font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/cormorant-garamond-600-latin.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  @font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/cormorant-garamond-600-latin-ext.woff2') format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+  @font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/dm-sans-400-latin.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  @font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/dm-sans-400-latin-ext.woff2') format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+  @font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 500; font-display: swap; src: url('/fonts/dm-sans-500-latin.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  @font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 500; font-display: swap; src: url('/fonts/dm-sans-500-latin-ext.woff2') format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+  :root {
+    --bg: #F8F7F3;
+    --surface: #FFFFFF;
+    --text: #1A1D1B;
+    --secondary: #5A5F5C;
+    --muted: #878C89;
+    --accent: #2E6058;
+    --accent-soft: rgba(46, 96, 88, 0.06);
+    --accent-muted: rgba(46, 96, 88, 0.14);
+    --warm: #C4956A;
+    --warm-soft: rgba(196, 149, 106, 0.08);
+    --warm-muted: rgba(196, 149, 106, 0.16);
+    --border: #E5E2DC;
+    --radius: 8px;
+    --radius-pill: 100px;
+    --text-xs: 0.65rem;
+    --text-sm: 0.72rem;
+    --text-base: 0.85rem;
+    --text-lg: 0.95rem;
+    --text-xl: 1.6rem;
+    --text-2xl: 4.2rem;
+  }
+  [data-theme="dark"] {
+    --bg: #0F1311;
+    --surface: #181C1A;
+    --text: #E4E6E4;
+    --secondary: #9EA3A0;
+    --muted: #8A8F8C;
+    --accent: #4CB0A1;
+    --accent-soft: rgba(76, 176, 161, 0.08);
+    --accent-muted: rgba(76, 176, 161, 0.15);
+    --warm: #D4A574;
+    --warm-soft: rgba(212, 165, 116, 0.10);
+    --warm-muted: rgba(212, 165, 116, 0.18);
+    --border: #262A28;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 3.5rem 2rem;
+  }
+  body, .card, footer {
+    transition: background-color 0.3s, border-color 0.3s, color 0.2s;
+  }
+  .back {
+    font-size: var(--text-sm);
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.25rem 0;
+  }
+  .back:hover { color: var(--accent); }
+  h1 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 2.4rem;
+    font-weight: 300;
+    line-height: 1.15;
+    margin: 1.5rem 0 0.5rem;
+  }
+  .meta {
+    font-size: var(--text-sm);
+    color: var(--muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0;
+    letter-spacing: 0.01em;
+  }
+  .meta span + span::before {
+    content: '·';
+    margin: 0 0.4rem;
+    color: var(--border);
+  }
+  .score {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 3.2rem;
+    font-weight: 600;
+    color: var(--warm);
+    margin: 1.25rem 0 0.25rem;
+    line-height: 1;
+  }
+  .ratings {
+    font-size: var(--text-sm);
+    color: var(--muted);
+    margin-bottom: 1rem;
+    letter-spacing: 0.01em;
+  }
+  .ratings strong { color: var(--secondary); font-weight: 500; }
+  .tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0.75rem 0; }
+  .tag {
+    font-size: var(--text-xs);
+    padding: 0.15rem 0.5rem;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: var(--radius-pill);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    margin: 1.25rem 0;
+  }
+  .card-label {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 0.3rem;
+    font-weight: 500;
+  }
+  .card-value {
+    font-size: var(--text-base);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .card-value a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .card-value a:hover { text-decoration: underline; }
+  .contact {
+    font-size: var(--text-base);
+    color: var(--muted);
+    margin: 1rem 0;
+  }
+  .contact a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .contact a:hover { text-decoration: underline; }
+  .maps-btn {
+    display: inline-block;
+    margin: 1rem 0;
+    padding: 0.6rem 1.4rem;
+    background: var(--accent);
+    color: #fff;
+    border-radius: var(--radius-pill);
+    font-size: var(--text-sm);
+    font-family: inherit;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    transition: background 0.25s;
+  }
+  .maps-btn:hover { background: var(--accent-hover, #245048); }
+  footer {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    font-size: var(--text-xs);
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  footer a {
+    color: var(--secondary);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+    transition: border-color 0.2s, color 0.2s;
+  }
+  footer a:hover { border-bottom-color: var(--accent); color: var(--accent); }
+  .theme-toggle {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--muted);
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.25s, color 0.25s;
+    line-height: 1;
+  }
+  .theme-toggle::before { content: '\263D'; }
+  [data-theme="dark"] .theme-toggle::before { content: '\2600'; }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: 0.01ms !important; }
+  }
+  @media (max-width: 640px) {
+    .container { padding: 2.5rem 1.25rem; }
+    h1 { font-size: 1.8rem; }
+    .score { font-size: 2.6rem; }
+  }
+</style>
 </head>
 <body>
-<div id="restaurant-root">
-  <main class="container" id="main">
-    <a href="/" class="back">&larr; Last Eat</a>
-    <h1>HER</h1>
-    <div class="meta">
-      <span>Salamanca</span>
-      <span>35 €</span>
-    </div>
-    <div class="tags">Fusión</div>
+<button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema"></button>
+<div class="container">
+  <a href="/" class="back">&larr; Last Eat</a>
+  <h1>HER</h1>
+  <div class="meta">
+    <span>Salamanca</span>
+    <span>35 €</span>
+  </div>
+  <div class="tags"><span class="tag">Fusión</span></div>
 
-    <div class="score">7.1</div>
-    <div class="ratings">Comida <strong>7.1</strong> &middot; Decor <strong>7.1</strong> &middot; Servicio <strong>6.9</strong></div>
+  <div class="score">7.1</div>
+  <div class="ratings">Comida <strong>7.1</strong> &middot; Decor <strong>7.1</strong> &middot; Servicio <strong>6.9</strong></div>
 
-    <div class="card">
-      <div class="card-label">Direcci&oacute;n</div>
-      <div class="card-value">Hermosilla, 4, 28001 Madrid</div>
-    </div>
+  <div class="card">
+    <div class="card-label">Direcci&oacute;n</div>
+    <div class="card-value">Hermosilla, 4, 28001 Madrid</div>
+  </div>
 
-    <div class="contact"><a href="tel:+34-914924122">+34-914924122</a> &middot; <a href="http://www.hermosillamadrid.es" target="_blank" rel="noopener noreferrer">Web</a> &middot; <a href="https://macarfi.com/es/mad/ficha-restaurante/her" target="_blank" rel="noopener noreferrer">Fuente</a></div>
-    <a href="https://www.google.com/maps/search/?api=1&query=HER%2C%20Hermosilla%2C%204%2C%2028001%20Madrid" class="maps-btn" target="_blank" rel="noopener noreferrer">Ver en Google Maps</a>
-  </main>
+  <div class="contact"><a href="tel:+34-914924122">+34-914924122</a> &middot; <a href="http://www.hermosillamadrid.es" target="_blank" rel="noopener noreferrer">Web</a> &middot; <a href="https://macarfi.com/es/mad/ficha-restaurante/her" target="_blank" rel="noopener noreferrer">Fuente</a></div>
 
-  <footer>
-    <a href="/">Last Eat</a> &middot; Restaurantes en Madrid
-  </footer>
+  <a href="https://www.google.com/maps/search/?api=1&query=HER%2C%20Hermosilla%2C%204%2C%2028001%20Madrid" class="maps-btn" target="_blank" rel="noopener noreferrer">Ver en Google Maps</a>
 </div>
 
-<script id="restaurant-data" type="application/json">{"name":"HER","slug":"her","address":"Hermosilla, 4, 28001 Madrid","district":"Salamanca","cuisine":"Fusión","rating":"7.1","rating_food":"7.1","rating_decor":"7.1","rating_service":"6.9","price_eur":"35","phone":"+34-914924122","website":"http://www.hermosillamadrid.es","macarfi_url":"https://macarfi.com/es/mad/ficha-restaurante/her","latitude":"40.426444","longitude":"-3.688764"}</script>
-<script type="module" src="/restaurant-app.js"></script>
+<footer>
+  <a href="/">Last Eat</a> &mdash; Restaurantes en Madrid
+</footer>
+
+<script>
+(function() {
+  var saved = null;
+  try { saved = localStorage.getItem('mf-theme'); } catch (_err) {}
+  if (saved) document.documentElement.dataset.theme = saved;
+  else if (window.matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.dataset.theme = 'dark';
+  document.getElementById('theme-toggle').addEventListener('click', function() {
+    var t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = t;
+    try { localStorage.setItem('mf-theme', t); } catch (_err) {}
+  });
+})();
+</script>
 </body>
 </html>

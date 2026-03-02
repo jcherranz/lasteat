@@ -75,11 +75,7 @@ def generate(input_path: Path, output_path: Path) -> int:
     json_str = json.dumps(abbreviated, ensure_ascii=False, separators=(",", ":"))
     meta_str = json.dumps(meta, ensure_ascii=False, separators=(",", ":"))
 
-    content = (
-        f"const RESTAURANTS={json_str};\n"
-        f"const META={meta_str};\n"
-        "if(typeof window!=='undefined'){window.RESTAURANTS=RESTAURANTS;window.META=META;};\n"
-    )
+    content = f"const RESTAURANTS={json_str};\nconst META={meta_str};\n"
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
