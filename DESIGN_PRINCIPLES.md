@@ -2,8 +2,6 @@
 
 A reference for building interfaces that communicate clearly and stay out of the way. Grounded in the work of Vignelli, Reichenstein, Rams, Tufte, Saffer, Krug, and foundational HCI research.
 
-Implementation context note (2026-03): principles apply to both React homepage components and generated React detail pages in `docs/`.
-
 ---
 
 ## 1. Typography

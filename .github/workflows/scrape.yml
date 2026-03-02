@@ -120,9 +120,6 @@ jobs:
       - name: Generate restaurant pages and sitemap
         run: python scripts/generate_pages.py
 
-      - name: Smoke-check generated site assets
-        run: python scripts/smoke_site.py
-
       - name: Check for changes
         id: diff
         run: |

@@ -1,67 +1,54 @@
 # Last Eat - Session Handoff
 
-Date: 2026-03-02
+Date: 2026-02-27
 
 ## Current Status
 
-Frontend migration is now **React-first** across both homepage and detail pages, while keeping the Python scraper/data pipeline intact.
+District choropleth map implemented — 21 Madrid city district polygons rendered as a background GeoJSON layer on the main Leaflet map. Users click polygons to toggle Zona filter selections, with bidirectional sync between map and dropdown. Topology-preserving simplification guarantees MECE boundaries (no gaps or overlaps between adjacent districts).
 
 ### Recently Completed
-- **Homepage migrated to React**
-  - `docs/index.html` now bootstraps React app entry
-  - `docs/react-app.js` implements list + map modes, filters, URL sync, favorites, geolocation distance sort
-  - `docs/react-app.css` defines full homepage visual system and responsive layout
-- **Detail pages migrated to React renderer**
-  - `scripts/generate_pages.py` now emits React-bootstrapped detail pages with embedded JSON payload per restaurant
-  - `docs/restaurant-app.js` renders each restaurant detail page from embedded data
-  - `docs/restaurant-app.css` styles detail pages
-  - Regenerated all pages: `docs/r/*.html` (770 files)
-- **Data pipeline compatibility retained**
-  - `scripts/generate_data_js.py` still emits `const RESTAURANTS`/`const META` and now also assigns to `window`
-- **Service worker updated**
-  - `docs/sw.js` now caches new React assets and `districts.geojson`
-- **Guardrails added (professionalization pass)**
-  - New CI workflow: `.github/workflows/ci.yml` (pytest + JS syntax checks + smoke tests)
-  - New smoke script: `scripts/smoke_site.py`
-  - Scheduled scraper workflow now also runs smoke checks before committing updates
+- **District choropleth on main map** — `docs/districts.geojson` (21 polygons, 17KB) rendered as Leaflet GeoJSON layer. Click-to-filter, hover tooltips with restaurant counts, theme-aware fill/stroke, lazy-loaded on first map init. Choropleth opacity scales by restaurant density (5 steps). Service worker bumped to `lasteat-v14`.
+- **Topology-preserving GeoJSON generation** — `scripts/fetch_district_geojson.py` simplifies at OSM way level (not per-polygon ring), ensuring shared borders between adjacent districts are identical. Douglas-Peucker with 0.001° tolerance, 83% point reduction (3870 → 643 points).
+- **Controls redesign** — three-tier hierarchy, ghost filter triggers, sort dropdown, text quick-links
+- **Editorial restraint refactor** — warm accent limited to 5 functional uses (ratings + map)
+- **12A/12B/12C** Design elevation — typography scale, card hierarchy, scroll reveals
+- **9A** Smart Search & Discovery — fuzzy matching, surprise me, quick-filter tags
 
-### Validation Completed
-- `./.venv/bin/python -m pytest tests/` → **37 passed**
-- `node --check docs/react-app.js` → pass
-- `node --check docs/restaurant-app.js` → pass
-- `./.venv/bin/python scripts/smoke_site.py` → pass (`Checked 770 detail pages`)
+### Open Checkboxes
+- **9A**: "Performance remains smooth with 770 restaurants" — needs manual testing with full dataset
+- **12C**: "No performance regression" — needs Lighthouse or manual verification
 
-## Known Caveats / Risks
+## What the Next Session Should Do
 
-- **Large generated diff**: React detail page migration regenerates all `docs/r/*.html` and updates `docs/sitemap.xml`.
-- **No Node build tooling yet**: React still runs via CDN ESM imports (`esm.sh`) at runtime.
-- **Package registry/network limitation in this environment**: `npm` registry lookups timed out, so Vite/TypeScript bundling phase could not be completed in-session.
+1. **Performance verification** — load the live site, test all features with 770 restaurants, check for jank during:
+   - Fuzzy search typing (edit distance calculation on keystrokes)
+   - Quick-filter toggling (re-filtering + re-rendering)
+   - Scroll reveals with IntersectionObserver
+   - District choropleth interactions (polygon click, hover, tooltip)
+   - District headers when sorted by name (extra DOM elements)
 
-## Recommended Next Steps
+2. **Regenerate detail pages** — run `scripts/generate_pages.py` to update all 770 detail pages with accent-colored tags (instead of warm)
 
-1. **If network is available, complete build-system hardening**
-   - Add Vite + TypeScript project
-   - Bundle React assets locally instead of CDN runtime imports
-   - Keep output deploy target as `docs/`
-2. **Manual QA on live/staging**
-   - Homepage: list/map parity, mobile map behavior, geolocation flows
-   - Detail pages: metadata correctness + rendering parity on random sample
-3. **Performance and a11y audits**
-   - Lighthouse Performance / Accessibility checks
-   - Validate no regressions from React migration
+3. **Close remaining audit items** if tools are available:
+   - 6B: axe DevTools → 0 critical/serious
+   - 6C: Lighthouse Accessibility ≥95
+   - 8A: schema.org validator on sample detail pages
+   - 10B: Lighthouse Performance ≥95
 
-## Files of Interest
+4. **Update ROADMAP.md** — check off performance items once verified, mark 9A and 12C as `[x]`
 
-- Frontend runtime:
-  - `docs/index.html`
-  - `docs/react-app.js`
-  - `docs/react-app.css`
-  - `docs/restaurant-app.js`
-  - `docs/restaurant-app.css`
-- Data/build pipeline:
-  - `scripts/generate_data_js.py`
-  - `scripts/generate_pages.py`
-  - `scripts/smoke_site.py`
-- CI:
-  - `.github/workflows/ci.yml`
-  - `.github/workflows/scrape.yml`
+## Commits Since Last Handoff
+```
+(latest) Topology-preserving GeoJSON: simplify at way level for MECE districts
+bbe8a9f Add district choropleth layer to main map with click-to-filter
+(earlier) Redesign Cocina/Zona filters from first principles
+```
+
+## Known Caveats
+- Detail pages (`docs/r/*.html`) have NOT been regenerated — `generate_pages.py` template now uses accent-colored tags but the 770 pages still have warm-colored tags until regenerated
+- Service worker cache is at `lasteat-v14`
+- `docs/districts.geojson` covers only 21 Madrid city districts — surrounding municipalities (Alcobendas, Pozuelo, etc.) are not on the map
+- District choropleth hidden on mobile (map is hidden below 640px) — mobile users use the Zona dropdown only
+- The `fuzzyMatchQuery` function is bounded (maxDist=2 for queries ≥7 chars, 1 otherwise) to limit perf impact — should still be verified with real typing patterns
+- Cuisine parsing splits on `•` only (regex `/\u2022/`) — preserves commas in names like "Creativa, de autor"
+- `--warm` CSS variable is retained for exactly 5 functional uses: card-rating color, top-rated left border, map-popup-rating background, map-tooltip rating color, map-panel rating color

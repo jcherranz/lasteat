@@ -6,25 +6,21 @@ Madrid restaurant discovery platform. Python scraper harvests ~770 restaurants f
 ## Architecture
 ```
 scraper.py                          → Python. Fetches Macarfi API + HTML cards, merges, exports JSON/CSV
-docs/index.html                     → React entrypoint (SEO meta + root container + script loading)
-docs/react-app.js                   → React UI (CDN ESM, no build step)
-docs/react-app.css                  → Homepage styles and typography tokens
-docs/restaurant-app.js              → React detail-page renderer (reads embedded restaurant JSON)
-docs/restaurant-app.css             → Detail-page styles
+docs/index.html                     → Single-file frontend (HTML + CSS + JS). No build step.
 docs/app.js                         → Extracted pure logic (esc, haversine, getFiltered, sortList)
-docs/data.js                        → Generated. RESTAURANTS array consumed by react-app.js
-docs/districts.geojson              → District geometry dataset (legacy map support / future use)
+docs/data.js                        → Generated. RESTAURANTS array consumed by index.html
+docs/districts.geojson              → 21 Madrid district polygons for map choropleth (static, 17KB)
 docs/favicon.svg                    → SVG favicon (teal LE monogram)
 docs/CNAME                          → Custom domain config (lasteat.es)
 scripts/fetch_district_geojson.py   → One-time: fetch + simplify district boundaries from Overpass API
-scripts/smoke_site.py               → Smoke checks for React/static-site wiring and generated detail pages
 output/                             → Gitignored. Scraper cache + exports
 ```
 
 ## Tech Stack
 - **Scraper:** Python 3, httpx, BeautifulSoup4, lxml, tqdm
-- **Frontend:** React 18 (CDN ESM), self-hosted fonts (Cormorant Garamond + DM Sans)
+- **Frontend:** Vanilla HTML/CSS/JS, Leaflet 1.9.4 (map), self-hosted fonts (Cormorant Garamond + DM Sans)
 - **Hosting:** GitHub Pages from `/docs` directory
+- **Map tiles:** CartoDB (light/dark)
 
 ## Commands
 ```bash
@@ -40,7 +36,6 @@ output/                             → Gitignored. Scraper cache + exports
 
 # Tests
 ./.venv/bin/python -m pytest tests/
-./.venv/bin/python scripts/smoke_site.py      # Static-site smoke checks (React wiring + assets)
 ```
 
 ## Data Model
@@ -49,11 +44,11 @@ Frontend uses abbreviated keys for payload size: `n`, `s`, `a`, `lat`, `lng`, `c
 
 ## Key Conventions
 - **Language:** UI is in Spanish (es). Code comments in English.
-- **No Node build step.** Frontend ships as static files in `docs/` and imports React modules directly from CDN.
+- **No build tooling.** The frontend is a single HTML file with inline CSS/JS. Keep it that way unless splitting becomes necessary for a specific phase.
 - **Palette:** Warm neutrals + teal accent (#2E6058 light / #4CB0A1 dark). Editorial minimalist aesthetic.
 - **Fonts:** Cormorant Garamond (headings), DM Sans (body). Do not add other fonts.
 - **localStorage keys:** `mf-fav` (favorites), `mf-theme` (dark/light). Prefix new keys with `le-`.
-- **Framework baseline:** React for homepage interactions; keep shared pure logic in `docs/app.js`.
+- **No frameworks.** Vanilla JS only. No React, no jQuery.
 
 ## Roadmap
 See `ROADMAP.md` for the phased improvement plan with status tracking.
@@ -64,7 +59,6 @@ Each phase is self-contained — a new Claude session can pick up any incomplete
 - **Accessibility:** axe DevTools audit and Lighthouse a11y score ≥95 not yet verified (Phase 6B/6C)
 - **SEO:** schema.org validator check pending for sample pages (Phase 8A)
 - **Performance:** Lighthouse Performance score ≥95 not yet verified (Phase 10B)
-- **Build hardening:** React still ships via CDN ESM runtime imports; migrate to bundled local build when package-registry access is available (Phase 13C)
 
 ## Handoff Notes
 - `docs/r/*.html` pages are generated output from `scripts/generate_pages.py`. Regenerating pages can change hundreds of files in one run.
@@ -75,7 +69,3 @@ Each phase is self-contained — a new Claude session can pick up any incomplete
 - Single branch: `main`
 - Commit style: imperative mood, concise (e.g. "Add GitHub Actions scraper workflow")
 - One logical change per commit when possible
-
-## CI
-- `.github/workflows/ci.yml` runs on push/PR: pytest + JS syntax checks + `scripts/smoke_site.py`
-- `.github/workflows/scrape.yml` (scheduled data refresh) now also runs `scripts/smoke_site.py` before commit/push
