@@ -129,38 +129,64 @@ def build_page(r: dict) -> str:
     gmaps_url = f"https://www.google.com/maps/search/?api=1&query={quote(r.get('name', '') + ', ' + r.get('address', ''))}"
     jsonld = build_jsonld(r)
 
-    # Cuisine tags
     cuisine_tags = ""
     if cuisine:
-        tags = [c.strip() for c in cuisine.split("\u2022") if c.strip()]
+        tags = [c.strip() for c in cuisine.replace(",", "\u2022").split("\u2022") if c.strip()]
         cuisine_tags = ", ".join(escape(t) for t in tags)
 
-    # Ratings breakdown
-    ratings_html = ""
     rating_items = []
     if rating_food:
-        rating_items.append(f'Comida <strong>{rating_food}</strong>')
+        rating_items.append(f'Comida <strong>{escape(rating_food)}</strong>')
     if rating_decor:
-        rating_items.append(f'Decor <strong>{rating_decor}</strong>')
+        rating_items.append(f'Decor <strong>{escape(rating_decor)}</strong>')
     if rating_service:
-        rating_items.append(f'Servicio <strong>{rating_service}</strong>')
-    if rating_items:
-        ratings_html = f'<div class="ratings">{" &middot; ".join(rating_items)}</div>'
+        rating_items.append(f'Servicio <strong>{escape(rating_service)}</strong>')
 
-    # Contact links
     contact_parts = []
     if phone:
-        contact_parts.append(f'<a href="tel:{phone.replace(" ", "")}">{escape(phone)}</a>')
+        contact_parts.append(f'<a href="tel:{escape(phone.replace(" ", ""))}">{escape(phone)}</a>')
     if website:
         contact_parts.append(f'<a href="{escape(website)}" target="_blank" rel="noopener noreferrer">Web</a>')
     if macarfi_url:
-        contact_parts.append(f'<a href="{escape(macarfi_url)}" target="_blank" rel="noopener noreferrer">Macarfi</a>')
-    contact_html = ""
-    if contact_parts:
-        contact_html = f'<div class="contact">{" &middot; ".join(contact_parts)}</div>'
+        contact_parts.append(f'<a href="{escape(macarfi_url)}" target="_blank" rel="noopener noreferrer">Fuente</a>')
 
     rating_display = rating if rating and rating != "-" else "\u2014"
-    price_display = f"{price} \u20ac" if price else ""
+    price_display = f"{escape(price)} \u20ac" if price else ""
+
+    page_data = {
+        "name": r.get("name", ""),
+        "slug": r.get("slug", ""),
+        "address": r.get("address", ""),
+        "district": r.get("district", ""),
+        "cuisine": r.get("cuisine", ""),
+        "rating": r.get("rating", ""),
+        "rating_food": r.get("rating_food", ""),
+        "rating_decor": r.get("rating_decor", ""),
+        "rating_service": r.get("rating_service", ""),
+        "price_eur": r.get("price_eur", ""),
+        "phone": r.get("phone", ""),
+        "website": website,
+        "macarfi_url": macarfi_url,
+        "latitude": r.get("latitude", ""),
+        "longitude": r.get("longitude", ""),
+    }
+    page_data_json = json.dumps(page_data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+
+    ratings_fallback = ""
+    if rating_items:
+        ratings_fallback = f'<div class="ratings">{" &middot; ".join(rating_items)}</div>'
+
+    contact_fallback = ""
+    if contact_parts:
+        contact_fallback = f'<div class="contact">{" &middot; ".join(contact_parts)}</div>'
+
+    maps_fallback = ""
+    if lat and lng:
+        maps_fallback = (
+            f'<a href="{gmaps_url}" class="maps-btn" target="_blank" rel="noopener noreferrer">'
+            "Ver en Google Maps"
+            "</a>"
+        )
 
     return f"""<!DOCTYPE html>
 <html lang="es">
@@ -198,274 +224,38 @@ def build_page(r: dict) -> str:
 <link rel="icon" href="/icons/icon-192.png" type="image/png">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#2E6058">
-<style>
-  @font-face {{ font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 300; font-display: swap; src: url('/fonts/cormorant-garamond-300-latin.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }}
-  @font-face {{ font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 300; font-display: swap; src: url('/fonts/cormorant-garamond-300-latin-ext.woff2') format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }}
-  @font-face {{ font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/cormorant-garamond-600-latin.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }}
-  @font-face {{ font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/cormorant-garamond-600-latin-ext.woff2') format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }}
-  @font-face {{ font-family: 'DM Sans'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/dm-sans-400-latin.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }}
-  @font-face {{ font-family: 'DM Sans'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/dm-sans-400-latin-ext.woff2') format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }}
-  @font-face {{ font-family: 'DM Sans'; font-style: normal; font-weight: 500; font-display: swap; src: url('/fonts/dm-sans-500-latin.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }}
-  @font-face {{ font-family: 'DM Sans'; font-style: normal; font-weight: 500; font-display: swap; src: url('/fonts/dm-sans-500-latin-ext.woff2') format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }}
-  :root {{
-    --bg: #F8F7F3;
-    --surface: #FFFFFF;
-    --text: #1A1D1B;
-    --secondary: #5A5F5C;
-    --muted: #878C89;
-    --accent: #2E6058;
-    --accent-soft: rgba(46, 96, 88, 0.06);
-    --accent-muted: rgba(46, 96, 88, 0.14);
-    --warm: #C4956A;
-    --border: #E5E2DC;
-    --radius: 2px;
-    --text-xs: 0.65rem;
-    --text-sm: 0.72rem;
-    --text-base: 0.85rem;
-    --text-lg: 0.95rem;
-    --text-xl: 1.6rem;
-  }}
-  [data-theme="dark"] {{
-    --bg: #0F1311;
-    --surface: #181C1A;
-    --text: #E4E6E4;
-    --secondary: #9EA3A0;
-    --muted: #8A8F8C;
-    --accent: #4CB0A1;
-    --accent-soft: rgba(76, 176, 161, 0.08);
-    --accent-muted: rgba(76, 176, 161, 0.15);
-    --warm: #D4A574;
-    --border: #262A28;
-  }}
-  * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-  body {{
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.6;
-    min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }}
-  .container {{
-    max-width: 640px;
-    margin: 0 auto;
-    padding: 3.5rem 2rem;
-  }}
-  body, .card, footer {{
-    transition: background-color 0.3s, border-color 0.3s, color 0.2s;
-  }}
-  .back {{
-    font-size: var(--text-sm);
-    color: var(--muted);
-    text-decoration: none;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    font-weight: 500;
-    transition: color 0.2s;
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    padding: 0.25rem 0;
-  }}
-  .back:hover {{ color: var(--accent); }}
-  h1 {{
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 2.4rem;
-    font-weight: 300;
-    line-height: 1.15;
-    margin: 1.5rem 0 0.5rem;
-  }}
-  .meta {{
-    font-size: var(--text-sm);
-    color: var(--muted);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem 0;
-    letter-spacing: 0.01em;
-  }}
-  .meta span + span::before {{
-    content: '\u00b7';
-    margin: 0 0.4rem;
-    color: var(--border);
-  }}
-  .score {{
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 3.2rem;
-    font-weight: 600;
-    color: var(--warm);
-    margin: 1.25rem 0 0.25rem;
-    line-height: 1;
-  }}
-  .ratings {{
-    font-size: var(--text-sm);
-    color: var(--muted);
-    margin-bottom: 1rem;
-    letter-spacing: 0.01em;
-  }}
-  .ratings strong {{ color: var(--secondary); font-weight: 500; }}
-  .tags {{
-    font-size: var(--text-sm);
-    color: var(--secondary);
-    margin: 0.75rem 0;
-    line-height: 1.45;
-  }}
-  .card {{
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.25rem 1.5rem;
-    margin: 1.25rem 0;
-  }}
-  .card-label {{
-    font-size: var(--text-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--muted);
-    margin-bottom: 0.3rem;
-    font-weight: 500;
-  }}
-  .card-value {{
-    font-size: var(--text-base);
-    color: var(--text);
-    line-height: 1.5;
-  }}
-  .card-value a {{
-    color: var(--accent);
-    text-decoration: none;
-  }}
-  .card-value a:hover {{ text-decoration: underline; }}
-  .contact {{
-    font-size: var(--text-base);
-    color: var(--muted);
-    margin: 1rem 0;
-  }}
-  .contact a {{
-    color: var(--secondary);
-    text-decoration: none;
-  }}
-  .contact a:hover {{ text-decoration: underline; color: var(--accent); }}
-  .contact a[href^="tel:"] {{ color: var(--accent); }}
-  .maps-btn {{
-    display: inline-block;
-    margin: 1rem 0;
-    padding: 0.25rem 0;
-    background: none;
-    color: var(--secondary);
-    border: none;
-    border-bottom: 1px solid var(--muted);
-    font-size: var(--text-sm);
-    font-family: inherit;
-    font-weight: 400;
-    letter-spacing: 0.04em;
-    text-decoration: none;
-    transition: color 0.2s, border-color 0.2s;
-  }}
-  .maps-btn:hover {{ color: var(--accent); border-bottom-color: var(--accent); }}
-  footer {{
-    max-width: 640px;
-    margin: 0 auto;
-    padding: 1.5rem 2rem;
-    border-top: 1px solid var(--border);
-    font-size: var(--text-sm);
-    color: var(--muted);
-    text-align: center;
-    letter-spacing: 0.02em;
-  }}
-  footer a {{
-    color: var(--muted);
-    text-decoration: none;
-    transition: color 0.2s;
-  }}
-  footer a:hover {{ color: var(--accent); }}
-  .theme-toggle {{
-    position: fixed;
-    top: 1.5rem;
-    right: 1.5rem;
-    background: none;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: var(--text-base);
-    color: var(--muted);
-    width: 44px;
-    height: 44px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.25s;
-    line-height: 1;
-  }}
-  .theme-toggle::before {{ content: '\\2600'; }}
-  [data-theme="dark"] .theme-toggle::before {{ content: '\\263D'; }}
-  .theme-toggle:hover {{ color: var(--accent); }}
-  @media (prefers-reduced-motion: reduce) {{
-    *, *::before, *::after {{ transition-duration: 0.01ms !important; }}
-  }}
-  .skip-link {{
-    position: absolute;
-    left: 1rem;
-    top: -40px;
-    padding: 0.5rem 0.8rem;
-    background: var(--surface);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    font-size: var(--text-sm);
-    text-decoration: none;
-    z-index: 400;
-  }}
-  .skip-link:focus {{ top: 1rem; }}
-  @media (max-width: 640px) {{
-    .container {{ padding: 2.5rem 1.25rem; }}
-    h1 {{ font-size: 1.8rem; }}
-    .score {{ font-size: 2.6rem; }}
-    footer {{ padding: 1.25rem; font-size: var(--text-xs); }}
-  }}
-</style>
+<link rel="stylesheet" href="/restaurant-app.css">
 </head>
 <body>
-<a href="#main" class="skip-link">Saltar al contenido</a>
-<button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema"></button>
-<div class="container" id="main">
-  <a href="/" class="back">&larr; Last Eat</a>
-  <h1>{name}</h1>
-  <div class="meta">
-    {f'<span>{district}</span>' if district else ''}
-    {f'<span>{price_display}</span>' if price_display else ''}
-  </div>
-  {f'<div class="tags">{cuisine_tags}</div>' if cuisine_tags else ''}
+<div id="restaurant-root">
+  <main class="container" id="main">
+    <a href="/" class="back">&larr; Last Eat</a>
+    <h1>{name}</h1>
+    <div class="meta">
+      {f'<span>{district}</span>' if district else ''}
+      {f'<span>{price_display}</span>' if price_display else ''}
+    </div>
+    {f'<div class="tags">{cuisine_tags}</div>' if cuisine_tags else ''}
 
-  <div class="score">{rating_display}</div>
-  {ratings_html}
+    <div class="score">{escape(rating_display)}</div>
+    {ratings_fallback}
 
-  <div class="card">
-    <div class="card-label">Direcci&oacute;n</div>
-    <div class="card-value">{address if address else '&mdash;'}</div>
-  </div>
+    <div class="card">
+      <div class="card-label">Direcci&oacute;n</div>
+      <div class="card-value">{address if address else '&mdash;'}</div>
+    </div>
 
-  {contact_html}
+    {contact_fallback}
+    {maps_fallback}
+  </main>
 
-  {f'<a href="{gmaps_url}" class="maps-btn" target="_blank" rel="noopener noreferrer">Ver en Google Maps</a>' if lat and lng else ''}
+  <footer>
+    <a href="/">Last Eat</a> &middot; Restaurantes en Madrid
+  </footer>
 </div>
 
-<footer>
-  <a href="/">Last Eat</a> &middot; Restaurantes en Madrid
-</footer>
-
-<script>
-(function() {{
-  var saved = null;
-  try {{ saved = localStorage.getItem('mf-theme'); }} catch (_err) {{}}
-  if (saved) document.documentElement.dataset.theme = saved;
-  else if (window.matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.dataset.theme = 'dark';
-  document.getElementById('theme-toggle').addEventListener('click', function() {{
-    var t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-    document.documentElement.dataset.theme = t;
-    try {{ localStorage.setItem('mf-theme', t); }} catch (_err) {{}}
-  }});
-}})();
-</script>
+<script id="restaurant-data" type="application/json">{page_data_json}</script>
+<script type="module" src="/restaurant-app.js"></script>
 </body>
 </html>"""
 

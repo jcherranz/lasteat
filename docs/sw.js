@@ -1,7 +1,12 @@
-var CACHE_NAME = 'lasteat-v14';
+var CACHE_NAME = 'lasteat-v15';
 var STATIC_ASSETS = [
   '/',
+  '/index.html',
   '/app.js',
+  '/react-app.js',
+  '/react-app.css',
+  '/restaurant-app.js',
+  '/restaurant-app.css',
   '/data.js',
   '/districts.geojson',
   '/manifest.json',
