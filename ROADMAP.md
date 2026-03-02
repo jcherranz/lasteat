@@ -71,7 +71,7 @@ A  @  185.199.111.153
 
 ---
 
-## Re-prioritized Execution Order (2026-02-26)
+## Re-prioritized Execution Order (2026-03-02)
 _Goal: match professional delivery sequencing for a live MVP._
 
 ### Completed sprints `[x]`
@@ -86,12 +86,15 @@ _Goal: match professional delivery sequencing for a live MVP._
 9. Editorial restraint refactor (warm accent limited to 5 locations, decorative animations removed)
 10. Controls redesign (three-tier hierarchy, ghost filter triggers, multi-select Cocina/Zona dropdowns)
 11. District choropleth (21 MECE Madrid district polygons on main map, click-to-filter, topology-preserving GeoJSON)
+12. React migration pass (homepage + map + detail pages moved to React runtime)
+13. Guardrail hardening (CI push/PR checks + static-site smoke checks)
 
 ### Remaining work
-1. **P0 Close open audits:** 6B/6C (axe + Lighthouse a11y), 8A (schema.org validator), 10B (Lighthouse perf)
-2. **P0 Performance verification:** 9A + 12C (confirm no regression with 770 restaurants)
-3. **P1 Analytics:** 9B (privacy-friendly analytics)
-4. **P2 Expansion:** 11A only after single-city KPI thresholds are met
+1. **P0 Build system hardening:** migrate React runtime from CDN ESM to bundled Vite/TypeScript output (blocked by package-registry/network availability in this environment)
+2. **P0 Close open audits:** 6B/6C (axe + Lighthouse a11y), 8A (schema.org validator), 10B (Lighthouse perf)
+3. **P0 Performance verification:** 9A + 12C (confirm no regression with 770 restaurants)
+4. **P1 Analytics:** 9B (privacy-friendly analytics)
+5. **P2 Expansion:** 11A only after single-city KPI thresholds are met
 
 ### KPI gate before multi-city (11A)
 - 4 consecutive weekly scraper runs without incident
@@ -587,6 +590,73 @@ _Note: Rating pill background, warm tags, fork-knife empty illustration, warm ca
 - [ ] No performance regression
 
 _Note: Rhythm banner between card batches was removed in the editorial restraint refactor. Stats count-up tightened from 800ms to 400ms. Zoom hover changed from warm to teal accent. District choropleth uses topology-preserving simplification at the OSM way level to guarantee MECE boundaries._
+
+---
+
+## Phase 13: React Migration & Guardrails
+_Goal: migrate runtime UI to React while maintaining static deploy compatibility and improving release safety._
+
+### 13A. React Runtime Migration `[x]`
+**Why:** Legacy single-file DOM scripting had become difficult to evolve safely (map + filters + detail pages + URL state in one file).
+**Scope:**
+- Replace homepage runtime with React entry + componentized app (`docs/react-app.js`, `docs/react-app.css`)
+- Port list/map behavior, filters, favorites, URL state, and geolocation distance sorting
+- Migrate detail pages to React-rendered runtime shell with embedded JSON payload (`docs/restaurant-app.js`, `docs/restaurant-app.css`)
+- Keep existing static URL structure and SEO metadata generation
+
+**Files modified/created:**
+- `docs/index.html`
+- `docs/react-app.js`
+- `docs/react-app.css`
+- `docs/restaurant-app.js`
+- `docs/restaurant-app.css`
+- `scripts/generate_pages.py`
+- `scripts/generate_data_js.py`
+- `docs/sw.js`
+
+**Acceptance criteria:**
+- [x] Homepage runs from React entrypoint and preserves core list+map behavior
+- [x] Detail pages bootstrap React from embedded restaurant JSON
+- [x] `scripts/generate_pages.py` still outputs valid SEO metadata, JSON-LD, and sitemap entries
+- [x] URL structure unchanged (`/` and `/r/{slug}.html`)
+- [x] Tests pass after migration
+
+---
+
+### 13B. CI & Smoke Guardrails `[x]`
+**Why:** A large migration requires stronger automated checks to prevent silent regressions.
+**Scope:**
+- Add push/PR CI workflow with unit tests + JS syntax checks + site smoke checks
+- Add `scripts/smoke_site.py` to verify generated site wiring (React assets, detail-page bootstrapping, SW asset list)
+- Integrate smoke checks into scheduled scraper workflow before auto-commit
+
+**Files modified/created:**
+- `.github/workflows/ci.yml`
+- `.github/workflows/scrape.yml`
+- `scripts/smoke_site.py`
+
+**Acceptance criteria:**
+- [x] CI runs on push/PR and enforces pytest + JS syntax + smoke checks
+- [x] Scraper automation runs smoke checks before creating update PRs
+- [x] Smoke checker validates all generated detail pages
+
+---
+
+### 13C. Build Toolchain Hardening `[ ]`
+**Why:** Runtime CDN ESM imports are less deterministic than a pinned local bundle and can fail if external CDNs are unavailable.
+**Scope:**
+- Introduce Vite + TypeScript app build
+- Bundle React assets locally and deploy built output into `docs/`
+- Add build step into CI and (optionally) scraper workflow
+- Remove runtime dependency on CDN module delivery for app code
+
+**Current blocker:**
+- Package registry/network access in this environment timed out during `npm` lookups, so this scope remains pending.
+
+**Acceptance criteria:**
+- [ ] `npm ci && npm run build` (or equivalent) succeeds in CI
+- [ ] Homepage and detail pages load bundled local JS/CSS assets (no runtime ESM CDN imports)
+- [ ] Existing tests + smoke checks remain green
 
 ---
 
