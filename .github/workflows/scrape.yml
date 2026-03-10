@@ -90,29 +90,29 @@ jobs:
         run: |
           if [ -f /tmp/data_prev.js ]; then
             python - <<'PY'
-            from pathlib import Path
+from pathlib import Path
 
-            old_path = Path("/tmp/data_prev.js")
-            new_path = Path("docs/data.js")
-            old_size = old_path.stat().st_size
-            new_size = new_path.stat().st_size
-            if old_size == 0:
-                print("Previous data.js size is zero; skipping size anomaly warning.")
-                raise SystemExit(0)
+old_path = Path("/tmp/data_prev.js")
+new_path = Path("docs/data.js")
+old_size = old_path.stat().st_size
+new_size = new_path.stat().st_size
+if old_size == 0:
+    print("Previous data.js size is zero; skipping size anomaly warning.")
+    raise SystemExit(0)
 
-            change_pct = ((new_size - old_size) / old_size) * 100
-            if abs(change_pct) > 20:
-                direction = "grew" if change_pct > 0 else "shrank"
-                print(
-                    f"::warning::data.js {direction} by {abs(change_pct):.1f}% "
-                    f"({old_size} -> {new_size} bytes)"
-                )
-            else:
-                print(
-                    f"data.js size change within threshold: "
-                    f"{change_pct:.1f}% ({old_size} -> {new_size} bytes)"
-                )
-            PY
+change_pct = ((new_size - old_size) / old_size) * 100
+if abs(change_pct) > 20:
+    direction = "grew" if change_pct > 0 else "shrank"
+    print(
+        f"::warning::data.js {direction} by {abs(change_pct):.1f}% "
+        f"({old_size} -> {new_size} bytes)"
+    )
+else:
+    print(
+        f"data.js size change within threshold: "
+        f"{change_pct:.1f}% ({old_size} -> {new_size} bytes)"
+    )
+PY
           else
             echo "No previous data.js snapshot; skipping size warning."
           fi
