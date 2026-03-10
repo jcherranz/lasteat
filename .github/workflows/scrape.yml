@@ -137,8 +137,20 @@ jobs:
             gh pr edit "$PR_NUMBER" --title "$PR_TITLE" --body "$PR_BODY"
             echo "Updated PR #$PR_NUMBER"
           else
-            gh pr create --base main --head "$UPDATE_BRANCH" --title "$PR_TITLE" --body "$PR_BODY"
-            echo "Created new PR for $UPDATE_BRANCH"
+            set +e
+            CREATE_OUTPUT=$(gh pr create --base main --head "$UPDATE_BRANCH" --title "$PR_TITLE" --body "$PR_BODY" 2>&1)
+            CREATE_STATUS=$?
+            set -e
+
+            if [ "$CREATE_STATUS" -eq 0 ]; then
+              echo "$CREATE_OUTPUT"
+              echo "Created new PR for $UPDATE_BRANCH"
+            elif printf '%s' "$CREATE_OUTPUT" | grep -Fq "GitHub Actions is not permitted to create or approve pull requests"; then
+              echo "::warning::GitHub Actions cannot create pull requests in this repository. Create one manually: https://github.com/$GITHUB_REPOSITORY/pull/new/$UPDATE_BRANCH"
+            else
+              echo "$CREATE_OUTPUT" >&2
+              exit "$CREATE_STATUS"
+            fi
           fi
 
       - name: Create issue on failure
